@@ -3,7 +3,19 @@
   "compilerOptions": {
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "strict": true
+    "strict": true,
+    // "target": "esnext",
+    // "module": "esnext",
+    // "lib": ["dom", "esnext"],
+    // "allowJs": true,
+    // "skipLibCheck": true,
+    // "forceConsistentCasingInFileNames": true,
+    // "noEmit": true,
+    // "esModuleInterop": true,
+    // "moduleResolution": "node",
+    // "allowSyntheticDefaultImports": true,
+    // "jsx": "react-native",
+    // "noFallthroughCasesInSwitch": true,
   },
   "include": [
     "**/*.ts",
