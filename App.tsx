@@ -4,6 +4,7 @@ import TextInputField from './component/signin-signup/TextInputField';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
+import PasswordInputField from './component/signin-signup/PasswordInputField';
 
 export default function App() {
 
@@ -14,7 +15,7 @@ export default function App() {
         try {
           await SplashScreen.preventAutoHideAsync();
           await Font.loadAsync({
-            'roboto': require('./assets/fonts/Roboto-Regular.ttf'),
+            'roboto-regular': require('./assets/fonts/Roboto-Regular.ttf'),
           });
         } catch (e) {
           console.warn('Error loading fonts', e);
@@ -36,6 +37,7 @@ export default function App() {
       <StatusBar style='dark' />
         <View style={styles.container}>
           <TextInputField placeHolder='Email' required />
+          <PasswordInputField placeHolder='Mật khẩu' />
         </View>
     </>
   );

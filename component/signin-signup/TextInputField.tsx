@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import TextInputFieldProps from "../type/TextInputField";
 
-const InputField = ({ placeHolder, required }: TextInputFieldProps) => {
+const TextInputField = ({ placeHolder, required }: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [value, setValue] = useState("");
 
@@ -41,6 +41,8 @@ const styles = StyleSheet.create({
     borderBottomColor: 'black',
     marginVertical: 20,
     position: 'relative',
+    fontFamily: 'roboto-regular',
+
   },
   input: {
     fontSize: 18,
@@ -53,13 +55,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     bottom: 10,
-    fontSize: 50,
+    fontSize: 18,
     color: 'grey',
-    fontFamily: 'roboto',
   },
   asterisk: {
     color: 'red',
   },
 });
 
-export default InputField;
+export default TextInputField;
