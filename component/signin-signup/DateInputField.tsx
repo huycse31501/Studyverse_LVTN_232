@@ -13,6 +13,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import DateInputFieldProps from "../type/DateInputField";
 import debounceParamFunc from "../type/GeneralFunction/debounce";
+import debounce from "../../utils/Debounce/debounce";
 
 const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
   const [date, setDate] = useState(new Date());
@@ -25,16 +26,6 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
     setIsPickerShow(true);
   };
 
-  const debounce = (func: debounceParamFunc, delay: number): (...args: any[]) => void => {
-    let inDebounce: ReturnType<typeof setTimeout> | null;
-    return function(this: any, ...args: any[]) {
-      const context = this;
-      if (inDebounce !== null) {
-        clearTimeout(inDebounce);
-      }
-      inDebounce = setTimeout(() => func.apply(context, args), delay);
-    };
-  };
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
