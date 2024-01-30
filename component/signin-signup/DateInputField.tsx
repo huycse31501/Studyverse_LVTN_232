@@ -11,7 +11,7 @@ import {
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import DateInputFieldProps from "./type/DateInputField";
+import DateInputFieldProps from "../type/DateInputField";
 import debounceParamFunc from "../../utils/Debounce/debounce";
 import debounce from "../../utils/Debounce/debounce";
 

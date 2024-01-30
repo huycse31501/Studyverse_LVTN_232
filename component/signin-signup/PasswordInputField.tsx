@@ -6,7 +6,7 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-import PasswordInputFieldProps from "./type/PasswordInputField";
+import PasswordInputFieldProps from "../type/PasswordInputField";
 import { Ionicons } from "@expo/vector-icons";
 
 const PasswordInputField = ({ placeHolder }: PasswordInputFieldProps) => {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import TextInputFieldProps from "./type/TextInputField";
+import TextInputFieldProps from "../type/TextInputField";
 
 const TextInputField = ({ placeHolder, required }: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
