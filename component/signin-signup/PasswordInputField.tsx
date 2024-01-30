@@ -52,9 +52,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'black',
     marginVertical: 20,
-    position: 'relative',
-    fontFamily: 'roboto-regular',
-
+    position: 'relative'
   },
   input: {
     fontSize: 18,
@@ -73,7 +71,7 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: 'absolute',
     right: 10,
-    bottom: 10,
+    bottom: 10
   },
   asterisk: {
     color: 'red',

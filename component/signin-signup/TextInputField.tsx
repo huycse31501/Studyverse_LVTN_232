@@ -40,9 +40,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'black',
     marginVertical: 20,
-    position: 'relative',
-    fontFamily: 'roboto-regular',
-
+    position: 'relative'
   },
   input: {
     fontSize: 18,
