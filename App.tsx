@@ -5,6 +5,7 @@ import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
 import PasswordInputField from './component/signin-signup/PasswordInputField';
+import DateInputField from './component/signin-signup/DateInputField';
 
 export default function App() {
 
@@ -38,6 +39,7 @@ export default function App() {
         <View style={styles.container}>
           <TextInputField placeHolder='Email' required />
           <PasswordInputField placeHolder='Mật khẩu' />
+          <DateInputField placeHolder='Ngày sinh' required />
         </View>
     </>
   );

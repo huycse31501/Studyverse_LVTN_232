@@ -1,26 +1,21 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View, TouchableOpacity } from "react-native";
-import PasswordInputFieldProps from "../type/PasswordInputField";
-import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import DateInputFieldProps from "../type/DateInputField";
 
-const PasswordInputField = ({ placeHolder }: PasswordInputFieldProps) => {
+const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [value, setValue] = useState("");
-  const [passwordVisible, setPasswordVisible] = useState(false);
 
+  // Function to handle the focus state
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
-
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible);
-  };
 
   return (
     <View style={styles.container}>
       {!value && !isFocused && (
         <Text style={styles.placeholder}>
           {placeHolder}
-          {<Text style={styles.asterisk}> *</Text>}
+          {required && <Text style={styles.asterisk}> *</Text>}
         </Text>
       )}
       <TextInput
@@ -32,15 +27,8 @@ const PasswordInputField = ({ placeHolder }: PasswordInputFieldProps) => {
         onChangeText={setValue}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        secureTextEntry={!passwordVisible} 
         autoCorrect={false}
       />
-      <TouchableOpacity
-        style={styles.eyeIcon}
-        onPress={togglePasswordVisibility}
-      >
-        <Ionicons name={passwordVisible ? 'eye' : 'eye-off'} size={24} color="grey" />
-      </TouchableOpacity>
     </View>
   );
 };
@@ -70,14 +58,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'grey',
   },
-  eyeIcon: {
-    position: 'absolute',
-    right: 10,
-    bottom: 10,
-  },
   asterisk: {
     color: 'red',
   },
 });
 
-export default PasswordInputField;
+export default DateInputField;
