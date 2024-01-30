@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
-import TextInputFieldProps from "../type/TextInputField";
+import TextInputFieldProps from "./type/TextInputField";
 
 const TextInputField = ({ placeHolder, required }: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -38,26 +38,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderBottomWidth: 1,
-    borderBottomColor: 'black',
+    borderBottomColor: "black",
     marginVertical: 20,
-    position: 'relative'
+    position: "relative",
   },
   input: {
     fontSize: 18,
-    color: 'black', 
+    color: "black",
   },
   inputPlaceholder: {
-    color: 'transparent',
+    color: "transparent",
   },
   placeholder: {
-    position: 'absolute',
+    position: "absolute",
     left: 10,
     bottom: 10,
     fontSize: 18,
-    color: 'grey',
+    color: "grey",
   },
   asterisk: {
-    color: 'red',
+    color: "red",
   },
 });
 
