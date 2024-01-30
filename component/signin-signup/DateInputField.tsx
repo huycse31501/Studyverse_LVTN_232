@@ -12,7 +12,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import DateInputFieldProps from "../type/DateInputField";
-import debounceParamFunc from "../type/GeneralFunction/debounce";
+import debounceParamFunc from "../../utils/Debounce/debounce";
 import debounce from "../../utils/Debounce/debounce";
 
 const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
@@ -26,14 +26,12 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
     setIsPickerShow(true);
   };
 
-
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
 
-  
   const validateDate = (dateStr: string) => {
     // Check if the string is empty
-    if (dateStr.trim() === '') {
+    if (dateStr.trim() === "") {
       // If empty, reset validation state or do not set an error
       setIsValidDate(true); // or handle this case appropriately
     } else {
@@ -44,7 +42,6 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
   };
 
   const debouncedValidateDate = useCallback(debounce(validateDate, 500), []);
-
 
   const handleDateChange = (text: string) => {
     setDateStr(text);
@@ -84,9 +81,7 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
         autoCorrect={false}
       />
       {!isValidDate && (
-        <Text style={styles.errorText}>
-          Ngày sinh không hợp lệ
-        </Text>
+        <Text style={styles.errorText}>Ngày sinh không hợp lệ</Text>
       )}
       <TouchableOpacity onPress={showPicker} style={styles.iconContainer}>
         <Image
