@@ -85,7 +85,7 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
       )}
       <TouchableOpacity onPress={showPicker} style={styles.iconContainer}>
         <Image
-          source={require("../../assets/images/signIn-signUp/datePickerIcon.png")}
+          source={require("assets/images/signIn-signUp/datePickerIcon.png")}
           style={styles.icon}
         />
       </TouchableOpacity>
