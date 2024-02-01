@@ -6,18 +6,26 @@ import PasswordInputField from './component/signin-signup/PasswordInputField';
 import DateInputField from './component/signin-signup/DateInputField';
 import AuthButton from './component/signin-signup/AuthButton';
 import { Asset } from 'expo-asset';
+import OptionSelector from './component/shared/OptionSelector';
+import ApplyButton from './component/shared/ApplyButton';
 
 export default function App() {
 
   return (
     <>
       <StatusBar style='dark' />
-        <View style={styles.container}>
-          <TextInputField placeHolder='Email' required />
+      <View style={styles.container}>
+        
+          {/* <TextInputField placeHolder='Email' required />
           <PasswordInputField placeHolder='Mật khẩu' />
-          <DateInputField placeHolder='Ngày sinh' required />
+        <DateInputField placeHolder='Ngày sinh' required />
+        <TextInputField placeHolder='Họ' required />
+        <TextInputField placeHolder='Tên' required />
+        <TextInputField placeHolder='Số điện thoại' required />
+
           <AuthButton type='SignUp' />
-          <AuthButton type='SignIn' />
+        <OptionSelector />
+        <ApplyButton label='Đăng ký'/> */}
         </View>
     </>
   );
