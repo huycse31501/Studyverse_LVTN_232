@@ -8,23 +8,7 @@ import AuthButton from './component/signin-signup/AuthButton';
 import { Asset } from 'expo-asset';
 
 export default function App() {
-  const [assetsLoaded, setAssetsLoaded] = useState(false);
 
-  const _loadAssetsAsync = async () => {
-    await Promise.all([
-      Asset.fromModule(require('./assets/images/signIn-signUp/datePickerIcon.png')).downloadAsync(),
-      // ... add other assets you want to load
-    ]);
-    setAssetsLoaded(true);
-  };
-
-  useEffect(() => {
-    _loadAssetsAsync();
-  }, []);
-
-  if (!assetsLoaded) {
-    return null;
-  }
   return (
     <>
       <StatusBar style='dark' />
@@ -32,7 +16,8 @@ export default function App() {
           <TextInputField placeHolder='Email' required />
           <PasswordInputField placeHolder='Mật khẩu' />
           <DateInputField placeHolder='Ngày sinh' required />
-          {/* <AuthButton type='SignIn' /> */}
+          <AuthButton type='SignUp' />
+          <AuthButton type='SignIn' />
         </View>
     </>
   );

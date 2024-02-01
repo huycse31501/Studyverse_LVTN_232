@@ -1,22 +1,23 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import AuthButtonProps from '../type/AuthButton';
-
-
 
 const AuthButton = ({ type }: AuthButtonProps) => {
   return (
+
     <View style={styles.container}>
-      {type === 'SignIn' ? (
-        <Text style={[styles.text, styles.bold]}>ĐĂNG NHẬP</Text>
-      ) : (
-        <Text style={styles.text}>ĐĂNG NHẬP</Text>
-      )}
-      {type === 'SignUp' ? (
-        <Text style={[styles.text, styles.bold, styles.underline]}>ĐĂNG KÝ</Text>
-      ) : (
-        <Text style={[styles.text, styles.underline]}>ĐĂNG KÝ</Text>
-      )}
+      <TouchableOpacity  disabled={type === 'SignUp'}>
+            <View style={styles.buttonContainer} >
+                <Text style={type === 'SignUp' ? [styles.text, styles.bold] : styles.text}>ĐĂNG KÝ</Text>
+                {type === 'SignUp' && <View style={styles.underline} />}
+            </View>
+      </TouchableOpacity>
+      <TouchableOpacity disabled={type === 'SignIn'}>
+      <View style={styles.buttonContainer}>
+        <Text style={type === 'SignIn' ? [styles.text, styles.bold] : styles.text}>ĐĂNG NHẬP</Text>
+        {type === 'SignIn' && <View style={styles.underline} />}
+      </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -27,17 +28,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  buttonContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingHorizontal: 7,
+  },
   text: {
     color: '#FF2D55',
-    fontSize: 16,
-    paddingHorizontal: 5,
+    fontSize: 18,
   },
   bold: {
     fontWeight: 'bold',
+    marginTop: 5,
   },
   underline: {
-    textDecorationLine: 'underline',
-    textDecorationColor: '#FF0076',
+    height: 3, // Adjust the thickness of the underline as needed
+    backgroundColor: '#FF0076',
+    width: '100%', 
+    marginTop: 2, // Adjust spacing between text and underline as needed
   },
 });
 
