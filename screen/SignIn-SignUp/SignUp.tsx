@@ -114,9 +114,6 @@ const SignUp = () => {
     500 // Thời gian trễ là 500 ms
   );
 
-  const onDateChange = (dateValue: string) => {
-    inputChangedHandler("dob", dateValue);
-  };
 
   function submitHandler() {
     let totalValidState = true;
@@ -198,7 +195,6 @@ const SignUp = () => {
               textInputConfig={{
                 onChangeText: delayedInputChangedHandler.bind(this, "dob"),
               }}
-              onDateChange={onDateChange}
             />
             <OptionSelector onOptionChange={handleOptionChange} />
             <TextInputField
