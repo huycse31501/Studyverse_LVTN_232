@@ -14,13 +14,14 @@ import DateInputField from "../../component/signin-signup/DateInputField";
 import OptionSelector from "../../component/shared/OptionSelector";
 import ApplyButton from "../../component/shared/ApplyButton";
 import AuthButton from "../../component/signin-signup/AuthButton";
-import regexVault from "../../utils/Debounce/regex";
+import regexVault from "../../utils/regex";
 import debounce from "../../utils/Debounce/debounce";
 
 type OptionType = "Parent" | "Children";
 
+
 const SignUp = () => {
-  const [curSignUpType, setCurSignUpType] = useState("Parent");
+  const [curSignUpType, setCurSignUpType] = useState<OptionType>("Parent");
   const [inputs, setInputs] = useState({
     email: {
       value: "",
@@ -113,6 +114,10 @@ const SignUp = () => {
     500 // Thời gian trễ là 500 ms
   );
 
+  const onDateChange = (dateValue: string) => {
+    inputChangedHandler("dob", dateValue);
+  };
+
   function submitHandler() {
     let totalValidState = true;
     for (const [field, validation] of Object.entries(inputValidation)) {
@@ -193,6 +198,7 @@ const SignUp = () => {
               textInputConfig={{
                 onChangeText: delayedInputChangedHandler.bind(this, "dob"),
               }}
+              onDateChange={onDateChange}
             />
             <OptionSelector onOptionChange={handleOptionChange} />
             <TextInputField
