@@ -16,7 +16,6 @@ const PasswordInputField = ({
   value,
 }: PasswordInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  // const [value, setValue] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleFocus = () => setIsFocused(true);

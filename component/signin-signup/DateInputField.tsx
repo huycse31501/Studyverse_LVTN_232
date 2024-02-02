@@ -68,13 +68,12 @@ const DateInputField = ({
           styles.input,
           !dateStr && !isFocused ? styles.inputPlaceholder : null,
         ]}
-        value={dateStr}
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCorrect={false}
         {...textInputConfig}
       />
-      {isValid && dateStr?.trim()?.length !== 0 && (
+      {!isValid && dateStr?.trim()?.length !== 0 && (
         <Text style={styles.errorText}>Ngày sinh không hợp lệ</Text>
       )}
       <TouchableOpacity onPress={showPicker} style={styles.iconContainer}>

@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
-  TouchableOpacity,
-  Text,
   StyleSheet,
   View,
   Image,
   KeyboardAvoidingView,
-  ScrollView,
   Platform,
   SafeAreaView,
-  Keyboard,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import TextInputField from "../../component/signin-signup/TextInputField";
@@ -24,27 +20,35 @@ import debounce from "../../utils/Debounce/debounce";
 type OptionType = "Parent" | "Children";
 
 const SignUp = () => {
+  const [curSignUpType, setCurSignUpType] = useState("Parent");
   const [inputs, setInputs] = useState({
     email: {
       value: "",
+      required: true,
     },
     password: {
       value: "",
+      required: true,
     },
     firstName: {
       value: "",
+      required: true,
     },
     lastName: {
       value: "",
+      required: true,
     },
     dob: {
       value: "",
+      required: false,
     },
     signUpType: {
       value: "",
+      required: true,
     },
     phoneNumber: {
       value: "",
+      required: curSignUpType === "Parent" ? true : false,
     },
   });
 
@@ -59,17 +63,42 @@ const SignUp = () => {
     isEmailValid: regexVault.emailValidate.test(inputs.email.value),
   };
 
-  function inputChangedHandler(inputIdentifier: string, enteredValue: string) {
+  function inputChangedHandler(
+    inputIdentifier: keyof typeof inputs,
+    enteredValue: string
+  ) {
     setInputs((curInputs) => {
-      return {
-        ...curInputs,
-        [inputIdentifier]: { value: enteredValue, isValid: true },
-      };
+      const isRequired =
+        inputIdentifier === "phoneNumber"
+          ? curSignUpType === "Parent"
+          : curInputs[inputIdentifier].required;
+      const currentInput = curInputs[inputIdentifier];
+
+      if (currentInput) {
+        return {
+          ...curInputs,
+          [inputIdentifier]: {
+            ...currentInput,
+            value: enteredValue,
+            required: isRequired,
+          },
+        };
+      }
+
+      return curInputs;
     });
   }
 
   const handleOptionChange = (selectedOption: OptionType) => {
     inputChangedHandler("signUpType", selectedOption);
+    setCurSignUpType(selectedOption);
+    setInputs((curInputs) => ({
+      ...curInputs,
+      phoneNumber: {
+        ...curInputs.phoneNumber,
+        required: selectedOption === "Parent",
+      },
+    }));
   };
 
   const delayedInputChangedHandler = debounce(
@@ -84,6 +113,15 @@ const SignUp = () => {
     500 // Thời gian trễ là 500 ms
   );
 
+  function submitHandler() {
+    let totalValidState = true;
+    for (const [field, validation] of Object.entries(inputValidation)) {
+      if (validation === false) {
+        totalValidState = false;
+      }
+    }
+    console.log(inputs, totalValidState);
+  }
   console.log(inputs);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "23.59%" }}>
@@ -114,6 +152,7 @@ const SignUp = () => {
               placeHolder="Email"
               required
               isValid={inputValidation.isEmailValid}
+              value={inputs.email.value}
               textInputConfig={{
                 onChangeText: delayedInputChangedHandler.bind(this, "email"),
               }}
@@ -129,6 +168,7 @@ const SignUp = () => {
             <TextInputField
               placeHolder="Họ"
               required
+              value={inputs.lastName.value}
               isValid={inputValidation.isLastNameValid}
               textInputConfig={{
                 onChangeText: delayedInputChangedHandler.bind(this, "lastName"),
@@ -138,6 +178,7 @@ const SignUp = () => {
               placeHolder="Tên"
               required
               isValid={inputValidation.isFirstNameValid}
+              value={inputs.firstName.value}
               textInputConfig={{
                 onChangeText: delayedInputChangedHandler.bind(
                   this,
@@ -157,6 +198,7 @@ const SignUp = () => {
             <TextInputField
               placeHolder="Số điện thoại"
               required={inputs.signUpType.value === "Parent"}
+              value={inputs.phoneNumber.value}
               isValid={inputValidation.isPhoneNumberValid}
               textInputConfig={{
                 onChangeText: delayedInputChangedHandler.bind(
@@ -167,7 +209,7 @@ const SignUp = () => {
             />
           </View>
           <View style={styles.applyButton}>
-            <ApplyButton label="ĐĂNG KÝ" />
+            <ApplyButton label="ĐĂNG KÝ" onPress={submitHandler} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

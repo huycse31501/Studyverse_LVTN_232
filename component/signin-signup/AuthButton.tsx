@@ -2,11 +2,11 @@ import React from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import AuthButtonProps from '../type/AuthButton';
 
-const AuthButton = ({ type }: AuthButtonProps) => {
+const AuthButton = ({ type}: AuthButtonProps) => {
   return (
 
     <View style={styles.container}>
-      <TouchableOpacity  disabled={type === 'SignUp'}>
+      <TouchableOpacity disabled={type === 'SignUp'}>
             <View style={styles.buttonContainer} >
                 <Text style={type === 'SignUp' ? [styles.text, styles.bold] : styles.text}>ĐĂNG KÝ</Text>
                 {type === 'SignUp' && <View style={styles.underline} />}

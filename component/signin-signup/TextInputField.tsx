@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import TextInputFieldProps from "../type/TextInputField";
 
-const TextInputField = ({ placeHolder, required, isValid,textInputConfig }: TextInputFieldProps) => {
+const TextInputField = ({ placeHolder, required, isValid,textInputConfig, value }: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState("");
 
   // Function to handle the focus state
   const handleFocus = () => setIsFocused(true);
@@ -23,14 +22,12 @@ const TextInputField = ({ placeHolder, required, isValid,textInputConfig }: Text
           styles.input,
           !value && !isFocused ? styles.inputPlaceholder : null,
         ]}
-        value={value}
-        onChangeText={setValue}
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCorrect={false}
         {...textInputConfig}
       />
-      {!isValid && value.trim().length !== 0 && (
+      {!isValid && value?.trim().length !== 0 && (
         <Text style={styles.errorText}>{placeHolder} không hợp lệ</Text>
       )}
     </View>

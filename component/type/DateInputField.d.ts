@@ -5,7 +5,7 @@ interface DateInputFieldProps {
   required?: boolean;
   isValid: boolean;
   textInputConfig?: TextInputProps;
-    dateStr?: string;
+  dateStr?: string;
 }
 
 export default DateInputFieldProps;
