@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import React, { useState } from "react";
+import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 
-type OptionType = 'PhuHuynh' | 'ConTre';
+type OptionType = "Parent" | "Children";
 
-const OptionSelector = () => {
-  const [selectedOption, setSelectedOption] = useState<OptionType>('PhuHuynh');
+type OptionSelectorProps = {
+  onOptionChange?: (option: OptionType) => void;
+};
+
+const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
+  const [selectedOption, setSelectedOption] = useState<OptionType>("Parent");
 
   const selectOption = (option: OptionType) => {
     setSelectedOption(option);
+    onOptionChange?.(option);
   };
 
   const isOptionSelected = (option: OptionType) => selectedOption === option;
@@ -15,19 +20,41 @@ const OptionSelector = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.option, isOptionSelected('PhuHuynh') ? styles.selected : styles.unselected, styles.leftOption]}
-        onPress={() => selectOption('PhuHuynh')}
+        style={[
+          styles.option,
+          isOptionSelected("Parent") ? styles.selected : styles.unselected,
+          styles.leftOption,
+        ]}
+        onPress={() => selectOption("Parent")}
       >
-        <Text style={isOptionSelected('PhuHuynh') ? styles.selectedText : styles.unselectedText}>
+        <Text
+          style={[
+            styles.text,
+            isOptionSelected("Parent")
+              ? styles.selectedText
+              : styles.unselectedText,
+          ]}
+        >
           Phụ huynh
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.option, isOptionSelected('ConTre') ? styles.selected : styles.unselected,styles.rightOption]}
-        onPress={() => selectOption('ConTre')}
+        style={[
+          styles.option,
+          isOptionSelected("Children") ? styles.selected : styles.unselected,
+          styles.rightOption,
+        ]}
+        onPress={() => selectOption("Children")}
       >
-        <Text style={isOptionSelected('ConTre') ? styles.selectedText : styles.unselectedText}>
+        <Text
+          style={[
+            styles.text,
+            isOptionSelected("Children")
+              ? styles.selectedText
+              : styles.unselectedText,
+          ]}
+        >
           Con trẻ
         </Text>
       </TouchableOpacity>
@@ -37,40 +64,42 @@ const OptionSelector = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: "7.5%",
   },
-    option: {
-    width: '40%',
+  option: {
+    width: "40%",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    marginTop: 10,
   },
   selected: {
-      backgroundColor: '#FF2D55',
+    backgroundColor: "#FF2D55",
   },
   unselected: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 0,
-      borderColor: '#FF2D55',
+    borderColor: "#FF2D55",
   },
   selectedText: {
-    color: '#FFFFFF',
-    textAlign: 'center',
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   unselectedText: {
-    color: '#FF2D55',
-    textAlign: 'center',
-    },
-    leftOption: {
-        borderTopLeftRadius: 10,
-        borderBottomLeftRadius: 10,
-
-    },
-    rightOption: {
-        borderTopRightRadius: 10,
-        borderBottomRightRadius: 10,
-    },
+    color: "#FF2D55",
+    textAlign: "center",
+  },
+  leftOption: {
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+  },
+  rightOption: {
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  text: {
+    fontSize: 16,
+  },
 });
 
 export default OptionSelector;

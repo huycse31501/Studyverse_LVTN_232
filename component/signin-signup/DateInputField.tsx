@@ -12,15 +12,17 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import DateInputFieldProps from "../type/DateInputField";
-import debounceParamFunc from "../../utils/Debounce/debounce";
-import debounce from "../../utils/Debounce/debounce";
 
-const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
+const DateInputField = ({
+  placeHolder,
+  required,
+  isValid,
+  textInputConfig,
+  dateStr,
+}: DateInputFieldProps) => {
   const [date, setDate] = useState(new Date());
   const [isPickerShow, setIsPickerShow] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [dateStr, setDateStr] = useState("");
-  const [isValidDate, setIsValidDate] = useState(true);
 
   const showPicker = () => {
     setIsPickerShow(true);
@@ -29,25 +31,20 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
 
-  const validateDate = (dateStr: string) => {
-    // Check if the string is empty
-    if (dateStr.trim() === "") {
-      // If empty, reset validation state or do not set an error
-      setIsValidDate(true); // or handle this case appropriately
-    } else {
-      // Existing validation logic
-      const regex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[012])\/\d{4}$/;
-      setIsValidDate(regex.test(dateStr));
-    }
-  };
+  // const validateDate = (dateStr: string) => {
+  //   // Check if the string is empty
+  //   if (dateStr.trim() === "") {
+  //     // If empty, reset validation state or do not set an error
+  //     setIsValidDate(true); // or handle this case appropriately
+  //   } else {
+  //     // Existing validation logic
+  //     const regex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[012])\/\d{4}$/;
+  //     setIsValidDate(regex.test(dateStr));
+  //   }
+  // };
 
-  const debouncedValidateDate = useCallback(debounce(validateDate, 500), []);
+  // const debouncedValidateDate = useCallback(debounce(validateDate, 500), []);
 
-  const handleDateChange = (text: string) => {
-    setDateStr(text);
-
-    debouncedValidateDate(text);
-  };
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
     setIsPickerShow(Platform.OS === "ios"); // For iOS, keep the picker open.
@@ -56,9 +53,6 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
     const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-indexed
     const year = currentDate.getFullYear().toString().slice(-2);
     const formattedDate = `${day}/${month}/${year}`;
-
-    setDateStr(formattedDate);
-    validateDate(formattedDate);
   };
 
   return (
@@ -72,15 +66,15 @@ const DateInputField = ({ placeHolder, required }: DateInputFieldProps) => {
       <TextInput
         style={[
           styles.input,
-          !date && !isFocused ? styles.inputPlaceholder : null,
+          !dateStr && !isFocused ? styles.inputPlaceholder : null,
         ]}
         value={dateStr}
-        onChangeText={handleDateChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCorrect={false}
+        {...textInputConfig}
       />
-      {!isValidDate && (
+      {isValid && dateStr?.trim()?.length !== 0 && (
         <Text style={styles.errorText}>Ngày sinh không hợp lệ</Text>
       )}
       <TouchableOpacity onPress={showPicker} style={styles.iconContainer}>
@@ -109,8 +103,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomWidth: 1,
     borderBottomColor: "black",
-    marginVertical: 20,
     position: "relative",
+    marginVertical: "2.5%",
   },
   input: {
     fontSize: 18,
@@ -128,10 +122,6 @@ const styles = StyleSheet.create({
   },
   asterisk: {
     color: "red",
-  },
-  invalidInput: {
-    borderColor: "red",
-    borderWidth: 1,
   },
   errorText: {
     color: "red",

@@ -9,9 +9,14 @@ import {
 import PasswordInputFieldProps from "../type/PasswordInputField";
 import { Ionicons } from "@expo/vector-icons";
 
-const PasswordInputField = ({ placeHolder }: PasswordInputFieldProps) => {
+const PasswordInputField = ({
+  placeHolder,
+  isValid,
+  textInputConfig,
+  value,
+}: PasswordInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [value, setValue] = useState("");
+  // const [value, setValue] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
@@ -34,13 +39,17 @@ const PasswordInputField = ({ placeHolder }: PasswordInputFieldProps) => {
           styles.input,
           !value && !isFocused ? styles.inputPlaceholder : null,
         ]}
-        value={value}
-        onChangeText={setValue}
         onFocus={handleFocus}
         onBlur={handleBlur}
         secureTextEntry={!passwordVisible}
         autoCorrect={false}
+        {...textInputConfig}
       />
+      {!isValid && value?.trim()?.length !== 0 && (
+        <Text style={styles.errorText}>
+          Tối thiểu 8 ký tự gồm 1 ký tự in hoa và 1 chữ số
+        </Text>
+      )}
       <TouchableOpacity
         style={styles.eyeIcon}
         onPress={togglePasswordVisibility}
@@ -61,8 +70,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomWidth: 1,
     borderBottomColor: "black",
-    marginVertical: 20,
     position: "relative",
+    marginVertical: "2.5%",
   },
   input: {
     fontSize: 18,
@@ -70,6 +79,11 @@ const styles = StyleSheet.create({
   },
   inputPlaceholder: {
     color: "transparent",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 5,
   },
   placeholder: {
     position: "absolute",

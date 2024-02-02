@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import TextInputFieldProps from "../type/TextInputField";
 
-const TextInputField = ({ placeHolder, required }: TextInputFieldProps) => {
+const TextInputField = ({ placeHolder, required, isValid,textInputConfig }: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [value, setValue] = useState("");
 
@@ -28,7 +28,11 @@ const TextInputField = ({ placeHolder, required }: TextInputFieldProps) => {
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCorrect={false}
+        {...textInputConfig}
       />
+      {!isValid && value.trim().length !== 0 && (
+        <Text style={styles.errorText}>{placeHolder} không hợp lệ</Text>
+      )}
     </View>
   );
 };
@@ -39,8 +43,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomWidth: 1,
     borderBottomColor: "black",
-    marginVertical: 20,
     position: "relative",
+    marginVertical: "2.5%",
   },
   input: {
     fontSize: 18,
@@ -58,6 +62,11 @@ const styles = StyleSheet.create({
   },
   asterisk: {
     color: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 5,
   },
 });
 
