@@ -9,12 +9,13 @@ import { Asset } from "expo-asset";
 import OptionSelector from "./component/shared/OptionSelector";
 import ApplyButton from "./component/shared/ApplyButton";
 import SignUp from "./screen/SignIn-SignUp/SignUp";
+import SignIn from "./screen/SignIn-SignUp/SignIn";
 
 export default function App() {
   return (
     <>
       <StatusBar style="dark" />
-      <SignUp />
+      <SignIn />
     </>
   );
 }
