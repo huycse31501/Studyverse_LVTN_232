@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     color: "red",
   },
   errorText: {
-    color: "red",
-    fontSize: 12,
+    color: "#FF2D58",
+    fontSize: 13,
     marginTop: 5,
   },
   iconContainer: {

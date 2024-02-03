@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
     color: "transparent",
   },
   errorText: {
-    color: "red",
-    fontSize: 12,
+    color: "#FF2D58",
+    fontSize: 13,
     marginTop: 5,
   },
   placeholder: {

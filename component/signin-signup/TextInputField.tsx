@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import TextInputFieldProps from "../type/TextInputField";
 
-const TextInputField = ({ placeHolder, required, isValid,textInputConfig, value }: TextInputFieldProps) => {
+const TextInputField = ({
+  placeHolder,
+  required,
+  isValid,
+  textInputConfig,
+  value,
+}: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
   // Function to handle the focus state
@@ -61,8 +67,8 @@ const styles = StyleSheet.create({
     color: "red",
   },
   errorText: {
-    color: "red",
-    fontSize: 12,
+    color: "#FF2D58",
+    fontSize: 13,
     marginTop: 5,
   },
 });
