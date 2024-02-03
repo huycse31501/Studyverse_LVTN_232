@@ -16,6 +16,7 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import AuthButton from "../../component/signin-signup/AuthButton";
 import regexVault from "../../utils/regex";
 import debounce from "../../utils/Debounce/debounce";
+import isDateValid from "../../utils/checkValidDate";
 
 type OptionType = "Parent" | "Children";
 
@@ -53,11 +54,12 @@ const SignUp = () => {
     },
   });
 
+  
   const inputValidation = {
     isPhoneNumberValid: regexVault.phoneNumberValidate.test(
       inputs.phoneNumber.value
     ),
-    isDOBValid: regexVault.DOBValidate.test(inputs.dob.value),
+    isDOBValid: regexVault.DOBValidate.test(inputs.dob.value) && isDateValid(inputs.dob.value),
     isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
     isFirstNameValid: regexVault.firstNameValidate.test(inputs.firstName.value),
     isLastNameValid: regexVault.lastNameValidate.test(inputs.lastName.value),
@@ -122,9 +124,7 @@ const SignUp = () => {
         totalValidState = false;
       }
     }
-    console.log(inputs, totalValidState);
   }
-  console.log(inputs);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "23.59%" }}>
       <KeyboardAvoidingView

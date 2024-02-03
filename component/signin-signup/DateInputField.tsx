@@ -74,7 +74,9 @@ const DateInputField = ({
         {...textInputConfig}
       />
       {!isValid && dateStr?.trim()?.length !== 0 && (
-        <Text style={styles.errorText}>Ngày sinh không hợp lệ</Text>
+        <Text style={styles.errorText}>
+          Sai định dạng (DD/MM/YYYY) hoặc không hợp lệ
+        </Text>
       )}
       <TouchableOpacity onPress={showPicker} style={styles.iconContainer}>
         <Image
