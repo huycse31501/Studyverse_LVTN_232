@@ -1,11 +1,22 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import AuthButtonProps from "../type/AuthButton";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type AuthNavigationProp = StackNavigationProp<{
+  SignIn: undefined;
+  SignUp: undefined;
+}>;
 
 const AuthButton = ({ type }: AuthButtonProps) => {
+  const navigation = useNavigation<AuthNavigationProp>();
   return (
     <View style={styles.container}>
-      <TouchableOpacity disabled={type === "SignUp"}>
+      <TouchableOpacity
+        disabled={type === "SignUp"}
+        onPress={() => navigation.navigate("SignUp")}
+      >
         <View style={styles.buttonContainer}>
           <Text
             style={type === "SignUp" ? [styles.text, styles.bold] : styles.text}
@@ -15,7 +26,10 @@ const AuthButton = ({ type }: AuthButtonProps) => {
           {type === "SignUp" && <View style={styles.underline} />}
         </View>
       </TouchableOpacity>
-      <TouchableOpacity disabled={type === "SignIn"}>
+      <TouchableOpacity
+        disabled={type === "SignIn"}
+        onPress={() => navigation.navigate("SignIn")}
+      >
         <View style={styles.buttonContainer}>
           <Text
             style={type === "SignIn" ? [styles.text, styles.bold] : styles.text}

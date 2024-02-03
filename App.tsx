@@ -10,13 +10,13 @@ import OptionSelector from "./component/shared/OptionSelector";
 import ApplyButton from "./component/shared/ApplyButton";
 import SignUp from "./screen/SignIn-SignUp/SignUp";
 import SignIn from "./screen/SignIn-SignUp/SignIn";
+import AppNavigator from "./component/navigator/appNavigator";
 
 export default function App() {
-
   return (
     <>
       <StatusBar style="dark" />
-      <SignIn />
+      <AppNavigator />
     </>
   );
 }
