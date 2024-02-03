@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import TextInputField from "../../component/signin-signup/TextInputField";
@@ -43,7 +44,7 @@ const SignUp = () => {
       required: false,
     },
     signUpType: {
-      value: "",
+      value: curSignUpType,
       required: true,
     },
     phoneNumber: {
@@ -67,16 +68,22 @@ const SignUp = () => {
 
   useEffect(() => {
     const updatedValidation = {
-      isPhoneNumberValid: regexVault.phoneNumberValidate.test(inputs.phoneNumber.value),
-      isDOBValid: regexVault.DOBValidate.test(inputs.dob.value) && isDateValid(inputs.dob.value),
+      isPhoneNumberValid: regexVault.phoneNumberValidate.test(
+        inputs.phoneNumber.value
+      ),
+      isDOBValid:
+        regexVault.DOBValidate.test(inputs.dob.value) &&
+        isDateValid(inputs.dob.value),
       isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
-      isFirstNameValid: regexVault.firstNameValidate.test(inputs.firstName.value),
+      isFirstNameValid: regexVault.firstNameValidate.test(
+        inputs.firstName.value
+      ),
       isLastNameValid: regexVault.lastNameValidate.test(inputs.lastName.value),
       isEmailValid: regexVault.emailValidate.test(inputs.email.value),
     };
     setInputValidation(updatedValidation);
   }, [inputs]);
-  
+
   function inputChangedHandler(
     inputIdentifier: keyof typeof inputs,
     enteredValue: string
@@ -116,11 +123,42 @@ const SignUp = () => {
   };
 
   function submitHandler() {
-    let totalValidState = true;
-    for (const [field, validation] of Object.entries(inputValidation)) {
-      if (validation === false) {
-        totalValidState = false;
+    let allFieldsFilled = true;
+    let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
+
+    for (const [key, value] of Object.entries(inputs)) {
+      if (value.required && !value.value) {
+        allFieldsFilled = false;
+        break; // Ngừng kiểm tra nếu tìm thấy trường trống
       }
+    }
+
+    if (!allFieldsFilled) {
+      // Hiển thị cảnh báo nếu một hoặc nhiều trường bắt buộc chưa được điền hoặc không hợp lệ
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin theo yêu cầu");
+    } else if (!allFieldsValid) {
+      Alert.alert("Thông báo", "Thông tin đăng ký chưa hợp lệ");
+    } else {
+      console.log(inputs);
+      setInputs({
+        email: { value: "", required: true },
+        password: { value: "", required: true },
+        firstName: { value: "", required: true },
+        lastName: { value: "", required: true },
+        dob: { value: "", required: false },
+        signUpType: { value: "Parent", required: true }, // Giữ nguyên giá trị mặc định hoặc reset nếu muốn
+        phoneNumber: { value: "", required: curSignUpType === "Parent" },
+      });
+      // Có thể cần thiết lập lại validation nếu bạn đang hiển thị thông tin phản hồi trên UI
+      setInputValidation({
+        isPhoneNumberValid: true,
+        isDOBValid: true,
+        isPasswordValid: true,
+        isFirstNameValid: true,
+        isLastNameValid: true,
+        isEmailValid: true,
+      });
+      Alert.alert("Thành công", "Đăng ký thành công");
     }
   }
 
@@ -226,6 +264,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     marginTop: "10%",
+    marginBottom: "20%",
   },
   authButton: {
     marginBottom: "5%",
