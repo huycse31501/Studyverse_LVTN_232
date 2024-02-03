@@ -38,8 +38,11 @@ const DateInputField = ({
     setDate(currentDate);
     const day = currentDate.getDate().toString().padStart(2, "0");
     const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-indexed
-    const year = currentDate.getFullYear().toString().slice(-2);
+    const year = currentDate.getFullYear().toString();
     const formattedDate = `${day}/${month}/${year}`;
+    if (textInputConfig?.onChangeText) {
+      textInputConfig.onChangeText(formattedDate);
+    }
   };
 
   useEffect(() => {
@@ -90,7 +93,7 @@ const DateInputField = ({
           mode="date"
           display="default"
           onChange={onChange}
-          maximumDate={new Date(2100, 11, 31)}
+          maximumDate={new Date()}
           minimumDate={new Date(1900, 0, 1)}
         />
       )}

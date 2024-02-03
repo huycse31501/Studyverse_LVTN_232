@@ -15,7 +15,6 @@ import OptionSelector from "../../component/shared/OptionSelector";
 import ApplyButton from "../../component/shared/ApplyButton";
 import AuthButton from "../../component/signin-signup/AuthButton";
 import regexVault from "../../utils/regex";
-import debounce from "../../utils/Debounce/debounce";
 import isDateValid from "../../utils/checkValidDate";
 
 type OptionType = "Parent" | "Children";
@@ -53,7 +52,7 @@ const SignUp = () => {
     },
   });
 
-  const [inputValidation,setInputValidation] = useState({
+  const [inputValidation, setInputValidation] = useState({
     isPhoneNumberValid: regexVault.phoneNumberValidate.test(
       inputs.phoneNumber.value
     ),
@@ -66,6 +65,18 @@ const SignUp = () => {
     isEmailValid: regexVault.emailValidate.test(inputs.email.value),
   });
 
+  useEffect(() => {
+    const updatedValidation = {
+      isPhoneNumberValid: regexVault.phoneNumberValidate.test(inputs.phoneNumber.value),
+      isDOBValid: regexVault.DOBValidate.test(inputs.dob.value) && isDateValid(inputs.dob.value),
+      isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
+      isFirstNameValid: regexVault.firstNameValidate.test(inputs.firstName.value),
+      isLastNameValid: regexVault.lastNameValidate.test(inputs.lastName.value),
+      isEmailValid: regexVault.emailValidate.test(inputs.email.value),
+    };
+    setInputValidation(updatedValidation);
+  }, [inputs]);
+  
   function inputChangedHandler(
     inputIdentifier: keyof typeof inputs,
     enteredValue: string
@@ -103,8 +114,6 @@ const SignUp = () => {
       },
     }));
   };
-
-
 
   function submitHandler() {
     let totalValidState = true;
@@ -172,10 +181,7 @@ const SignUp = () => {
               isValid={inputValidation.isFirstNameValid}
               value={inputs.firstName.value}
               textInputConfig={{
-                onChangeText: inputChangedHandler.bind(
-                  this,
-                  "firstName"
-                ),
+                onChangeText: inputChangedHandler.bind(this, "firstName"),
               }}
             />
             <DateInputField
@@ -193,10 +199,7 @@ const SignUp = () => {
               value={inputs.phoneNumber.value}
               isValid={inputValidation.isPhoneNumberValid}
               textInputConfig={{
-                onChangeText: inputChangedHandler.bind(
-                  this,
-                  "phoneNumber"
-                ),
+                onChangeText: inputChangedHandler.bind(this, "phoneNumber"),
               }}
             />
           </View>
