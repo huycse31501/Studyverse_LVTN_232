@@ -129,12 +129,11 @@ const SignUp = () => {
     for (const [key, value] of Object.entries(inputs)) {
       if (value.required && !value.value) {
         allFieldsFilled = false;
-        break; // Ngừng kiểm tra nếu tìm thấy trường trống
+        break;
       }
     }
 
     if (!allFieldsFilled) {
-      // Hiển thị cảnh báo nếu một hoặc nhiều trường bắt buộc chưa được điền hoặc không hợp lệ
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin theo yêu cầu");
     } else if (!allFieldsValid) {
       Alert.alert("Thông báo", "Thông tin đăng ký chưa hợp lệ");
@@ -146,10 +145,9 @@ const SignUp = () => {
         firstName: { value: "", required: true },
         lastName: { value: "", required: true },
         dob: { value: "", required: false },
-        signUpType: { value: "Parent", required: true }, // Giữ nguyên giá trị mặc định hoặc reset nếu muốn
+        signUpType: { value: "Parent", required: true },
         phoneNumber: { value: "", required: curSignUpType === "Parent" },
       });
-      // Có thể cần thiết lập lại validation nếu bạn đang hiển thị thông tin phản hồi trên UI
       setInputValidation({
         isPhoneNumberValid: true,
         isDOBValid: true,
