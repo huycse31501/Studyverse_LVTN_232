@@ -12,6 +12,7 @@ import SignUp from "./screen/SignIn-SignUp/SignUp";
 import SignIn from "./screen/SignIn-SignUp/SignIn";
 
 export default function App() {
+
   return (
     <>
       <StatusBar style="dark" />

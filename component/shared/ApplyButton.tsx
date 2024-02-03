@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF", // Text color
     fontSize: 16,
     fontWeight: "bold",
+    fontFamily: "Roboto",
   },
 });
 

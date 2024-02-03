@@ -23,7 +23,7 @@ const TextInputField = ({
       } else {
         setShowError(false);
       }
-    }, 500); 
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [value, isValid]);
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 18,
     color: "black",
+    fontFamily: "Roboto",
   },
   inputPlaceholder: {
     color: "transparent",

@@ -13,8 +13,10 @@ interface TouchableTextComponentProps {
   onPress?: () => void;
 }
 
-
-const TouchableTextComponent = ({ text, onPress }: TouchableTextComponentProps) => {
+const TouchableTextComponent = ({
+  text,
+  onPress,
+}: TouchableTextComponentProps) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={onPress}>
@@ -36,7 +38,8 @@ const styles = StyleSheet.create({
   text: {
     color: "#FF2D55",
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "bold",
+    fontFamily: "Roboto",
   },
 });
 
