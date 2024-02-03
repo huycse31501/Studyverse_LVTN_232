@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -19,7 +19,6 @@ import debounce from "../../utils/Debounce/debounce";
 import isDateValid from "../../utils/checkValidDate";
 
 type OptionType = "Parent" | "Children";
-
 
 const SignUp = () => {
   const [curSignUpType, setCurSignUpType] = useState<OptionType>("Parent");
@@ -54,17 +53,18 @@ const SignUp = () => {
     },
   });
 
-  
-  const inputValidation = {
+  const [inputValidation,setInputValidation] = useState({
     isPhoneNumberValid: regexVault.phoneNumberValidate.test(
       inputs.phoneNumber.value
     ),
-    isDOBValid: regexVault.DOBValidate.test(inputs.dob.value) && isDateValid(inputs.dob.value),
+    isDOBValid:
+      regexVault.DOBValidate.test(inputs.dob.value) &&
+      isDateValid(inputs.dob.value),
     isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
     isFirstNameValid: regexVault.firstNameValidate.test(inputs.firstName.value),
     isLastNameValid: regexVault.lastNameValidate.test(inputs.lastName.value),
     isEmailValid: regexVault.emailValidate.test(inputs.email.value),
-  };
+  });
 
   function inputChangedHandler(
     inputIdentifier: keyof typeof inputs,
@@ -104,17 +104,6 @@ const SignUp = () => {
     }));
   };
 
-  const delayedInputChangedHandler = debounce(
-    (inputIdentifier: string, enteredValue: string) => {
-      setInputs((curInputs) => {
-        return {
-          ...curInputs,
-          [inputIdentifier]: { value: enteredValue, isValid: true },
-        };
-      });
-    },
-    500 // Thời gian trễ là 500 ms
-  );
 
 
   function submitHandler() {
@@ -125,6 +114,8 @@ const SignUp = () => {
       }
     }
   }
+
+  console.log(inputs);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "23.59%" }}>
       <KeyboardAvoidingView
@@ -149,14 +140,13 @@ const SignUp = () => {
             <AuthButton type="SignUp" />
           </View>
           <View style={styles.inputField}>
-            {/* Sử dụng props `onChangeText` để cập nhật trạng thái khi giá trị thay đổi */}
             <TextInputField
               placeHolder="Email"
               required
               isValid={inputValidation.isEmailValid}
               value={inputs.email.value}
               textInputConfig={{
-                onChangeText: delayedInputChangedHandler.bind(this, "email"),
+                onChangeText: inputChangedHandler.bind(this, "email"),
               }}
             />
             <PasswordInputField
@@ -164,7 +154,7 @@ const SignUp = () => {
               isValid={inputValidation.isPasswordValid}
               value={inputs.password.value}
               textInputConfig={{
-                onChangeText: delayedInputChangedHandler.bind(this, "password"),
+                onChangeText: inputChangedHandler.bind(this, "password"),
               }}
             />
             <TextInputField
@@ -173,7 +163,7 @@ const SignUp = () => {
               value={inputs.lastName.value}
               isValid={inputValidation.isLastNameValid}
               textInputConfig={{
-                onChangeText: delayedInputChangedHandler.bind(this, "lastName"),
+                onChangeText: inputChangedHandler.bind(this, "lastName"),
               }}
             />
             <TextInputField
@@ -182,7 +172,7 @@ const SignUp = () => {
               isValid={inputValidation.isFirstNameValid}
               value={inputs.firstName.value}
               textInputConfig={{
-                onChangeText: delayedInputChangedHandler.bind(
+                onChangeText: inputChangedHandler.bind(
                   this,
                   "firstName"
                 ),
@@ -193,7 +183,7 @@ const SignUp = () => {
               isValid={inputValidation.isDOBValid}
               dateStr={inputs.dob.value}
               textInputConfig={{
-                onChangeText: delayedInputChangedHandler.bind(this, "dob"),
+                onChangeText: inputChangedHandler.bind(this, "dob"),
               }}
             />
             <OptionSelector onOptionChange={handleOptionChange} />
@@ -203,7 +193,7 @@ const SignUp = () => {
               value={inputs.phoneNumber.value}
               isValid={inputValidation.isPhoneNumberValid}
               textInputConfig={{
-                onChangeText: delayedInputChangedHandler.bind(
+                onChangeText: inputChangedHandler.bind(
                   this,
                   "phoneNumber"
                 ),

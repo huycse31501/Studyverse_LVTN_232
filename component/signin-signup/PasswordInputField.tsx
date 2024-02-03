@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -17,6 +17,7 @@ const PasswordInputField = ({
 }: PasswordInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
@@ -24,6 +25,18 @@ const PasswordInputField = ({
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isValid && value?.trim().length !== 0) {
+        setShowError(true);
+      } else {
+        setShowError(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [value, isValid]);
 
   return (
     <View style={styles.container}>
@@ -42,9 +55,10 @@ const PasswordInputField = ({
         onBlur={handleBlur}
         secureTextEntry={!passwordVisible}
         autoCorrect={false}
+        value={value}
         {...textInputConfig}
       />
-      {!isValid && value?.trim()?.length !== 0 && (
+      {showError && (
         <Text style={styles.errorText}>
           Tối thiểu 8 ký tự gồm 1 ký tự in hoa và 1 chữ số
         </Text>

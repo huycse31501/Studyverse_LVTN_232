@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import TextInputFieldProps from "../type/TextInputField";
 
@@ -14,6 +14,19 @@ const TextInputField = ({
   // Function to handle the focus state
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
+  const [showError, setShowError] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isValid && value?.trim().length !== 0) {
+        setShowError(true);
+      } else {
+        setShowError(false);
+      }
+    }, 500); 
+
+    return () => clearTimeout(timer);
+  }, [value, isValid]);
 
   return (
     <View style={styles.container}>
@@ -31,9 +44,10 @@ const TextInputField = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCorrect={false}
+        value={value}
         {...textInputConfig}
       />
-      {!isValid && value?.trim().length !== 0 && (
+      {showError && (
         <Text style={styles.errorText}>{placeHolder} không hợp lệ</Text>
       )}
     </View>

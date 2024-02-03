@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -23,6 +23,7 @@ const DateInputField = ({
   const [date, setDate] = useState(new Date());
   const [isPickerShow, setIsPickerShow] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const showPicker = () => {
     setIsPickerShow(true);
@@ -30,20 +31,6 @@ const DateInputField = ({
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
-
-  // const validateDate = (dateStr: string) => {
-  //   // Check if the string is empty
-  //   if (dateStr.trim() === "") {
-  //     // If empty, reset validation state or do not set an error
-  //     setIsValidDate(true); // or handle this case appropriately
-  //   } else {
-  //     // Existing validation logic
-  //     const regex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[012])\/\d{4}$/;
-  //     setIsValidDate(regex.test(dateStr));
-  //   }
-  // };
-
-  // const debouncedValidateDate = useCallback(debounce(validateDate, 500), []);
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
@@ -54,6 +41,18 @@ const DateInputField = ({
     const year = currentDate.getFullYear().toString().slice(-2);
     const formattedDate = `${day}/${month}/${year}`;
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isValid && dateStr?.trim().length !== 0) {
+        setShowError(true);
+      } else {
+        setShowError(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [dateStr, isValid]);
 
   return (
     <View style={styles.container}>
@@ -71,9 +70,10 @@ const DateInputField = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCorrect={false}
+        value={dateStr}
         {...textInputConfig}
       />
-      {!isValid && dateStr?.trim()?.length !== 0 && (
+      {showError && (
         <Text style={styles.errorText}>
           Sai định dạng (DD/MM/YYYY) hoặc không hợp lệ
         </Text>
