@@ -1,16 +1,17 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from "react-native";
 
-// Define the type for your props
 type ApplyButtonProps = {
   label: string;
-  onPress?: () => void; // You can add more props if needed, like an onPress function
+  onPress?: () => void;
+  extraStyle?: StyleProp<ViewStyle>; 
+  extraTextStyle?: StyleProp<TextStyle>; 
 };
 
-const ApplyButton = ({ label, onPress }: ApplyButtonProps) => {
+const ApplyButton = ({ label, onPress, extraStyle, extraTextStyle }: ApplyButtonProps) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Text style={styles.text}>{label}</Text>
+    <TouchableOpacity style={[styles.button, extraStyle]} onPress={onPress}>
+      <Text style={[styles.text, extraTextStyle]}>{label}</Text>
     </TouchableOpacity>
   );
 };
