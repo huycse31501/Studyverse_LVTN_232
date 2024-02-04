@@ -57,17 +57,16 @@ const styles = StyleSheet.create({
   text: {
     color: "#FF2D55",
     fontSize: 18,
-    fontFamily: "Roboto",
   },
   bold: {
     fontWeight: "bold",
     marginTop: 5,
   },
   underline: {
-    height: 3, // Adjust the thickness of the underline as needed
+    height: 3,
     backgroundColor: "#FF0076",
     width: "100%",
-    marginTop: 2, // Adjust spacing between text and underline as needed
+    marginTop: 2,
   },
 });
 

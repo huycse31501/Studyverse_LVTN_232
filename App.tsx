@@ -14,13 +14,16 @@ import AppNavigator from "./component/navigator/appNavigator";
 
 export default function App() {
   return (
-    <>
+    <View style={styles.container}>
       <StatusBar style="dark" />
       <AppNavigator />
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF"
+  },
 });

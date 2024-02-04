@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 18,
     color: "black",
-    fontFamily: "Roboto",
   },
   inputPlaceholder: {
     color: "transparent",

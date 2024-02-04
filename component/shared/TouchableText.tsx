@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     color: "#FF2D55",
     fontSize: 18,
     fontWeight: "bold",
-    fontFamily: "Roboto",
   },
 });
 

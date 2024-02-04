@@ -18,7 +18,7 @@ const ApplyButton = ({ label, onPress }: ApplyButtonProps) => {
 const styles = StyleSheet.create({
   button: {
     width: "40%",
-    backgroundColor: "#FF2D55", // Button background color
+    backgroundColor: "#FF2D55",
     padding: 10,
     borderRadius: 100,
     alignItems: "center",
@@ -26,10 +26,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   text: {
-    color: "#FFFFFF", // Text color
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "Roboto",
   },
 });
 
