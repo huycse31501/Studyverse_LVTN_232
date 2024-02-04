@@ -15,8 +15,15 @@ import PasswordInputField from "../../component/signin-signup/PasswordInputField
 import ApplyButton from "../../component/shared/ApplyButton";
 import TouchableTextComponent from "../../component/shared/TouchableText";
 import regexVault from "../../utils/regex";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
+
+type ForgotPasswordNavigationProp = StackNavigationProp<{
+  ForgotPassword: undefined;
+}>;
 
 const SignIn = () => {
+  const navigation = useNavigation<ForgotPasswordNavigationProp>();
   const [inputs, setInputs] = useState({
     email: {
       value: "",
@@ -135,7 +142,7 @@ const SignIn = () => {
             <ApplyButton label="ĐĂNG NHẬP" onPress={submitHandler} />
           </View>
           <View>
-            <TouchableTextComponent text="Quên mật khẩu" />
+            <TouchableTextComponent text="Quên mật khẩu" onPress={() => navigation.navigate("ForgotPassword")} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

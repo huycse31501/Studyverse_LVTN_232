@@ -160,7 +160,6 @@ const SignUp = () => {
     }
   }
 
-  console.log(inputs);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "23.59%" }}>
       <KeyboardAvoidingView

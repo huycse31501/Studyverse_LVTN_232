@@ -6,6 +6,7 @@ import {
   Platform,
   SafeAreaView,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AuthButton from "../../component/signin-signup/AuthButton";
@@ -50,9 +51,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   introTextStyle: {
-    // fontFamily: "Montserrat",
     fontSize: 16,
-    fontWeight: "600",
   },
 });
 
