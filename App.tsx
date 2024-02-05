@@ -11,11 +11,13 @@ import ApplyButton from "./component/shared/ApplyButton";
 import SignUp from "./screen/SignIn-SignUp/SignUp";
 import SignIn from "./screen/SignIn-SignUp/SignIn";
 import AppNavigator from "./component/navigator/appNavigator";
+import OTPInput from "./component/shared/OTPInput";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
+      {/* <OTPInput input={["1", "1", "1", "1"]} /> */}
       <AppNavigator />
     </View>
   );
@@ -24,6 +26,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#FFFFFF",
   },
 });

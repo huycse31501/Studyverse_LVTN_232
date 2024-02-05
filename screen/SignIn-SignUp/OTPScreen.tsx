@@ -18,80 +18,32 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
+import OTPInput from "../../component/shared/OTPInput";
 
-type ForgotPasswordNavigationProp = StackNavigationProp<{
+type OTPScreenNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
-  OTPScreen: undefined;
 }>;
 
-const ForgotPassword = () => {
-  const navigation = useNavigation<ForgotPasswordNavigationProp>();
+const OTPScreen = () => {
+  const navigation = useNavigation<OTPScreenNavigationProp>();
 
-  const [inputs, setInputs] = useState({
-    email: {
-      value: "",
-      required: true,
-    },
-  });
+  const [OTPinput, setOTPInput] = useState(["", "", "", ""] as [
+    string,
+    string,
+    string,
+    string
+  ]);
 
-  const [inputValidation, setInputValidation] = useState({
-    isEmailValid: regexVault.emailValidate.test(inputs.email.value),
-  });
-
-  useEffect(() => {
-    const updatedValidation = {
-      isEmailValid: regexVault.emailValidate.test(inputs.email.value),
-    };
-    setInputValidation(updatedValidation);
-  }, [inputs]);
-
-  function inputChangedHandler(
-    inputIdentifier: keyof typeof inputs,
-    enteredValue: string
-  ) {
-    setInputs((curInputs) => {
-      const currentInput = curInputs[inputIdentifier];
-
-      if (currentInput) {
-        return {
-          ...curInputs,
-          [inputIdentifier]: {
-            ...currentInput,
-            value: enteredValue,
-          },
-        };
-      }
-
-      return curInputs;
-    });
-  }
+  const handleInputChange = (text: string, index: number) => {
+    const newInput = [...OTPinput] as [string, string, string, string];
+    newInput[index] = text;
+    setOTPInput(newInput);
+  };
 
   function submitHandler() {
-    let allFieldsFilled = true;
-    let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
-
-    for (const [key, value] of Object.entries(inputs)) {
-      if (value.required && !value.value) {
-        allFieldsFilled = false;
-        break;
-      }
-    }
-
-    if (!allFieldsFilled) {
-      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin theo yêu cầu");
-    } else if (!allFieldsValid) {
-      Alert.alert("Thông báo", "Thông tin đăng ký chưa hợp lệ");
-    } else {
-      setInputs({
-        email: { value: "", required: true },
-      });
-      setInputValidation({
-        isEmailValid: true,
-      });
-      Alert.alert("Thành công", "Xác thực");
-      navigation.navigate("OTPScreen");
-    }
+    setOTPInput(["", "", "", ""]);
+    Alert.alert("Thành công", `Xác thực OTP: ${OTPinput.join("")}`);
   }
 
   return (
@@ -111,34 +63,21 @@ const ForgotPassword = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <RedTextHeader text="QUÊN MẬT KHẨU" />
+            <RedTextHeader text="ĐIỀN MÃ XÁC THỰC" />
           </View>
-          <View style={styles.introText}>
-            <Text style={styles.introTextStyle}>
-              Nhập địa chỉ email của bạn
-            </Text>
+          <View style={styles.OTPContainer}>
+            <OTPInput input={OTPinput} onInputChange={handleInputChange} />
           </View>
-          <View style={styles.inputField}>
-            <TextInputField
-              placeHolder="Email"
-              required
-              isValid={inputValidation.isEmailValid}
-              value={inputs.email.value}
-              textInputConfig={{
-                onChangeText: inputChangedHandler.bind(this, "email"),
-              }}
-            />
-          </View>
-          <View style={styles.backToSignIn}>
-            <Text style={styles.backToSignInText}>Trở lại</Text>
+          <View style={styles.resendOTP}>
+            <Text style={styles.resendOTPText}>Không nhận được mã?</Text>
             <TouchableTextComponent
-              text="Đăng nhập"
-              onPress={() => navigation.navigate("SignIn")}
+              text="Gửi lại"
+              onPress={() => Alert.alert("Handle gửi lại OTP")}
             />
           </View>
           <View style={styles.sendOTPButton}>
             <ApplyButton
-              label="GỬI MÃ XÁC THỰC"
+              label="XÁC THỰC"
               extraStyle={styles.OTPButton}
               onPress={submitHandler}
             />
@@ -154,6 +93,13 @@ const ForgotPassword = () => {
               onPress={() => navigation.navigate("SignUp")}
             />
           </View>
+          <View style={styles.backToSignIn}>
+            <Text style={styles.backToSignInText}>Trở lại</Text>
+            <TouchableTextComponent
+              text="Đăng nhập"
+              onPress={() => navigation.navigate("SignIn")}
+            />
+          </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -167,40 +113,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  introTextStyle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginVertical: "12.5%",
-    color: "#444444",
-  },
-  inputField: {
-    paddingLeft: "6.8%",
-    paddingRight: "6.8%",
-  },
-  backToSignIn: {
+  resendOTP: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginTop: "7.5%",
   },
-  backToSignInText: {
+  resendOTPText: {
     fontSize: 16,
     color: "#666666",
     paddingRight: "2%",
     fontWeight: "500",
   },
   sendOTPButton: {
-    marginTop: "20%",
+    marginTop: "10%",
   },
   OTPButton: {
-    width: "80%",
+    width: "50%",
     height: 50,
   },
   askToSignUp: {
     flexDirection: "column",
     alignItems: "center",
     paddingHorizontal: 7,
-    marginTop: "30%",
+    marginTop: "25%",
   },
   askToSignUpText: {
     fontSize: 18,
@@ -219,6 +155,21 @@ const styles = StyleSheet.create({
   backToSignUpButtonTextStyle: {
     color: "#000000",
   },
+  OTPContainer: {
+    marginTop: "17.5%",
+  },
+  backToSignIn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: "25%",
+  },
+  backToSignInText: {
+    fontSize: 16,
+    color: "#666666",
+    paddingRight: "2%",
+    fontWeight: "500",
+  },
 });
 
-export default ForgotPassword;
+export default OTPScreen;
