@@ -81,7 +81,7 @@ const ForgotPassword = () => {
     if (!allFieldsFilled) {
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin theo yêu cầu");
     } else if (!allFieldsValid) {
-      Alert.alert("Thông báo", "Thông tin đăng ký chưa hợp lệ");
+      Alert.alert("Thông báo", "Thông tin email chưa hợp lệ");
     } else {
       setInputs({
         email: { value: "", required: true },
