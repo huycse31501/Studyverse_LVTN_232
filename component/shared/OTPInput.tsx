@@ -13,11 +13,11 @@ type OTPInputProps = {
   textInputConfig?: TextInputProps;
 };
 
-const OTPInput: React.FC<OTPInputProps> = ({
+const OTPInput = ({
   input,
   onInputChange,
   textInputConfig,
-}) => {
+}: OTPInputProps) => {
   const keyboardType: KeyboardTypeOptions = "numeric";
 
   const inputRefs = useRef<Array<TextInput | null>>([]);

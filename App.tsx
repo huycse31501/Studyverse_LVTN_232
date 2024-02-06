@@ -12,13 +12,15 @@ import SignUp from "./screen/SignIn-SignUp/SignUp";
 import SignIn from "./screen/SignIn-SignUp/SignIn";
 import AppNavigator from "./component/navigator/appNavigator";
 import OTPInput from "./component/shared/OTPInput";
+import EventTimeline from "./component/shared/EventTimeline";
+import eventSampleData from "./mockData/EventData";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      {/* <OTPInput input={["1", "1", "1", "1"]} /> */}
-      <AppNavigator />
+      {/* <AppNavigator /> */}
+      <EventTimeline data={eventSampleData} height={200} />
     </View>
   );
 }
@@ -27,5 +29,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    marginTop: 200,
+    paddingHorizontal: "6.8%",
   },
 });
