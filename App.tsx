@@ -14,13 +14,26 @@ import AppNavigator from "./component/navigator/appNavigator";
 import OTPInput from "./component/shared/OTPInput";
 import EventTimeline from "./component/shared/EventTimeline";
 import eventSampleData from "./mockData/EventData";
+import UserStatus from "./component/dashboard/DashboardStatus";
+import StatusCard from "./component/dashboard/FamilyStatus";
+import { userStatusData } from "./mockData/FamilyStatus";
+import Footer from "./component/shared/Footer";
+import StatusDashboard from "./screen/Dashboard/StatusBoard";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
       {/* <AppNavigator /> */}
-      <EventTimeline data={eventSampleData} height={200} />
+
+      {/* <UserStatus userName="Mẹ Thỏ" status="on" />
+      <EventTimeline data={eventSampleData} height={200} /> */}
+      {/* <StatusCard
+        FamilyStatusData={userStatusData}
+        onCardPress={(x) => console.log(x)}
+      /> */}
+      {/* <Footer /> */}
+      <StatusDashboard />
     </View>
   );
 }
@@ -28,8 +41,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    marginTop: 200,
-    paddingHorizontal: "6.8%",
+    backgroundColor: "#F9F9F9",
   },
 });

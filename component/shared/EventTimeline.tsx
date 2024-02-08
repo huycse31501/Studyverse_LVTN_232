@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     backgroundColor: "#FF2D55",
-    borderRadius: 10,
+    borderRadius: 14,
     padding: 10,
   },
   taskBlock: {
