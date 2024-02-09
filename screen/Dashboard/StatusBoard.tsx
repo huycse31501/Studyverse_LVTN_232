@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import StatusCard from "../../component/dashboard/FamilyStatus";
@@ -17,7 +18,7 @@ import Footer from "../../component/shared/Footer";
 
 const StatusDashboard = () => {
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "20%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: "15%" }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   eventContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12.5,
     paddingVertical: 10,
   },
   footerContainer: {

@@ -47,6 +47,7 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
       <ScrollView
         style={height ? { height } : styles.scrollView}
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}
       >
         {data.map((event, index) => (
           <View key={index} style={styles.eventBlock}>
@@ -132,6 +133,7 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     marginLeft: 10,
+    alignSelf: "center",
   },
 });
 
