@@ -1,7 +1,7 @@
 type EventInfo = {
     time: string; 
     task: string; 
-    image?: string; 
+    images?: string[]; 
 };
   
 export default EventInfo;

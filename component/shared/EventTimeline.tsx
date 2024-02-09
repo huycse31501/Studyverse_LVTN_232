@@ -8,9 +8,7 @@ type EventTimelineProps = {
 };
 
 const EventTimeline = ({ data, height }: EventTimelineProps) => {
-  const scrollViewStyle = {
-    height: height || "auto",
-  };
+  
 
   const [currentTime, setCurrentTime] = useState("");
 
@@ -65,8 +63,20 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
                   </View>
                 )}
               </View>
-              {event.image && (
-                <Image source={{ uri: event.image }} style={styles.image} />
+              {event.images &&
+                event.images
+                  .slice(0, 3)
+                  .map((image, imgIndex) => (
+                    <Image
+                      key={imgIndex}
+                      source={{ uri: image }}
+                      style={styles.image}
+                    />
+                  ))}
+              {event.images && event.images.length > 3 && (
+                <Text style={styles.moreImages}>
+                  +{event.images.length - 3}
+                </Text>
               )}
             </View>
           </View>
@@ -132,6 +142,12 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
+    marginLeft: 10,
+    alignSelf: "center",
+  },
+  moreImages: {
+    fontSize: 15,
+    color: "#FFFFFF",
     marginLeft: 10,
     alignSelf: "center",
   },

@@ -8,7 +8,13 @@ const eventSampleData: EventInfo[] = [
   {
     time: "12.00",
     task: "Dẫn Su đi khám răng",
-    image: "https://via.placeholder.com/150",
+    images: [
+      "https://via.placeholder.com/150",
+      "https://via.placeholder.com/150",
+      "https://via.placeholder.com/150",
+      "https://via.placeholder.com/150",
+      "https://via.placeholder.com/150",
+    ],
   },
   {
     time: "14.00",
@@ -17,13 +23,13 @@ const eventSampleData: EventInfo[] = [
   {
     time: "18.00",
     task: "Lớp yoga buổi tối",
-    image: "https://via.placeholder.com/150",
-    },
-    {
-        time: "23.00",
-        task: "Lớp yoga buổi tối",
-        image: "https://via.placeholder.com/150",
-      },
+    images: ["https://via.placeholder.com/150"],
+  },
+  {
+    time: "23.00",
+    task: "Lớp yoga buổi tối",
+    images: ["https://via.placeholder.com/150"],
+  },
 ];
 
 export default eventSampleData;
