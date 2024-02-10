@@ -1,3 +1,5 @@
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
 import {
   StyleSheet,
@@ -11,6 +13,11 @@ import {
   Platform,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { RootStackParamList } from "../../component/navigator/appNavigator";
+
+type DetailsNavigationProp = StackNavigationProp<{
+  StatusDashboard: undefined;
+}>;
 
 export interface User {
   fullName: string;
@@ -19,11 +26,15 @@ export interface User {
   avatarUri: ImageSourcePropType;
 }
 
-interface UserDetailsScreenProps {
-  user: User;
-}
+type UserDetailsRouteProp = RouteProp<RootStackParamList, "UserDetailsScreen">;
 
-const UserDetailsScreen = ({ user }: UserDetailsScreenProps) => {
+interface UserDetailsScreenProps {
+  route: UserDetailsRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "UserDetailsScreen">;
+}
+const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
+  const { user } = route.params;
+
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "10%" }}>
       <KeyboardAvoidingView
@@ -40,58 +51,71 @@ const UserDetailsScreen = ({ user }: UserDetailsScreenProps) => {
           enableAutomaticScroll={true}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.backButtonContainer}>
-            <TouchableOpacity style={styles.backButton}>
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Thông tin chi tiết</Text>
-          </View>
-          <View style={styles.userInformationContainer}>
-            <View style={styles.card}>
-              <Image source={user.avatarUri} style={styles.avatar} />
-              <View style={styles.textContainer}>
-                <Text style={styles.textInfo}>Họ và tên: {user.fullName}</Text>
-                <Text style={styles.textInfo}>Biệt danh: {user.nickname}</Text>
-                <Text style={styles.textInfo}>Ngày sinh: {user.birthdate}</Text>
+          {user && (
+            <>
+              <View style={styles.backButtonContainer}>
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => navigation.navigate("StatusDashboard")}
+                >
+                  <Text style={styles.backButtonText}>Back</Text>
+                </TouchableOpacity>
               </View>
-            </View>
-          </View>
-          <View style={styles.activityContainer}>
-            <TouchableOpacity style={styles.activityButton}>
-              <Text style={styles.activityText}>Thời gian biểu</Text>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Thông tin chi tiết</Text>
+              </View>
+              <View style={styles.userInformationContainer}>
+                <View style={styles.card}>
+                  <Image source={user.avatarUri} style={styles.avatar} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.textInfo}>
+                      Họ và tên: {user.fullName}
+                    </Text>
+                    <Text style={styles.textInfo}>
+                      Biệt danh: {user.nickname}
+                    </Text>
+                    <Text style={styles.textInfo}>
+                      Ngày sinh: {user.birthdate}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.activityContainer}>
+                <TouchableOpacity style={styles.activityButton}>
+                  <Text style={styles.activityText}>Thời gian biểu</Text>
 
-              <Image
-                source={require("../../assets/images/dashboard/scheduleIcon.png")}
-                style={styles.activityIcon}
-              />
-            </TouchableOpacity>
+                  <Image
+                    source={require("../../assets/images/dashboard/scheduleIcon.png")}
+                    style={styles.activityIcon}
+                  />
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.activityButton}>
-              <Text style={styles.activityText}>Huy hiệu</Text>
-              <Image
-                source={require("../../assets/images/dashboard/badgeIcon.png")}
-                style={styles.activityIcon}
-              />
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.activityButton}>
+                  <Text style={styles.activityText}>Huy hiệu</Text>
+                  <Image
+                    source={require("../../assets/images/dashboard/badgeIcon.png")}
+                    style={styles.activityIcon}
+                  />
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.activityButton}>
-              <Text style={styles.activityText}>Nhắc nhở</Text>
-              <Image
-                source={require("../../assets/images/dashboard/remindIcon.png")}
-                style={styles.activityIcon}
-              />
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.activityButton}>
+                  <Text style={styles.activityText}>Nhắc nhở</Text>
+                  <Image
+                    source={require("../../assets/images/dashboard/remindIcon.png")}
+                    style={styles.activityIcon}
+                  />
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.activityButton}>
-              <Text style={styles.activityText}>Hoạt động mạng</Text>
-              <Image
-                source={require("../../assets/images/dashboard/networkIcon.png")}
-                style={styles.activityIcon}
-              />
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity style={styles.activityButton}>
+                  <Text style={styles.activityText}>Hoạt động mạng</Text>
+                  <Image
+                    source={require("../../assets/images/dashboard/networkIcon.png")}
+                    style={styles.activityIcon}
+                  />
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -110,7 +134,7 @@ const styles = StyleSheet.create({
     color: "#FF2D58",
   },
   title: {
-    color: "1E293B",
+    color: "#1E293B",
     fontWeight: "600",
     fontSize: 25,
   },

@@ -15,8 +15,17 @@ import UserStatus from "../../component/dashboard/DashboardStatus";
 import eventSampleData from "../../mockData/EventData";
 import EventTimeline from "../../component/shared/EventTimeline";
 import Footer from "../../component/shared/Footer";
+import { useNavigation } from "@react-navigation/native";
+import { mockUser } from "../../mockData/UserInfo";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { User } from "./Details";
+
+type StatusBoardNavigationProp = StackNavigationProp<{
+  UserDetailsScreen: { user: User };
+}>;
 
 const StatusDashboard = () => {
+  const navigation = useNavigation<StatusBoardNavigationProp>();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "15%" }}>
       <KeyboardAvoidingView
@@ -42,7 +51,10 @@ const StatusDashboard = () => {
           <View style={styles.familyStatusContainer}>
             <StatusCard
               FamilyStatusData={userStatusData}
-              onCardPress={(x) => console.log(x)}
+              onCardPress={(x) => {
+                console.log(x);
+                navigation.navigate("UserDetailsScreen", { user: mockUser });
+              }}
             />
           </View>
         </KeyboardAwareScrollView>

@@ -4,12 +4,13 @@ import React from "react";
 import StatusDashboard from "./screen/Dashboard/StatusBoard";
 import UserDetailsScreen from "./screen/Dashboard/Details";
 import { mockUser } from "./mockData/UserInfo";
+import AppNavigator from "./component/navigator/appNavigator";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      {/* <AppNavigator /> */}
+      <AppNavigator />
 
       {/* <UserStatus userName="Mẹ Thỏ" status="on" />
       <EventTimeline data={eventSampleData} height={200} /> */}
@@ -19,7 +20,7 @@ export default function App() {
       /> */}
       {/* <Footer /> */}
       {/* <StatusDashboard /> */}
-      <UserDetailsScreen user={mockUser} />
+      {/* <UserDetailsScreen user={mockUser} /> */}
     </View>
   );
 }
