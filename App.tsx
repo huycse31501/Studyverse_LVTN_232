@@ -2,6 +2,8 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import StatusDashboard from "./screen/Dashboard/StatusBoard";
+import UserDetailsScreen from "./screen/Dashboard/Details";
+import { mockUser } from "./mockData/UserInfo";
 
 export default function App() {
   return (
@@ -16,7 +18,8 @@ export default function App() {
         onCardPress={(x) => console.log(x)}
       /> */}
       {/* <Footer /> */}
-      <StatusDashboard />
+      {/* <StatusDashboard /> */}
+      <UserDetailsScreen user={mockUser} />
     </View>
   );
 }
