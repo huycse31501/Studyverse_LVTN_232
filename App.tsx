@@ -13,7 +13,7 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="dark" />
       {/* <FamilyInfoSwitcher type="List" /> */}
-      <AppNavigator />
+      {/* <AppNavigator /> */}
       {/* <Setting /> */}
       {/* <UserStatus userName="Mẹ Thỏ" status="on" />
       <EventTimeline data={eventSampleData} height={200} /> */}
