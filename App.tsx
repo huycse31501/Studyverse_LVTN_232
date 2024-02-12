@@ -6,11 +6,13 @@ import UserDetailsScreen from "./screen/Dashboard/Details";
 import { mockUser } from "./mockData/UserInfo";
 import AppNavigator from "./component/navigator/appNavigator";
 import Setting from "./screen/Dashboard/Setting";
+import FamilyInfoSwitcher from "./component/dashboard/familyInfoSwitcher";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
+      {/* <FamilyInfoSwitcher type="List" /> */}
       <AppNavigator />
       {/* <Setting /> */}
       {/* <UserStatus userName="Mẹ Thỏ" status="on" />
@@ -30,5 +32,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9F9F9",
+    // marginTop: "20%",
   },
 });

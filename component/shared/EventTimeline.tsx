@@ -26,17 +26,28 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
     const [eventHours, eventMinutes] = eventTime.split(".").map(Number);
     const eventDate = new Date(now);
     eventDate.setHours(eventHours, eventMinutes, 0, 0);
-
+  
     const diff = eventDate.getTime() - now.getTime();
     if (diff < 0) {
       return null;
     }
-
-    const minutesUntilEvent = Math.round(diff / 60000);
-    if (minutesUntilEvent === 0) {
+  
+    const minutesUntilEvent = Math.floor(diff / 60000);
+    const hoursUntilEvent = Math.floor(minutesUntilEvent / 60);
+    const remainingMinutes = minutesUntilEvent % 60;
+  
+    if (hoursUntilEvent === 0 && remainingMinutes === 0) {
       return "Bắt đầu ngay bây giờ";
     }
-    return `Sau ${minutesUntilEvent} phút`;
+  
+    let timeString = '';
+    if (hoursUntilEvent > 0) {
+      timeString += `${hoursUntilEvent} giờ `;
+    }
+    if (remainingMinutes > 0) {
+      timeString += `${remainingMinutes} phút`;
+    }
+    return `Sau ${timeString}`;
   };
 
   return (
