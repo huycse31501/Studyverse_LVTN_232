@@ -15,9 +15,6 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 
-type DetailsNavigationProp = StackNavigationProp<{
-  StatusDashboard: undefined;
-}>;
 
 export interface User {
   fullName: string;

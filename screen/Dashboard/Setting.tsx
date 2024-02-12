@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
 import {
   StyleSheet,
@@ -10,6 +12,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
+type DetailsNavigationProp = StackNavigationProp<{
+  StatusDashboard: undefined;
+}>;
+
+
 
 const listOfAccountSetting = [
   {
@@ -41,6 +49,8 @@ const extraSetting = [
   },
 ];
 const Setting = () => {
+  const navigation = useNavigation<DetailsNavigationProp>();
+
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "15.5%" }}>
       <KeyboardAvoidingView
@@ -58,7 +68,7 @@ const Setting = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.titleContainer}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("StatusDashboard")}>
               <Image
                 source={require("../../assets/images/dashboard/left-arrow.png")}
                 style={styles.leftArrow}
@@ -148,7 +158,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    // elevation: 5,
   },
   account: {
     color: "#090A0A",
@@ -188,7 +198,7 @@ const styles = StyleSheet.create({
     color: "#979C9E",
     fontSize: 18,
     alignSelf: "center",
-    marginTop: "10%",
+    marginTop: "16.5%",
   },
 });
 

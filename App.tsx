@@ -11,8 +11,8 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      {/* <AppNavigator /> */}
-      <Setting />
+      <AppNavigator />
+      {/* <Setting /> */}
       {/* <UserStatus userName="Mẹ Thỏ" status="on" />
       <EventTimeline data={eventSampleData} height={200} /> */}
       {/* <StatusCard

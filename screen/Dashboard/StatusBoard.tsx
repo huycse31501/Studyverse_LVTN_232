@@ -22,6 +22,7 @@ import { User } from "./Details";
 
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
+  Setting: undefined;
 }>;
 
 const StatusDashboard = () => {
@@ -43,7 +44,11 @@ const StatusDashboard = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.statusBarContainer}>
-            <UserStatus userName="Mẹ Thỏ" status="on" />
+            <UserStatus
+              userName="Mẹ Thỏ"
+              status="on"
+              onMenuPress={() => navigation.navigate("Setting")}
+            />
           </View>
           <View style={styles.eventContainer}>
             <EventTimeline data={eventSampleData} height={200} />

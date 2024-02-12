@@ -10,6 +10,7 @@ import ForgotPassword from "../../screen/SignIn-SignUp/ForgotPassword";
 import OTPScreen from "../../screen/SignIn-SignUp/OTPScreen";
 import StatusDashboard from "../../screen/Dashboard/StatusBoard";
 import UserDetailsScreen, { User } from "../../screen/Dashboard/Details";
+import Setting from "../../screen/Dashboard/Setting";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -18,6 +19,7 @@ export type RootStackParamList = {
   OTPScreen: undefined;
   StatusDashboard: undefined;
   UserDetailsScreen: { user: User };
+  Setting: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -26,7 +28,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="StatusDashboard"
+        initialRouteName="Setting"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
@@ -38,6 +40,7 @@ const AppNavigator = () => {
         <Stack.Screen name="OTPScreen" component={OTPScreen} />
         <Stack.Screen name="StatusDashboard" component={StatusDashboard} />
         <Stack.Screen name="UserDetailsScreen" component={UserDetailsScreen} />
+        <Stack.Screen name="Setting" component={Setting} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -8,9 +8,11 @@ const MenuIcon = require("../../assets/images/dashboard/ellypsis-vertical.png");
 type UserStatusProps = {
   userName: string;
   status: "on" | "off" | "busy";
+  onMenuPress?: () => void;
+  onChatPress?: () => void;
 };
 
-const UserStatus = ({ userName, status }: UserStatusProps) => {
+const UserStatus = ({ userName, status, onMenuPress, onChatPress }: UserStatusProps) => {
   const getStatusColor = () => {
     switch (status) {
       case "on":
@@ -41,10 +43,10 @@ const UserStatus = ({ userName, status }: UserStatusProps) => {
         </View>
         <Text style={styles.status}>{"Trạng thái hoạt động"}</Text>
       </View>
-      <TouchableOpacity onPress={() => console.log("Message icon pressed")}>
+      <TouchableOpacity onPress={onChatPress}>
         <Image source={MessageIcon} style={styles.messageIcon} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => console.log("Menu icon pressed")}>
+      <TouchableOpacity onPress={onMenuPress}>
         <Image source={MenuIcon} style={styles.menuIcon} />
       </TouchableOpacity>
     </View>
