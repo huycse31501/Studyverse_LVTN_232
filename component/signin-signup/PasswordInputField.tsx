@@ -14,6 +14,7 @@ const PasswordInputField = ({
   isValid,
   textInputConfig,
   value,
+  customError,
 }: PasswordInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -60,7 +61,7 @@ const PasswordInputField = ({
       />
       {showError && (
         <Text style={styles.errorText}>
-          Tối thiểu 8 ký tự gồm 1 ký tự in hoa và 1 chữ số
+          {customError ?? `Tối thiểu 8 ký tự gồm 1 ký tự in hoa và 1 chữ số`}
         </Text>
       )}
       <TouchableOpacity

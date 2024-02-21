@@ -6,6 +6,7 @@ interface TextInputFieldProps {
   isValid: boolean;
   textInputConfig?: TextInputProps;
   value?: string;
+  customError?: string;
 }
 
 export default TextInputFieldProps;

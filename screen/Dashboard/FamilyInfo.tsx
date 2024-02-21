@@ -13,22 +13,44 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import FamilyInfoSwitcher from "../../component/dashboard/familyInfoSwitcher";
+import { User } from "./Details";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
+  FamilyAcceptScreen: undefined;
 }>;
 
-type FamilyMember = {
-  name: string;
-  nickname: string;
-  dob: string;
-};
-
 type FamilyInfoProp = {
-  listOfMember?: FamilyMember[];
+  listOfMember?: User[];
 };
 
-const FamilyInfoScreen = ({ listOfMember }: FamilyInfoProp) => {
+const listOfMember: User[] = [
+  {
+    fullName: "Nguyễn Mai Anh",
+    nickname: "Phô mai",
+    birthdate: "20/02/2012",
+    avatarUri: require("../../assets/images/dashboard/avatar-details.png"),
+  },
+  {
+    fullName: "Nguyễn Văn Bố",
+    nickname: "Bố Panda",
+    avatarUri: require("../../assets/images/dashboard/avatar-2.png"),
+    birthdate: "20/01/1988",
+  },
+  {
+    fullName: "Nguyễn Văn Anh",
+    nickname: "Anh cá sấu ",
+    avatarUri: require("../../assets/images/dashboard/avatar-3.png"),
+    birthdate: "20/01/2004",
+  },
+  {
+    fullName: "Nguyễn Thị Mẹ",
+    nickname: "Mẹ thỏ ",
+    avatarUri: require("../../assets/images/dashboard/avatar.png"),
+    birthdate: "20/01/1994",
+  },
+];
+const FamilyInfoScreen = () => {
   const navigation = useNavigation<FamilyInfoNavigationProp>();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "10%" }}>
@@ -70,7 +92,35 @@ const FamilyInfoScreen = ({ listOfMember }: FamilyInfoProp) => {
             </TouchableOpacity>
           </View>
           <View style={styles.switcherContainer}>
-            <FamilyInfoSwitcher type={"List"} />
+            <FamilyInfoSwitcher
+              type={"List"}
+              onWaitListPress={() => navigation.navigate("FamilyAcceptScreen")}
+            />
+          </View>
+          <View style={styles.familyList}>
+            {listOfMember.map((member, index) => (
+              <View style={styles.familyMember}>
+                <View style={styles.userInformationContainer}>
+                  <View style={styles.card}>
+                    <Image
+                      source={member.avatarUri}
+                      style={styles.avatarCard}
+                    />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.textInfo}>
+                        Họ và tên: {member.fullName}
+                      </Text>
+                      <Text style={styles.textInfo}>
+                        Biệt danh: {member.nickname}
+                      </Text>
+                      <Text style={styles.textInfo}>
+                        Ngày sinh: {member.birthdate}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))}
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
@@ -120,6 +170,32 @@ const styles = StyleSheet.create({
   },
   switcherContainer: {
     marginTop: "10%",
+  },
+  familyList: {},
+  familyMember: {},
+  userInformationContainer: {
+    marginTop: "2.5%",
+  },
+  card: {
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  textContainer: {
+    marginLeft: "7.5%",
+  },
+  avatarCard: {
+    width: 100,
+    height: 100,
+    borderRadius: 40,
+  },
+  textInfo: {
+    color: "#242425",
+    fontSize: 16,
+    textAlign: "left",
+    fontWeight: "500",
+    paddingVertical: 3,
   },
 });
 

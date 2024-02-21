@@ -23,6 +23,7 @@ import OTPInput from "../../component/shared/OTPInput";
 type OTPScreenNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
+  NewPasswordScreen: undefined;
 }>;
 
 const OTPScreen = () => {
@@ -44,6 +45,7 @@ const OTPScreen = () => {
   function submitHandler() {
     setOTPInput(["", "", "", ""]);
     Alert.alert("Thành công", `Xác thực OTP: ${OTPinput.join("")}`);
+    navigation.navigate("NewPasswordScreen")
   }
 
   return (

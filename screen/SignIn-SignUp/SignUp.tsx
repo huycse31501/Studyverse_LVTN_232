@@ -161,7 +161,7 @@ const SignUp = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "23.59%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: "15.59%" }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}

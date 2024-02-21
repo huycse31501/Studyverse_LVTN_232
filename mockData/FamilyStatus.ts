@@ -19,39 +19,10 @@ export const userStatusData: FamilyStatusData = {
     currentStatus: "busy",
   },
   user3: {
-    name: "Ngài Morgan",
+    name: "Anh cá sấu",
     status: "Đang học bơi",
     avatarUri: avatar3,
     lastOnline: "30 phút trước",
     currentStatus: "busy",
   },
-  user4: {
-    name: "Ngài Morgan",
-    status: "Đang học bơi",
-    avatarUri: avatar3,
-    lastOnline: "30 phút trước",
-    currentStatus: "busy",
-  },
-  user5: {
-    name: "Ngài Morgan",
-    status: "Đang học bơi",
-    avatarUri: avatar3,
-    lastOnline: "30 phút trước",
-    currentStatus: "busy",
-  },
-  user6: {
-    name: "Ngài Morgan",
-    status: "Đang học bơi",
-    avatarUri: avatar3,
-    lastOnline: "30 phút trước",
-    currentStatus: "busy",
-  },
-  user7: {
-    name: "Ngài Morgan",
-    status: "Đang học bơi",
-    avatarUri: avatar3,
-    lastOnline: "30 phút trước",
-    currentStatus: "busy",
-  },
-
 };

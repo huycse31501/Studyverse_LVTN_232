@@ -5,6 +5,7 @@ interface PasswordInputFieldProps {
   isValid: boolean;
   textInputConfig?: TextInputProps;
   value?: string;
+  customError?: string;
 }
 
 export default PasswordInputFieldProps;

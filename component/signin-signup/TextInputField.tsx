@@ -8,6 +8,7 @@ const TextInputField = ({
   isValid,
   textInputConfig,
   value,
+  customError,
 }: TextInputFieldProps) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -48,7 +49,9 @@ const TextInputField = ({
         {...textInputConfig}
       />
       {showError && (
-        <Text style={styles.errorText}>{placeHolder} không hợp lệ</Text>
+        <Text style={styles.errorText}>
+          {customError ?? `${placeHolder} không hợp lệ`}
+        </Text>
       )}
     </View>
   );

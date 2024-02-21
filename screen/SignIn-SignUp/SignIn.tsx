@@ -20,6 +20,7 @@ import { useNavigation } from "@react-navigation/native";
 
 type ForgotPasswordNavigationProp = StackNavigationProp<{
   ForgotPassword: undefined;
+  StatusDashboard: undefined;
 }>;
 
 const SignIn = () => {
@@ -92,12 +93,13 @@ const SignIn = () => {
         isPasswordValid: true,
         isEmailValid: true,
       });
-      Alert.alert("Thành công", "Đăng nhập thành công");
+      // Alert.alert("Thành công", "Đăng nhập thành công");
+      navigation.navigate("StatusDashboard");
     }
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "28.59%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: "17.59%" }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -142,7 +144,10 @@ const SignIn = () => {
             <ApplyButton label="ĐĂNG NHẬP" onPress={submitHandler} />
           </View>
           <View>
-            <TouchableTextComponent text="Quên mật khẩu" onPress={() => navigation.navigate("ForgotPassword")} />
+            <TouchableTextComponent
+              text="Quên mật khẩu"
+              onPress={() => navigation.navigate("ForgotPassword")}
+            />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

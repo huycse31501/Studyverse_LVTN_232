@@ -18,30 +18,47 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
+import PasswordInputField from "../../component/signin-signup/PasswordInputField";
 
-type ForgotPasswordNavigationProp = StackNavigationProp<{
+type NewPasswordNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
   OTPScreen: undefined;
 }>;
 
-const ForgotPassword = () => {
-  const navigation = useNavigation<ForgotPasswordNavigationProp>();
+const NewPasswordScreen = () => {
+  const navigation = useNavigation<NewPasswordNavigationProp>();
 
   const [inputs, setInputs] = useState({
-    email: {
+    newpassword: {
+      value: "",
+      required: true,
+    },
+    rePassword: {
       value: "",
       required: true,
     },
   });
 
   const [inputValidation, setInputValidation] = useState({
-    isEmailValid: regexVault.emailValidate.test(inputs.email.value),
+    isNewPasswordValid: regexVault.passwordValidate.test(
+      inputs.newpassword.value
+    ),
+    isRePasswordValid: !!(
+      inputs.newpassword.value &&
+      inputs.newpassword.value === inputs.rePassword.value
+    ),
   });
 
   useEffect(() => {
     const updatedValidation = {
-      isEmailValid: regexVault.emailValidate.test(inputs.email.value),
+      isNewPasswordValid: regexVault.passwordValidate.test(
+        inputs.newpassword.value
+      ),
+      isRePasswordValid: !!(
+        inputs.newpassword.value &&
+        inputs.newpassword.value === inputs.rePassword.value
+      ),
     };
     setInputValidation(updatedValidation);
   }, [inputs]);
@@ -81,16 +98,23 @@ const ForgotPassword = () => {
     if (!allFieldsFilled) {
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin theo yêu cầu");
     } else if (!allFieldsValid) {
-      Alert.alert("Thông báo", "Thông tin email chưa hợp lệ");
+      Alert.alert("Thông báo", "Thông tin nhập chưa hợp lệ");
     } else {
       setInputs({
-        email: { value: "", required: true },
+        newpassword: { value: "", required: true },
+        rePassword: { value: "", required: true },
       });
       setInputValidation({
-        isEmailValid: true,
+        isNewPasswordValid: regexVault.passwordValidate.test(
+          inputs.newpassword.value
+        ),
+        isRePasswordValid: !!(
+          inputs.newpassword.value &&
+          inputs.newpassword.value === inputs.rePassword.value
+        ),
       });
-      Alert.alert("Thành công", "Xác thực");
-      navigation.navigate("OTPScreen");
+      Alert.alert("Thành công", "Đổi mật khẩu thành công");
+      navigation.navigate("SignIn");
     }
   }
 
@@ -111,21 +135,24 @@ const ForgotPassword = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <RedTextHeader text="QUÊN MẬT KHẨU" />
-          </View>
-          <View style={styles.introText}>
-            <Text style={styles.introTextStyle}>
-              Nhập địa chỉ email của bạn
-            </Text>
+            <RedTextHeader text="ĐẶT LẠI MẬT KHẨU" />
           </View>
           <View style={styles.inputField}>
-            <TextInputField
-              placeHolder="Email"
-              required
-              isValid={inputValidation.isEmailValid}
-              value={inputs.email.value}
+            <PasswordInputField
+              placeHolder="Mật khẩu mới"
+              isValid={inputValidation.isNewPasswordValid}
+              value={inputs.newpassword.value}
               textInputConfig={{
-                onChangeText: inputChangedHandler.bind(this, "email"),
+                onChangeText: inputChangedHandler.bind(this, "newpassword"),
+              }}
+            />
+            <PasswordInputField
+              placeHolder="Nhập lại mật khẩu mới"
+              customError="Mật khẩu chưa trùng khớp"
+              isValid={inputValidation.isRePasswordValid}
+              value={inputs.rePassword.value}
+              textInputConfig={{
+                onChangeText: inputChangedHandler.bind(this, "rePassword"),
               }}
             />
           </View>
@@ -136,22 +163,11 @@ const ForgotPassword = () => {
               onPress={() => navigation.navigate("SignIn")}
             />
           </View>
-          <View style={styles.sendOTPButton}>
+          <View style={styles.sendNewPassword}>
             <ApplyButton
-              label="GỬI MÃ XÁC THỰC"
-              extraStyle={styles.OTPButton}
+              label="XÁC NHẬN"
+              extraStyle={styles.NewPasswordButton}
               onPress={submitHandler}
-            />
-          </View>
-          <View style={styles.askToSignUp}>
-            <Text style={styles.askToSignUpText}>Bạn chưa có tài khoản?</Text>
-          </View>
-          <View style={styles.backToSignUpContainer}>
-            <ApplyButton
-              label="ĐĂNG KÝ"
-              extraStyle={styles.backToSignUpButton}
-              extraTextStyle={styles.backToSignUpButtonTextStyle}
-              onPress={() => navigation.navigate("SignUp")}
             />
           </View>
         </KeyboardAwareScrollView>
@@ -176,12 +192,13 @@ const styles = StyleSheet.create({
   inputField: {
     paddingLeft: "6.8%",
     paddingRight: "6.8%",
+    marginTop: "12%",
   },
   backToSignIn: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "7.5%",
+    marginTop: "12.5%",
   },
   backToSignInText: {
     fontSize: 16,
@@ -189,36 +206,13 @@ const styles = StyleSheet.create({
     paddingRight: "2%",
     fontWeight: "500",
   },
-  sendOTPButton: {
-    marginTop: "20%",
+  sendNewPassword: {
+    marginTop: "10%",
   },
-  OTPButton: {
-    width: "80%",
+  NewPasswordButton: {
+    width: "50%",
     height: 50,
-  },
-  askToSignUp: {
-    flexDirection: "column",
-    alignItems: "center",
-    paddingHorizontal: 7,
-    marginTop: "30%",
-  },
-  askToSignUpText: {
-    fontSize: 18,
-    color: "#666666",
-    fontWeight: "500",
-  },
-  backToSignUpContainer: {
-    marginTop: "5%",
-  },
-  backToSignUpButton: {
-    backgroundColor: "#F9F9F9",
-    borderWidth: 2,
-    borderRadius: 30,
-    borderColor: "#0e0d0d7a",
-  },
-  backToSignUpButtonTextStyle: {
-    color: "#000000",
   },
 });
 
-export default ForgotPassword;
+export default NewPasswordScreen;
