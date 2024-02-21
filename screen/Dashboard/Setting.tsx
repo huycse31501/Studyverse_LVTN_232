@@ -15,41 +15,45 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 type DetailsNavigationProp = StackNavigationProp<{
   StatusDashboard: undefined;
+  FamilyInfoScreen: undefined;
 }>;
 
-
-
-const listOfAccountSetting = [
-  {
-    name: "Thông tin cá nhân",
-    image: require("../../assets/images/dashboard/setting1.png"),
-  },
-  {
-    name: "Thông tin gia đình",
-    image: require("../../assets/images/dashboard/setting2.png"),
-  },
-  {
-    name: "Mật khẩu",
-    image: require("../../assets/images/dashboard/setting3.png"),
-  },
-  {
-    name: "Thông báo",
-    image: require("../../assets/images/dashboard/setting4.png"),
-  },
-];
-
-const extraSetting = [
-  {
-    name: "Đánh giá & Nhận xét",
-    image: require("../../assets/images/dashboard/setting5.png"),
-  },
-  {
-    name: "Hỗ trợ",
-    image: require("../../assets/images/dashboard/setting6.png"),
-  },
-];
 const Setting = () => {
   const navigation = useNavigation<DetailsNavigationProp>();
+
+  const listOfAccountSetting = [
+    {
+      name: "Thông tin cá nhân",
+      image: require("../../assets/images/dashboard/setting1.png"),
+      onPress: () => {},
+    },
+    {
+      name: "Thông tin gia đình",
+      image: require("../../assets/images/dashboard/setting2.png"),
+      onPress: () => navigation.navigate("FamilyInfoScreen"),
+    },
+    {
+      name: "Mật khẩu",
+      image: require("../../assets/images/dashboard/setting3.png"),
+      onPress: () => {},
+    },
+    {
+      name: "Thông báo",
+      image: require("../../assets/images/dashboard/setting4.png"),
+      onPress: () => {},
+    },
+  ];
+
+  const extraSetting = [
+    {
+      name: "Đánh giá & Nhận xét",
+      image: require("../../assets/images/dashboard/setting5.png"),
+    },
+    {
+      name: "Hỗ trợ",
+      image: require("../../assets/images/dashboard/setting6.png"),
+    },
+  ];
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "15.5%" }}>
@@ -68,7 +72,9 @@ const Setting = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.titleContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate("StatusDashboard")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("StatusDashboard")}
+            >
               <Image
                 source={require("../../assets/images/dashboard/left-arrow.png")}
                 style={styles.leftArrow}
@@ -86,7 +92,7 @@ const Setting = () => {
           <Text style={styles.account}>Tài khoản</Text>
           <View style={styles.accountSettingContainer}>
             {listOfAccountSetting.map((setting, index) => (
-              <TouchableOpacity key={index} style={styles.functionContainer}>
+              <TouchableOpacity key={index} style={styles.functionContainer} onPress={setting.onPress}>
                 <Image source={setting.image} style={styles.imageFunction} />
                 <Text style={styles.textFunction}>{setting.name}</Text>
                 <View style={styles.rightArrowContainer}>

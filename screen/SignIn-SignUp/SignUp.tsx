@@ -14,9 +14,9 @@ import PasswordInputField from "../../component/signin-signup/PasswordInputField
 import DateInputField from "../../component/signin-signup/DateInputField";
 import OptionSelector from "../../component/shared/OptionSelector";
 import ApplyButton from "../../component/shared/ApplyButton";
-import AuthButton from "../../component/signin-signup/AuthButton";
 import regexVault from "../../utils/regex";
 import isDateValid from "../../utils/checkValidDate";
+import AuthButton from "../../component/signin-signup/AuthButton";
 
 type OptionType = "Parent" | "Children";
 

@@ -7,11 +7,14 @@ import { mockUser } from "./mockData/UserInfo";
 import AppNavigator from "./component/navigator/appNavigator";
 import Setting from "./screen/Dashboard/Setting";
 import FamilyInfoSwitcher from "./component/dashboard/familyInfoSwitcher";
+import FamilyInfoScreen from "./screen/Dashboard/FamilyInfo";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
+      <AppNavigator />
+      {/* <FamilyInfoScreen /> */}
       {/* <FamilyInfoSwitcher type="List" /> */}
       {/* <AppNavigator /> */}
       {/* <Setting /> */}
