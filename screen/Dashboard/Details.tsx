@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -11,10 +11,12 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Platform,
+  Modal,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
-
+import ApplyButton from "../../component/shared/ApplyButton";
 
 export interface User {
   fullName: string;
@@ -32,6 +34,12 @@ interface UserDetailsScreenProps {
 const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
   const { user } = route.params;
 
+  const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
+    useState(false);
+
+  const handleCancelButton = () => {
+    setConfirmCancelModalVisible(false);
+  };
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: "10%" }}>
       <KeyboardAvoidingView
@@ -111,10 +119,59 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   />
                 </TouchableOpacity>
               </View>
+              <View style={styles.cancelButtonContainer}>
+                <ApplyButton
+                  label="Hủy liên kết"
+                  onPress={() => {
+                    setConfirmCancelModalVisible(true);
+                  }}
+                  extraStyle={styles.cancelButton}
+                ></ApplyButton>
+              </View>
             </>
           )}
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={confirmCancelModalVisible}
+        onRequestClose={() => setConfirmCancelModalVisible(false)}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setConfirmCancelModalVisible(false);
+          }}
+        >
+          <View style={styles.cancelModalContainer}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.cancelModalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setConfirmCancelModalVisible(false);
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.modalIntroText}>Hủy liên kết</Text>
+                <Text style={styles.modalWarningText}>
+                  Lưu ý: Thành viên sau khi hủy sẽ chỉ được liên kết lại sau 14
+                  ngày
+                </Text>
+                <ApplyButton
+                  extraStyle={styles.modalButton}
+                  label="XÁC NHẬN"
+                  onPress={handleCancelButton}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -196,6 +253,61 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#242425",
     fontWeight: "bold",
+  },
+  cancelButtonContainer: {
+    marginTop: "10%",
+  },
+  cancelButton: {
+    width: 200,
+  },
+  cancelModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  cancelModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "90%",
+  },
+  modalIntroText: {
+    color: "#54595E",
+    fontWeight: "600",
+    fontSize: 21.5,
+    alignSelf: "center",
+  },
+  modalButton: {
+    width: 160,
+    height: 50,
+    marginTop: "2%",
+  },
+  modalWarningText: {
+    color: "#FF2D55",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "left",
+    marginTop: "7.5%",
+    marginBottom: "7.5%",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 1,
+  },
+  closeIcon: {
+    width: 24,
+    height: 24,
   },
 });
 

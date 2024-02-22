@@ -27,11 +27,14 @@ const Setting = () => {
   const navigation = useNavigation<DetailsNavigationProp>();
 
   const [linkStatus, setLinkStatus] = useState("unlinked");
-  const [modalVisible, setModalVisible] = useState(false);
+  const [familyLinkedModalVisible, setFamilyLinkedModalVisible] =
+    useState(false);
+  const [createFamilyModalVisible, setcreateFamilyModalVisible] =
+    useState(false);
   const [familyLinkInfo, setFamilyLinkInfo] = useState("");
 
   const handleApplyPress = () => {
-    setModalVisible(true);
+    setFamilyLinkedModalVisible(true);
   };
 
   const handleUnlinkPress = () => {
@@ -39,10 +42,14 @@ const Setting = () => {
     setFamilyLinkInfo("");
   };
 
+  const handleCreateFamily = () => {
+    setcreateFamilyModalVisible(false);
+    setLinkStatus("linked");
+  };
   const handleConfirmLink = () => {
     if (regexVault.phoneNumberValidate.test(familyLinkInfo)) {
       setLinkStatus("pending");
-      setModalVisible(false);
+      setFamilyLinkedModalVisible(false);
       console.log(familyLinkInfo);
     } else {
       alert("Vui lòng nhập số điện thoại hợp lệ");
@@ -55,6 +62,14 @@ const Setting = () => {
       image: require("../../assets/images/dashboard/setting1.png"),
       onPress: () => {},
       valid: true,
+    },
+    {
+      name: "Tạo gia đình",
+      image: require("../../assets/images/dashboard/setting2.png"),
+      onPress: () => {
+        setcreateFamilyModalVisible(true);
+      },
+      valid: !!(linkStatus === "unlinked"),
     },
     {
       name: "Thông tin gia đình",
@@ -197,16 +212,24 @@ const Setting = () => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={familyLinkedModalVisible}
+        onRequestClose={() => setFamilyLinkedModalVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setFamilyLinkedModalVisible(false);
+            setFamilyLinkInfo("");
+          }}
+        >
           <View style={styles.centeredView}>
             <TouchableWithoutFeedback onPress={() => {}}>
               <View style={styles.modalView}>
                 <TouchableOpacity
                   style={styles.closeButton}
-                  onPress={() => setModalVisible(false)}
+                  onPress={() => {
+                    setFamilyLinkedModalVisible(false);
+                    setFamilyLinkInfo("");
+                  }}
                 >
                   <Image
                     source={require("../../assets/images/shared/closedModal.png")}
@@ -225,6 +248,45 @@ const Setting = () => {
                   extraStyle={styles.modalButton}
                   label="XÁC NHẬN"
                   onPress={handleConfirmLink}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={createFamilyModalVisible}
+        onRequestClose={() => setcreateFamilyModalVisible(false)}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setcreateFamilyModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredCreateFamilyView}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.createFamilyModalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setcreateFamilyModalVisible(false);
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.modalIntroText}>Tạo gia đình</Text>
+                <Text style={styles.modalWarningText}>
+                  Lưu ý: Tài khoản sau khi khởi tạo gia đình sẽ không hủy được
+                </Text>
+                <ApplyButton
+                  extraStyle={styles.modalButton}
+                  label="XÁC NHẬN"
+                  onPress={handleCreateFamily}
                 />
               </View>
             </TouchableWithoutFeedback>
@@ -322,7 +384,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: "5%",
-    marginTop: "7.5%",
   },
   pendingLinkText: {
     alignSelf: "center",
@@ -350,6 +411,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
+  centeredCreateFamilyView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  createFamilyModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "90%",
+  },
   modalView: {
     backgroundColor: "white",
     borderRadius: 20,
@@ -369,7 +450,8 @@ const styles = StyleSheet.create({
     color: "#54595E",
     fontWeight: "600",
     fontSize: 21.5,
-    marginBottom: "5%",
+    // marginBottom: "10%",
+    alignSelf: "center",
   },
   modalTextInput: {
     height: 50,
@@ -384,6 +466,14 @@ const styles = StyleSheet.create({
     width: 160,
     height: 50,
     marginTop: "2%",
+  },
+  modalWarningText: {
+    color: "#FF2D55",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "left",
+    marginTop: "7.5%",
+    marginBottom: "7.5%",
   },
   closeButton: {
     position: "absolute",

@@ -34,7 +34,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Setting"
+        initialRouteName="StatusDashboard"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
@@ -48,7 +48,10 @@ const AppNavigator = () => {
         <Stack.Screen name="UserDetailsScreen" component={UserDetailsScreen} />
         <Stack.Screen name="Setting" component={Setting} />
         <Stack.Screen name="FamilyInfoScreen" component={FamilyInfoScreen} />
-        <Stack.Screen name="FamilyAcceptScreen" component={FamilyAcceptScreen} />
+        <Stack.Screen
+          name="FamilyAcceptScreen"
+          component={FamilyAcceptScreen}
+        />
         <Stack.Screen name="NewPasswordScreen" component={NewPasswordScreen} />
       </Stack.Navigator>
     </NavigationContainer>
