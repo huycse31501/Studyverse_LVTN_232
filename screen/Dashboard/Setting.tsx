@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   KeyboardAvoidingView,
@@ -10,8 +10,13 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  Modal,
+  TextInput,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import ApplyButton from "../../component/shared/ApplyButton";
+import regexVault from "../../utils/regex";
 
 type DetailsNavigationProp = StackNavigationProp<{
   StatusDashboard: undefined;
@@ -21,37 +26,64 @@ type DetailsNavigationProp = StackNavigationProp<{
 const Setting = () => {
   const navigation = useNavigation<DetailsNavigationProp>();
 
+  const [linkStatus, setLinkStatus] = useState("unlinked");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [familyLinkInfo, setFamilyLinkInfo] = useState("");
+
+  const handleApplyPress = () => {
+    setModalVisible(true);
+  };
+
+  const handleUnlinkPress = () => {
+    setLinkStatus("unlinked");
+    setFamilyLinkInfo("");
+  };
+
+  const handleConfirmLink = () => {
+    if (regexVault.phoneNumberValidate.test(familyLinkInfo)) {
+      setLinkStatus("pending");
+      setModalVisible(false);
+      console.log(familyLinkInfo);
+    } else {
+      alert("Vui lòng nhập số điện thoại hợp lệ");
+    }
+  };
+
   const listOfAccountSetting = [
     {
       name: "Thông tin cá nhân",
       image: require("../../assets/images/dashboard/setting1.png"),
       onPress: () => {},
+      valid: true,
     },
     {
       name: "Thông tin gia đình",
       image: require("../../assets/images/dashboard/setting2.png"),
       onPress: () => navigation.navigate("FamilyInfoScreen"),
+      valid: !!(linkStatus === "linked"),
     },
     {
       name: "Mật khẩu",
       image: require("../../assets/images/dashboard/setting3.png"),
       onPress: () => {},
+      valid: true,
     },
     {
       name: "Thông báo",
       image: require("../../assets/images/dashboard/setting4.png"),
       onPress: () => {},
+      valid: true,
     },
   ];
 
   const extraSetting = [
     {
-      name: "Đánh giá & Nhận xét",
-      image: require("../../assets/images/dashboard/setting5.png"),
-    },
-    {
       name: "Hỗ trợ",
       image: require("../../assets/images/dashboard/setting6.png"),
+    },
+    {
+      name: "Đăng xuất",
+      image: require("../../assets/images/shared/logout.png"),
     },
   ];
 
@@ -91,18 +123,28 @@ const Setting = () => {
           </View>
           <Text style={styles.account}>Tài khoản</Text>
           <View style={styles.accountSettingContainer}>
-            {listOfAccountSetting.map((setting, index) => (
-              <TouchableOpacity key={index} style={styles.functionContainer} onPress={setting.onPress}>
-                <Image source={setting.image} style={styles.imageFunction} />
-                <Text style={styles.textFunction}>{setting.name}</Text>
-                <View style={styles.rightArrowContainer}>
-                  <Image
-                    style={styles.rightArrow}
-                    source={require("../../assets/images/dashboard/right-arrow.png")}
-                  />
-                </View>
-              </TouchableOpacity>
-            ))}
+            {listOfAccountSetting.map(
+              (setting, index) =>
+                setting.valid && (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.functionContainer}
+                    onPress={setting.onPress}
+                  >
+                    <Image
+                      source={setting.image}
+                      style={styles.imageFunction}
+                    />
+                    <Text style={styles.textFunction}>{setting.name}</Text>
+                    <View style={styles.rightArrowContainer}>
+                      <Image
+                        style={styles.rightArrow}
+                        source={require("../../assets/images/dashboard/right-arrow.png")}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                )
+            )}
           </View>
           <Text style={styles.account}>Thêm</Text>
           <View style={styles.accountSettingContainer}>
@@ -119,11 +161,76 @@ const Setting = () => {
               </TouchableOpacity>
             ))}
           </View>
-          <TouchableOpacity>
-            <Text style={styles.logout}>Đăng xuất</Text>
-          </TouchableOpacity>
+          {linkStatus === "unlinked" && (
+            <>
+              <Text style={styles.linkText}>Tài khoản chưa liên kết</Text>
+              <ApplyButton
+                extraStyle={styles.linkButton}
+                label="LIÊN KẾT GIA ĐÌNH"
+                onPress={handleApplyPress}
+              />
+            </>
+          )}
+
+          {linkStatus === "pending" && (
+            <>
+              <Text style={styles.pendingLinkText}>
+                Đã gửi yêu cầu liên kết
+              </Text>
+              <ApplyButton
+                extraStyle={styles.pendingLinkButton}
+                label="HỦY"
+                onPress={handleUnlinkPress}
+              />
+            </>
+          )}
+
+          {linkStatus === "linked" && (
+            <>
+              <Text style={styles.linkedText}>
+                Tài khoản đã liên kết gia đình
+              </Text>
+            </>
+          )}
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.centeredView}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.modalIntroText}>Liên kết gia đình</Text>
+                <TextInput
+                  style={styles.modalTextInput}
+                  placeholder="Số điện thoại liên kết"
+                  value={familyLinkInfo}
+                  onChangeText={setFamilyLinkInfo}
+                  keyboardType="phone-pad"
+                />
+                <ApplyButton
+                  extraStyle={styles.modalButton}
+                  label="XÁC NHẬN"
+                  onPress={handleConfirmLink}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -164,7 +271,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    // elevation: 5,
   },
   account: {
     color: "#090A0A",
@@ -200,11 +306,94 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
-  logout: {
-    color: "#979C9E",
-    fontSize: 18,
+  pendingText: {
     alignSelf: "center",
-    marginTop: "16.5%",
+    marginVertical: 20,
+    fontSize: 16,
+    color: "#FF9500",
+  },
+  linkButton: {
+    width: 265,
+    height: 56,
+  },
+  linkText: {
+    alignSelf: "center",
+    color: "#FF2D58",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: "5%",
+    marginTop: "7.5%",
+  },
+  pendingLinkText: {
+    alignSelf: "center",
+    color: "#000000",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: "5%",
+    marginTop: "7.5%",
+  },
+  pendingLinkButton: {
+    width: 216,
+    height: 56,
+  },
+  linkedText: {
+    alignSelf: "center",
+    color: "#FF2D58",
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: "10%",
+  },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "80%",
+  },
+  modalIntroText: {
+    color: "#54595E",
+    fontWeight: "600",
+    fontSize: 21.5,
+    marginBottom: "5%",
+  },
+  modalTextInput: {
+    height: 50,
+    marginVertical: "7.5%",
+    borderWidth: 1,
+    borderColor: "#D1D1D1",
+    borderRadius: 10,
+    paddingHorizontal: 50,
+    fontSize: 16,
+  },
+  modalButton: {
+    width: 160,
+    height: 50,
+    marginTop: "2%",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 1,
+  },
+  closeIcon: {
+    width: 24,
+    height: 24,
   },
 });
 

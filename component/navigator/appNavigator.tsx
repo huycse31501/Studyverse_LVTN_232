@@ -34,7 +34,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="FamilyInfoScreen"
+        initialRouteName="Setting"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
