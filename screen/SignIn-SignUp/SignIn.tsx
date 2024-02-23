@@ -35,18 +35,6 @@ const SignIn = () => {
       required: true,
     },
   });
-  const [inputValidation, setInputValidation] = useState({
-    isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
-    isEmailValid: regexVault.emailValidate.test(inputs.email.value),
-  });
-
-  useEffect(() => {
-    const updatedValidation = {
-      isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
-      isEmailValid: regexVault.emailValidate.test(inputs.email.value),
-    };
-    setInputValidation(updatedValidation);
-  }, [inputs]);
 
   function inputChangedHandler(
     inputIdentifier: keyof typeof inputs,
@@ -71,7 +59,6 @@ const SignIn = () => {
 
   function submitHandler() {
     let allFieldsFilled = true;
-    let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
     for (const [key, value] of Object.entries(inputs)) {
       if (value.required && !value.value) {
@@ -81,19 +68,12 @@ const SignIn = () => {
     }
 
     if (!allFieldsFilled) {
-      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin theo yêu cầu");
-    } else if (!allFieldsValid) {
-      Alert.alert("Thông báo", "Thông tin đăng ký chưa hợp lệ");
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin đăng nhập");
     } else {
       setInputs({
         email: { value: "", required: true },
         password: { value: "", required: true },
       });
-      setInputValidation({
-        isPasswordValid: true,
-        isEmailValid: true,
-      });
-      // Alert.alert("Thành công", "Đăng nhập thành công");
       navigation.navigate("StatusDashboard");
     }
   }
@@ -125,7 +105,7 @@ const SignIn = () => {
             <TextInputField
               placeHolder="Email"
               required
-              isValid={inputValidation.isEmailValid}
+              isValid={true}
               value={inputs.email.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(this, "email"),
@@ -133,7 +113,7 @@ const SignIn = () => {
             />
             <PasswordInputField
               placeHolder="Mật khẩu"
-              isValid={inputValidation.isPasswordValid}
+              isValid={true}
               value={inputs.password.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(this, "password"),
