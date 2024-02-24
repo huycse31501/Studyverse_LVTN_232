@@ -28,7 +28,7 @@ type StatusBoardNavigationProp = StackNavigationProp<{
 const StatusDashboard = () => {
   const navigation = useNavigation<StatusBoardNavigationProp>();
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "15%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -79,10 +79,12 @@ const styles = StyleSheet.create({
   familyStatusContainer: {
     paddingHorizontal: 10,
     paddingVertical: 5,
+    marginTop: "5%",
   },
   eventContainer: {
     paddingHorizontal: 12.5,
     paddingVertical: 10,
+    marginTop: "5%",
   },
   footerContainer: {
     height: 60,

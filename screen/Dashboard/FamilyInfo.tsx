@@ -53,7 +53,7 @@ const listOfMember: User[] = [
 const FamilyInfoScreen = () => {
   const navigation = useNavigation<FamilyInfoNavigationProp>();
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "10%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -99,7 +99,7 @@ const FamilyInfoScreen = () => {
           </View>
           <View style={styles.familyList}>
             {listOfMember.map((member, index) => (
-              <View style={styles.familyMember}>
+              <View  key={index} style={styles.familyMember}>
                 <View style={styles.userInformationContainer}>
                   <View style={styles.card}>
                     <Image

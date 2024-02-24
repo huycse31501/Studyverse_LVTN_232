@@ -41,7 +41,7 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
     setConfirmCancelModalVisible(false);
   };
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "10%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 30 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}

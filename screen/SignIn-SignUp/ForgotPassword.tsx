@@ -95,7 +95,7 @@ const ForgotPassword = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "18.59%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 55 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}

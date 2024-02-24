@@ -45,11 +45,11 @@ const OTPScreen = () => {
   function submitHandler() {
     setOTPInput(["", "", "", ""]);
     Alert.alert("Thành công", `Xác thực OTP: ${OTPinput.join("")}`);
-    navigation.navigate("NewPasswordScreen")
+    navigation.navigate("NewPasswordScreen");
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "28.59%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 65 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
