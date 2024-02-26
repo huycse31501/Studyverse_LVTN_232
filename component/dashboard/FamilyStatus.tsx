@@ -79,7 +79,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
 const styles = StyleSheet.create({
   cardContainer: {
     borderRadius: 20,
-    padding: 10,
     margin: 10,
   },
   statusContainer: {

@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import {
   StyleSheet,
   Text,
@@ -12,6 +18,7 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import DateInputFieldProps from "../type/DateInputField";
+import calculateAge from "../../utils/calculateAge";
 
 const DateInputField = ({
   placeHolder,
@@ -19,11 +26,14 @@ const DateInputField = ({
   isValid,
   textInputConfig,
   dateStr,
+  signUpType,
 }: DateInputFieldProps) => {
   const [date, setDate] = useState(new Date());
   const [isPickerShow, setIsPickerShow] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const isInitialMount = useRef(true);
 
   const showPicker = () => {
     setIsPickerShow(true);
@@ -57,6 +67,34 @@ const DateInputField = ({
     return () => clearTimeout(timer);
   }, [dateStr, isValid]);
 
+  useEffect(() => {
+    if (!isInitialMount.current) {
+      let newErrorMessage = "";
+      let age = 0;
+
+      if (dateStr?.trim()) {
+        age = calculateAge(dateStr);
+      }
+
+      const isAgeValid = signUpType === "Parent" ? age >= 18 : age >= 6;
+
+      if (!isAgeValid && dateStr?.trim()) {
+        newErrorMessage =
+          signUpType === "Parent"
+            ? "Phụ huynh cần tối thiểu trên 18 tuổi"
+            : "Con trẻ cần tối thiểu trên 6 tuổi";
+        setShowError(true);
+      } else if (!isValid) {
+        newErrorMessage = "Sai định dạng (DD/MM/YYYY) hoặc không hợp lệ";
+        setShowError(true);
+      } else {
+        setShowError(false);
+      }
+
+      setErrorMessage(newErrorMessage);
+    }
+  }, [dateStr, isValid, signUpType]);
+
   return (
     <View style={styles.container}>
       {!dateStr && !isFocused && (
@@ -76,11 +114,7 @@ const DateInputField = ({
         value={dateStr}
         {...textInputConfig}
       />
-      {showError && (
-        <Text style={styles.errorText}>
-          Sai định dạng (DD/MM/YYYY) hoặc không hợp lệ
-        </Text>
-      )}
+      {showError && <Text style={styles.errorText}>{errorMessage}</Text>}
       <TouchableOpacity onPress={showPicker} style={styles.iconContainer}>
         <Image
           source={require("../../assets/images/signIn-signUp/datePickerIcon.png")}
