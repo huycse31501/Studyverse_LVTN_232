@@ -122,7 +122,7 @@ const SignUp = () => {
     }));
   };
 
-  function submitHandler() {
+  async function submitHandler() {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -156,7 +156,27 @@ const SignUp = () => {
         isLastNameValid: true,
         isEmailValid: true,
       });
-      Alert.alert("Thành công", "Đăng ký thành công");
+      const response = await fetch('http://192.168.1.17:8080/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "email": inputs.email.value,
+          "password": inputs.password.value,
+          "firstName": inputs.firstName.value,
+          "lastName": inputs.lastName.value,
+          "dob": inputs.dob.value,
+          "signUpType": inputs.signUpType.value,
+          "phoneNumber": inputs.phoneNumber.value
+        })
+      });
+      const message = await response.json();
+      if (message.msg == "1") {
+        Alert.alert("Thành công", "Đăng ký thành công");
+      }
+      else Alert.alert("Thất bại", "Đăng ký thất bại");
+      // Alert.alert("Thành công", "Đăng ký thành công");
     }
   }
 

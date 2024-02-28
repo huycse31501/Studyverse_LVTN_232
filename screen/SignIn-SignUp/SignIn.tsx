@@ -57,7 +57,7 @@ const SignIn = () => {
     });
   }
 
-  function submitHandler() {
+  async function submitHandler() {
     let allFieldsFilled = true;
 
     for (const [key, value] of Object.entries(inputs)) {
@@ -74,7 +74,22 @@ const SignIn = () => {
         email: { value: "", required: true },
         password: { value: "", required: true },
       });
-      navigation.navigate("StatusDashboard");
+      const response = await fetch('http://192.168.1.17:8080/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "email": inputs.email.value,
+          "password": inputs.password.value
+        })
+      });
+      const message = await response.json();
+      if (message.msg == "1") {
+        Alert.alert("Thành công", "Đăng nhập thành công");
+        navigation.navigate("StatusDashboard");
+      }
+      else Alert.alert("Thất bại", "Đăng nhập thất bại");
     }
   }
 

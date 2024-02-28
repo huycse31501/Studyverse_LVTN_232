@@ -34,7 +34,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="StatusDashboard"
+        initialRouteName="SignIn"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
