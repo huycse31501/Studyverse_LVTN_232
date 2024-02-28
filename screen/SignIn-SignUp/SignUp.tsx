@@ -17,6 +17,7 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import regexVault from "../../utils/regex";
 import isDateValid from "../../utils/checkValidDate";
 import AuthButton from "../../component/signin-signup/AuthButton";
+import calculateAge from "../../utils/calculateAge";
 
 type OptionType = "Parent" | "Children";
 
@@ -49,7 +50,7 @@ const SignUp = () => {
     },
     phoneNumber: {
       value: "",
-      required: curSignUpType === "Parent" ? true : false,
+      required: false,
     },
   });
 
@@ -59,7 +60,10 @@ const SignUp = () => {
     ),
     isDOBValid:
       regexVault.DOBValidate.test(inputs.dob.value) &&
-      isDateValid(inputs.dob.value),
+      isDateValid(inputs.dob.value) &&
+      (curSignUpType === "Parent"
+        ? calculateAge(inputs.dob.value) > 18
+        : calculateAge(inputs.dob.value) > 6),
     isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
     isFirstNameValid: regexVault.firstNameValidate.test(inputs.firstName.value),
     isLastNameValid: regexVault.lastNameValidate.test(inputs.lastName.value),
@@ -67,13 +71,16 @@ const SignUp = () => {
   });
 
   useEffect(() => {
+    const age = calculateAge(inputs.dob.value);
+    const isAgeValid = curSignUpType === "Parent" ? age > 18 : age > 6;
     const updatedValidation = {
       isPhoneNumberValid: regexVault.phoneNumberValidate.test(
         inputs.phoneNumber.value
       ),
       isDOBValid:
         regexVault.DOBValidate.test(inputs.dob.value) &&
-        isDateValid(inputs.dob.value),
+        isDateValid(inputs.dob.value) &&
+        isAgeValid,
       isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
       isFirstNameValid: regexVault.firstNameValidate.test(
         inputs.firstName.value
@@ -89,10 +96,6 @@ const SignUp = () => {
     enteredValue: string
   ) {
     setInputs((curInputs) => {
-      const isRequired =
-        inputIdentifier === "phoneNumber"
-          ? curSignUpType === "Parent"
-          : curInputs[inputIdentifier].required;
       const currentInput = curInputs[inputIdentifier];
 
       if (currentInput) {
@@ -101,7 +104,6 @@ const SignUp = () => {
           [inputIdentifier]: {
             ...currentInput,
             value: enteredValue,
-            required: isRequired,
           },
         };
       }
@@ -113,13 +115,6 @@ const SignUp = () => {
   const handleOptionChange = (selectedOption: OptionType) => {
     inputChangedHandler("signUpType", selectedOption);
     setCurSignUpType(selectedOption);
-    setInputs((curInputs) => ({
-      ...curInputs,
-      phoneNumber: {
-        ...curInputs.phoneNumber,
-        required: selectedOption === "Parent",
-      },
-    }));
   };
 
   async function submitHandler() {
@@ -144,9 +139,9 @@ const SignUp = () => {
         password: { value: "", required: true },
         firstName: { value: "", required: true },
         lastName: { value: "", required: true },
-        dob: { value: "", required: false },
+        dob: { value: "", required: true },
         signUpType: { value: "Parent", required: true },
-        phoneNumber: { value: "", required: curSignUpType === "Parent" },
+        phoneNumber: { value: "", required: false },
       });
       setInputValidation({
         isPhoneNumberValid: true,
@@ -181,7 +176,7 @@ const SignUp = () => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "15.59%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -240,9 +235,11 @@ const SignUp = () => {
               }}
             />
             <DateInputField
+              required
               placeHolder="Ngày sinh"
               isValid={inputValidation.isDOBValid}
               dateStr={inputs.dob.value}
+              signUpType={curSignUpType}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(this, "dob"),
               }}
@@ -250,7 +247,7 @@ const SignUp = () => {
             <OptionSelector onOptionChange={handleOptionChange} />
             <TextInputField
               placeHolder="Số điện thoại"
-              required={inputs.signUpType.value === "Parent"}
+              required={false}
               value={inputs.phoneNumber.value}
               isValid={inputValidation.isPhoneNumberValid}
               textInputConfig={{
@@ -280,8 +277,7 @@ const styles = StyleSheet.create({
   applyButton: {
     alignItems: "center",
     width: "100%",
-    marginTop: "10%",
-    marginBottom: "20%",
+    marginTop: 50,
   },
   authButton: {
     marginBottom: "5%",

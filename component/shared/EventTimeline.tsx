@@ -8,8 +8,6 @@ type EventTimelineProps = {
 };
 
 const EventTimeline = ({ data, height }: EventTimelineProps) => {
-  
-
   const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
@@ -26,21 +24,21 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
     const [eventHours, eventMinutes] = eventTime.split(".").map(Number);
     const eventDate = new Date(now);
     eventDate.setHours(eventHours, eventMinutes, 0, 0);
-  
+
     const diff = eventDate.getTime() - now.getTime();
     if (diff < 0) {
       return null;
     }
-  
+
     const minutesUntilEvent = Math.floor(diff / 60000);
     const hoursUntilEvent = Math.floor(minutesUntilEvent / 60);
     const remainingMinutes = minutesUntilEvent % 60;
-  
+
     if (hoursUntilEvent === 0 && remainingMinutes === 0) {
       return "Bắt đầu ngay bây giờ";
     }
-  
-    let timeString = '';
+
+    let timeString = "";
     if (hoursUntilEvent > 0) {
       timeString += `${hoursUntilEvent} giờ `;
     }
@@ -52,7 +50,6 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
 
   return (
     <View style={[styles.container, height ? { height: height } : {}]}>
-      <Text style={styles.header}>Sự kiện hôm nay</Text>
       <ScrollView
         style={height ? { height } : styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -100,12 +97,6 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#FFF",
-  },
-  header: {
-    fontWeight: "600",
-    fontSize: 18,
-    marginBottom: 10,
-    color: "#000",
   },
   scrollView: {
     flex: 1,

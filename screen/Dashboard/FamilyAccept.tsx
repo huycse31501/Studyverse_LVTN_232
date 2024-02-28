@@ -35,7 +35,7 @@ const waitList = [
 const FamilyAcceptScreen = () => {
   const navigation = useNavigation<FamilyInfoNavigationProp>();
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "10%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -81,7 +81,7 @@ const FamilyAcceptScreen = () => {
           </View>
           <View style={styles.waitListContainer}>
             {waitList.map((member, index) => (
-              <View style={styles.newMember}>
+              <View key={index} style={styles.newMember}>
                 <View style={styles.userInformationContainer}>
                   <View style={styles.card}>
                     <Image

@@ -12,7 +12,12 @@ type UserStatusProps = {
   onChatPress?: () => void;
 };
 
-const UserStatus = ({ userName, status, onMenuPress, onChatPress }: UserStatusProps) => {
+const UserStatus = ({
+  userName,
+  status,
+  onMenuPress,
+  onChatPress,
+}: UserStatusProps) => {
   const getStatusColor = () => {
     switch (status) {
       case "on":
@@ -57,7 +62,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9F9F9",
     padding: 10,
   },
   textContainer: {
@@ -75,7 +79,7 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 16,
-    color: "#C2C1C1",
+    color: "#C2C2C1",
   },
   avatarIcon: {
     width: 50,

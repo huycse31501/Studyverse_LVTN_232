@@ -103,7 +103,7 @@ const Setting = () => {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: "15.5%" }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -310,7 +310,8 @@ const styles = StyleSheet.create({
     height: 30,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
+    fontWeight: "400",
     color: "#090A0A",
     alignSelf: "center",
     textAlign: "center",

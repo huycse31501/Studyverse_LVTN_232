@@ -6,6 +6,7 @@ interface DateInputFieldProps {
   isValid: boolean;
   textInputConfig?: TextInputProps;
   dateStr?: string;
+  signUpType: OptionType;
 }
 
 export default DateInputFieldProps;
