@@ -14,6 +14,7 @@ import Setting from "../../screen/Dashboard/Setting";
 import FamilyInfoScreen from "../../screen/Dashboard/FamilyInfo";
 import NewPasswordScreen from "../../screen/SignIn-SignUp/NewPassword";
 import FamilyAcceptScreen from "../../screen/Dashboard/FamilyAccept";
+import UserInformationScreen from "../../screen/Dashboard/UserInformation";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -26,6 +27,7 @@ export type RootStackParamList = {
   FamilyInfoScreen: undefined;
   NewPasswordScreen: undefined;
   FamilyAcceptScreen: undefined;
+  UserInformationScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -34,7 +36,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="StatusDashboard"
+        initialRouteName="UserInformationScreen"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
@@ -53,6 +55,10 @@ const AppNavigator = () => {
           component={FamilyAcceptScreen}
         />
         <Stack.Screen name="NewPasswordScreen" component={NewPasswordScreen} />
+        <Stack.Screen
+          name="UserInformationScreen"
+          component={UserInformationScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
