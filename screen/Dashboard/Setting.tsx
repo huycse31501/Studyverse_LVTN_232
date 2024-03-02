@@ -21,6 +21,7 @@ import regexVault from "../../utils/regex";
 type DetailsNavigationProp = StackNavigationProp<{
   StatusDashboard: undefined;
   FamilyInfoScreen: undefined;
+  UserInformationScreen: undefined;
 }>;
 
 const Setting = () => {
@@ -60,7 +61,9 @@ const Setting = () => {
     {
       name: "Thông tin cá nhân",
       image: require("../../assets/images/dashboard/setting1.png"),
-      onPress: () => {},
+      onPress: () => {
+        navigation.navigate("UserInformationScreen");
+      },
       valid: true,
     },
     {
@@ -213,7 +216,10 @@ const Setting = () => {
         animationType="slide"
         transparent={true}
         visible={familyLinkedModalVisible}
-        onRequestClose={() => setFamilyLinkedModalVisible(false)}
+        onRequestClose={() => {
+          setFamilyLinkedModalVisible(false);
+          setFamilyLinkInfo("");
+        }}
       >
         <TouchableWithoutFeedback
           onPress={() => {

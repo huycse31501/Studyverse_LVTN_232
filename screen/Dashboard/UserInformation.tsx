@@ -13,10 +13,12 @@ import {
   Platform,
   Modal,
   TouchableWithoutFeedback,
+  TextInput,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import ApplyButton from "../../component/shared/ApplyButton";
+import regexVault from "../../utils/regex";
 
 export interface User {
   fullName: string;
@@ -41,11 +43,60 @@ type UserInformationScreenProp = StackNavigationProp<{
 const UserInformationScreen = () => {
   const navigation = useNavigation<UserInformationScreenProp>();
 
+  const [changeInfoModal, setChangeInfoModal] = useState(false);
+
+  const [infoToChange, setInfoToChange] = useState("");
+
+  const [curInfoToChangeType, setCurInfoToChangeType] = useState("");
+
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
 
   const handleCancelButton = () => {
     setConfirmCancelModalVisible(false);
+  };
+
+  const handleSubmitChangeInfo = () => {
+    switch (curInfoToChangeType) {
+      case "số điện thoại":
+        if (regexVault.phoneNumberValidate.test(infoToChange)) {
+          setInfoToChange("");
+          setChangeInfoModal(false);
+          console.log(infoToChange);
+        } else {
+          alert("Vui lòng nhập số điện thoại hợp lệ");
+        }
+        break;
+      case "họ và tên":
+        if (regexVault.fullNameValidate.test(infoToChange)) {
+          setInfoToChange("");
+          setChangeInfoModal(false);
+          console.log(infoToChange);
+        } else {
+          alert("Vui lòng nhập họ và tên hợp lệ");
+        }
+        break;
+      case "biệt danh":
+        if (regexVault.firstNameValidate.test(infoToChange)) {
+          setInfoToChange("");
+          setChangeInfoModal(false);
+          console.log(infoToChange);
+        } else {
+          alert("Vui lòng nhập biệt danh hợp lệ");
+        }
+        break;
+      case "ngày sinh":
+        if (regexVault.DOBValidate.test(infoToChange)) {
+          setInfoToChange("");
+          setChangeInfoModal(false);
+          console.log(infoToChange);
+        } else {
+          alert("Vui lòng nhập ngày sinh hợp lệ");
+        }
+        break;
+      default:
+        alert("Đã có lỗi xảy ra, vui lòng quay về màn hình thông tin");
+    }
   };
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 30 }}>
@@ -86,7 +137,13 @@ const UserInformationScreen = () => {
                   <Text style={styles.textInfo}>
                     Họ và tên: {mockUser.fullName}
                   </Text>
-                  <TouchableOpacity style={styles.editIcon}>
+                  <TouchableOpacity
+                    style={styles.editIcon}
+                    onPress={() => {
+                      setChangeInfoModal(true);
+                      setCurInfoToChangeType("họ và tên");
+                    }}
+                  >
                     <Image
                       source={require("../../assets/images/shared/edit.png")}
                       style={styles.editIcon}
@@ -97,7 +154,13 @@ const UserInformationScreen = () => {
                   <Text style={styles.textInfo}>
                     Biệt danh: {mockUser.nickname}
                   </Text>
-                  <TouchableOpacity style={styles.editIcon}>
+                  <TouchableOpacity
+                    style={styles.editIcon}
+                    onPress={() => {
+                      setChangeInfoModal(true);
+                      setCurInfoToChangeType("biệt danh");
+                    }}
+                  >
                     <Image
                       source={require("../../assets/images/shared/edit.png")}
                       style={styles.editIcon}
@@ -108,7 +171,13 @@ const UserInformationScreen = () => {
                   <Text style={styles.textInfo}>
                     Số điện thoại: {mockUser.phoneNumber}
                   </Text>
-                  <TouchableOpacity style={styles.editIcon}>
+                  <TouchableOpacity
+                    style={styles.editIcon}
+                    onPress={() => {
+                      setChangeInfoModal(true);
+                      setCurInfoToChangeType("số điện thoại");
+                    }}
+                  >
                     <Image
                       source={require("../../assets/images/shared/edit.png")}
                       style={styles.editIcon}
@@ -119,7 +188,13 @@ const UserInformationScreen = () => {
                   <Text style={styles.textInfo}>
                     Ngày sinh: {mockUser.birthdate}
                   </Text>
-                  <TouchableOpacity style={styles.editIcon}>
+                  <TouchableOpacity
+                    style={styles.editIcon}
+                    onPress={() => {
+                      setChangeInfoModal(true);
+                      setCurInfoToChangeType("ngày sinh");
+                    }}
+                  >
                     <Image
                       source={require("../../assets/images/shared/edit.png")}
                       style={styles.editIcon}
@@ -175,6 +250,58 @@ const UserInformationScreen = () => {
                   extraStyle={styles.modalButton}
                   label="XÁC NHẬN"
                   onPress={handleCancelButton}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={changeInfoModal}
+        onRequestClose={() => {
+          setChangeInfoModal(false);
+          setInfoToChange("");
+        }}
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setChangeInfoModal(false);
+            setInfoToChange("");
+          }}
+        >
+          <View style={styles.modalCenteredView}>
+            <TouchableWithoutFeedback onPress={() => {}}>
+              <View style={styles.modalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setChangeInfoModal(false);
+                    setInfoToChange("");
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.modalIntroText}>Thay đổi thông tin</Text>
+                <TextInput
+                  style={styles.modalTextInput}
+                  placeholder={`Thay đổi ${curInfoToChangeType}`}
+                  value={infoToChange}
+                  onChangeText={setInfoToChange}
+                  keyboardType={
+                    curInfoToChangeType === "số điện thoại"
+                      ? "phone-pad"
+                      : "default"
+                  }
+                />
+                <ApplyButton
+                  extraStyle={styles.modalButton}
+                  label="XÁC NHẬN"
+                  onPress={handleSubmitChangeInfo}
                 />
               </View>
             </TouchableWithoutFeedback>
@@ -298,6 +425,56 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 5,
     marginLeft: 25,
+  },
+  modalCenteredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  centeredCreateFamilyView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  createFamilyModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "90%",
+  },
+  modalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "80%",
+  },
+  modalTextInput: {
+    height: 50,
+    marginVertical: "7.5%",
+    borderWidth: 1,
+    borderColor: "#D1D1D1",
+    borderRadius: 10,
+    paddingHorizontal: 50,
+    fontSize: 16,
   },
 });
 
