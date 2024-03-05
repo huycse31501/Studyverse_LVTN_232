@@ -54,7 +54,7 @@ const StatusDashboard = () => {
           </View>
           <View style={styles.eventContainer}>
             <Text style={styles.eventHeader}>Sự kiện hôm nay</Text>
-            {false ? (
+            {true ? (
               <EventTimeline data={eventSampleData} height={200} />
             ) : (
               <View style={styles.eventPlaceHolder}>
@@ -70,7 +70,7 @@ const StatusDashboard = () => {
           <View style={styles.familyStatusContainer}>
             <Text style={styles.familyStatusText}>Trạng thái gia đình </Text>
 
-            {false ? (
+            {true ? (
               <StatusCard
                 FamilyStatusData={userStatusData}
                 onCardPress={(x) => {
