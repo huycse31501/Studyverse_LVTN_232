@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 
 const AvatarIcon = require("../../assets/images/dashboard/avatar.png");
 const MessageIcon = require("../../assets/images/dashboard/bubble-chat-big.png");
-const MenuIcon = require("../../assets/images/dashboard/ellypsis-vertical.png");
+const MenuIcon = require("../../assets/images/dashboard/setting.png");
 
 type UserStatusProps = {
   userName: string;
@@ -87,11 +87,10 @@ const styles = StyleSheet.create({
     borderRadius: 25,
   },
   menuIcon: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 5,
-    padding: 8,
-    marginTop: 8,
+    width: 35,
+    height: 35,
+    marginHorizontal: 10,
+    padding: 15,
   },
   messageIcon: {
     width: 35,

@@ -4,28 +4,23 @@ import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
 const icons = [
   {
     id: "1",
-    uri: require("../../assets/images/dashboard/icon-1.png"),
-    onPress: () => console.log("Icon 1 pressed"),
+    uri: require("../../assets/images/footer/calendar.png"),
+    onPress: () => console.log("Icon pressed"),
   },
   {
     id: "2",
-    uri: require("../../assets/images/dashboard/icon-2.png"),
-    onPress: () => console.log("Icon 2 pressed"),
+    uri: require("../../assets/images/footer/exam.png"),
+    onPress: () => console.log("Icon pressed"),
   },
   {
     id: "3",
-    uri: require("../../assets/images/dashboard/icon-3.png"),
-    onPress: () => console.log("Icon 3 pressed"),
+    uri: require("../../assets/images/footer/studyplan.png"),
+    onPress: () => console.log("Icon pressed"),
   },
   {
     id: "4",
-    uri: require("../../assets/images/dashboard/icon-4.png"),
-    onPress: () => console.log("Icon 4 pressed"),
-  },
-  {
-    id: "5",
-    uri: require("../../assets/images/dashboard/icon-5.png"),
-    onPress: () => console.log("Icon 5 pressed"),
+    uri: require("../../assets/images/footer/map.png"),
+    onPress: () => console.log("Icon pressed"),
   },
 ];
 
