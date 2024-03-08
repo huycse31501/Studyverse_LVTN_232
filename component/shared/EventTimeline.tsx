@@ -11,32 +11,51 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
   const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date().toISOString());
-    }, 60000);
-    setCurrentTime(new Date().toISOString());
+    const updateCurrentTime = () => {
+      const newCurrentTime = new Date().toLocaleTimeString("en-GB", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      setCurrentTime(newCurrentTime);
+    };
 
+    updateCurrentTime(); // Update immediately on mount
+    const interval = setInterval(updateCurrentTime, 1000); // Update every second
     return () => clearInterval(interval);
   }, []);
+  const getTimeUntilNextEvent = (eventTime: string): string | null => {
+    const now = new Date();
 
-  const getTimeUntilNextEvent = (eventTime: string) => {
-    const now = new Date(currentTime);
-    const [eventHours, eventMinutes] = eventTime.split(".").map(Number);
-    const eventDate = new Date(now);
-    eventDate.setHours(eventHours, eventMinutes, 0, 0);
+    const currentISODate = now.toISOString().slice(0, 10);
+    const eventDateTimeString = `${currentISODate}T${eventTime}:00`;
+    const eventDate = new Date(eventDateTimeString);
 
     const diff = eventDate.getTime() - now.getTime();
-    if (diff < 0) {
-      return null;
-    }
 
+    if (diff < 0) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowDateString = tomorrow.toLocaleDateString();
+      const eventDateTimeStringTomorrow = `${tomorrowDateString} ${eventTime}`;
+      const eventDateTomorrow = new Date(eventDateTimeStringTomorrow);
+
+      const diffTomorrow = eventDateTomorrow.getTime() - now.getTime();
+      if (diffTomorrow < 0) {
+        return null;
+      } else {
+        return calculateTimeUntilEvent(diffTomorrow);
+      }
+    } else {
+      return calculateTimeUntilEvent(diff);
+    }
+  };
+
+  const calculateTimeUntilEvent = (diff: number): string => {
     const minutesUntilEvent = Math.floor(diff / 60000);
     const hoursUntilEvent = Math.floor(minutesUntilEvent / 60);
     const remainingMinutes = minutesUntilEvent % 60;
-
-    if (hoursUntilEvent === 0 && remainingMinutes === 0) {
-      return "Bắt đầu ngay bây giờ";
-    }
 
     let timeString = "";
     if (hoursUntilEvent > 0) {
@@ -45,7 +64,8 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
     if (remainingMinutes > 0) {
       timeString += `${remainingMinutes} phút`;
     }
-    return `Sau ${timeString}`;
+
+    return timeString ? `Sau ${timeString}` : "";
   };
 
   return (
@@ -58,15 +78,16 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
         {data.map((event, index) => (
           <View key={index} style={styles.eventBlock}>
             <View style={styles.timeContainer}>
-              <Text style={styles.time}>{event.time}</Text>
+              <Text style={styles.time}>{event.timeStart}</Text>
+              <Text style={styles.time}>{event.timeEnd}</Text>
             </View>
             <View style={styles.taskContainer}>
               <View style={styles.taskBlock}>
                 <Text style={styles.task}>{event.task}</Text>
-                {getTimeUntilNextEvent(event.time) && (
+                {getTimeUntilNextEvent(event.timeStart) && (
                   <View style={styles.countdownContainer}>
                     <Text style={styles.countdown}>
-                      {getTimeUntilNextEvent(event.time)}
+                      {getTimeUntilNextEvent(event.timeStart)}
                     </Text>
                   </View>
                 )}
@@ -114,6 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#94A3B8",
     fontWeight: "bold",
+    paddingTop: 10,
   },
   taskContainer: {
     flex: 1,

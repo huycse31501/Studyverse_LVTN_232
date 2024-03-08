@@ -70,7 +70,7 @@ const StatusDashboard = () => {
           <View style={styles.familyStatusContainer}>
             <Text style={styles.familyStatusText}>Trạng thái gia đình </Text>
 
-            {true ? (
+            {false ? (
               <StatusCard
                 FamilyStatusData={userStatusData}
                 onCardPress={(x) => {
@@ -78,7 +78,7 @@ const StatusDashboard = () => {
                   navigation.navigate("UserDetailsScreen", { user: mockUser });
                 }}
               />
-            ) : false ? (
+            ) : true ? (
               <View style={styles.familyNotLinkPlaceHolder}>
                 <Text style={styles.familyNotLinkText}>
                   Tài khoản hiện chưa liên kết gia đình

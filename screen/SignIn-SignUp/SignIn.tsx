@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   applyButton: {
     alignItems: "center",
     width: "100%",
-    marginTop: "15%",
+    marginTop: "25%",
     marginBottom: "7.5%",
   },
 });

@@ -10,12 +10,14 @@ const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
 
 const WeekDatePicker: React.FC<Props> = (props) => {
   const [date, setDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || date;
     setShowPicker(false);
     setDate(currentDate);
+    setSelectedDate(currentDate);
   };
 
   const generateWeekDates = (selectedDate: Date): Date[] => {

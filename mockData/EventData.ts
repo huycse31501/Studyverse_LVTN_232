@@ -2,11 +2,13 @@ import EventInfo from "../component/type/EventInfo";
 
 const eventSampleData: EventInfo[] = [
   {
-    time: "08.00",
+    timeStart: "8:00",
+    timeEnd: "9:00",
     task: "Họp phụ huynh cho Bin",
   },
   {
-    time: "12.00",
+    timeStart: "12:00",
+    timeEnd: "14:00",
     task: "Dẫn Su đi khám răng",
     images: [
       "https://img.freepik.com/free-vector/cute-rabbit-with-duck-working-laptop-cartoon-illustration_56104-471.jpg",
@@ -17,18 +19,17 @@ const eventSampleData: EventInfo[] = [
     ],
   },
   {
-    time: "14.00",
+    timeStart: "16:00",
+    timeEnd: "18:00",
     task: "Họp nhóm tại thư viện",
   },
   {
-    time: "18.00",
+    timeStart: "23:00",
+    timeEnd: "24:00",
     task: "Lớp yoga buổi tối",
-    images: ["https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s"],
-  },
-  {
-    time: "23.00",
-    task: "Lớp yoga buổi tối",
-    images: ["https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s"],
+    images: [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+    ],
   },
 ];
 

@@ -15,6 +15,9 @@ import FamilyInfoScreen from "../../screen/Dashboard/FamilyInfo";
 import NewPasswordScreen from "../../screen/SignIn-SignUp/NewPassword";
 import FamilyAcceptScreen from "../../screen/Dashboard/FamilyAccept";
 import UserInformationScreen from "../../screen/Dashboard/UserInformation";
+import { EventProps } from "../shared/RemindEvent";
+import EventInfo from "../type/EventInfo";
+import EventInfoScreen from "../../screen/Calendar/CalendarDashboard";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -28,6 +31,7 @@ export type RootStackParamList = {
   NewPasswordScreen: undefined;
   FamilyAcceptScreen: undefined;
   UserInformationScreen: undefined;
+  EventInfoScreen: { user: User, eventRemindList: EventProps[], eventList: EventInfo[], routeBefore: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -36,7 +40,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="StatusDashboard"
+        initialRouteName="EventInfoScreen"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
@@ -59,6 +63,7 @@ const AppNavigator = () => {
           name="UserInformationScreen"
           component={UserInformationScreen}
         />
+        <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
