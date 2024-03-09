@@ -16,7 +16,7 @@ import TextInputField from "../../component/signin-signup/TextInputField";
 import TouchableTextComponent from "../../component/shared/TouchableText";
 import ApplyButton from "../../component/shared/ApplyButton";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
 import PasswordInputField from "../../component/signin-signup/PasswordInputField";
 
@@ -28,6 +28,9 @@ type NewPasswordNavigationProp = StackNavigationProp<{
 
 const NewPasswordScreen = () => {
   const navigation = useNavigation<NewPasswordNavigationProp>();
+
+  const route = useRoute<any>();
+  const { email } = route.params;
 
   const [inputs, setInputs] = useState({
     newpassword: {
@@ -84,7 +87,7 @@ const NewPasswordScreen = () => {
     });
   }
 
-  function submitHandler() {
+  async function submitHandler() {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -100,6 +103,7 @@ const NewPasswordScreen = () => {
     } else if (!allFieldsValid) {
       Alert.alert("Thông báo", "Thông tin nhập chưa hợp lệ");
     } else {
+      let newPassword = inputs.newpassword.value
       setInputs({
         newpassword: { value: "", required: true },
         rePassword: { value: "", required: true },
@@ -113,7 +117,24 @@ const NewPasswordScreen = () => {
           inputs.newpassword.value === inputs.rePassword.value
         ),
       });
-      Alert.alert("Thành công", "Đổi mật khẩu thành công");
+
+      const response = await fetch('http://192.168.1.17:8080/user/newPassword', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "email": email,
+          "newPassword": newPassword
+        })
+      });
+      const message = await response.json();
+      if (message.msg == "1") {
+        Alert.alert("Thành công", "Đổi mật khẩu thành công");
+      }
+      else {
+        Alert.alert("Thất bại", "Đổi mật khẩu thất bại");
+      }
       navigation.navigate("SignIn");
     }
   }

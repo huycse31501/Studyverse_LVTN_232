@@ -70,18 +70,20 @@ const SignIn = () => {
     if (!allFieldsFilled) {
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin đăng nhập");
     } else {
+      let email = inputs.email.value
+      let password = inputs.password.value
       setInputs({
         email: { value: "", required: true },
         password: { value: "", required: true },
       });
-      const response = await fetch('http://192.168.1.17:8080/login', {
+      const response = await fetch('http://192.168.1.17:8080/user/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          "email": inputs.email.value,
-          "password": inputs.password.value
+          "email": email,
+          "password": password
         })
       });
       const message = await response.json();

@@ -151,7 +151,7 @@ const SignUp = () => {
         isLastNameValid: true,
         isEmailValid: true,
       });
-      const response = await fetch('http://192.168.1.17:8080/signup', {
+      const response = await fetch('http://192.168.1.17:8080/user/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

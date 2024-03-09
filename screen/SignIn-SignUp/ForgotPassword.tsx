@@ -22,7 +22,7 @@ import regexVault from "../../utils/regex";
 type ForgotPasswordNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
-  OTPScreen: undefined;
+  OTPScreen: { email: string };
 }>;
 
 const ForgotPassword = () => {
@@ -67,7 +67,7 @@ const ForgotPassword = () => {
     });
   }
 
-  function submitHandler() {
+  async function submitHandler() {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -83,14 +83,28 @@ const ForgotPassword = () => {
     } else if (!allFieldsValid) {
       Alert.alert("Thông báo", "Thông tin email chưa hợp lệ");
     } else {
+      let email = inputs.email.value
       setInputs({
         email: { value: "", required: true },
       });
       setInputValidation({
         isEmailValid: true,
       });
-      Alert.alert("Thành công", "Xác thực");
-      navigation.navigate("OTPScreen");
+      const response = await fetch('http://192.168.1.17:8080/user/confirmEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "email": email,
+        })
+      });
+      const message = await response.json();
+      if (message.msg == "1") {
+        Alert.alert("Thành công", "OTP đã được gửi về email " + email);
+        navigation.navigate("OTPScreen", { email: email });
+      }
+      else Alert.alert("Thất bại", "Không tìm thấy thông tin email")
     }
   }
 

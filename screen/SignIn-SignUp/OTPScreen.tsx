@@ -16,17 +16,36 @@ import TextInputField from "../../component/signin-signup/TextInputField";
 import TouchableTextComponent from "../../component/shared/TouchableText";
 import ApplyButton from "../../component/shared/ApplyButton";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
 import OTPInput from "../../component/shared/OTPInput";
 
 type OTPScreenNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
-  NewPasswordScreen: undefined;
+  NewPasswordScreen: { email: string };
 }>;
 
 const OTPScreen = () => {
+  const route = useRoute<any>();
+  const { email } = route.params;
+
+  useEffect(() => {
+    sendOTP()
+  }, [])
+
+  async function sendOTP() {
+    await fetch('http://192.168.1.17:8080/user/sendOTP', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "email": email,
+      })
+    });
+  }
+
   const navigation = useNavigation<OTPScreenNavigationProp>();
 
   const [OTPinput, setOTPInput] = useState(["", "", "", ""] as [
@@ -42,10 +61,26 @@ const OTPScreen = () => {
     setOTPInput(newInput);
   };
 
-  function submitHandler() {
+  async function submitHandler() {
+    let otpInput = OTPinput.join("")
     setOTPInput(["", "", "", ""]);
-    Alert.alert("Thành công", `Xác thực OTP: ${OTPinput.join("")}`);
-    navigation.navigate("NewPasswordScreen");
+
+    const response = await fetch('http://192.168.1.17:8080/user/confirmOTP', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "email": email,
+        "otp": otpInput
+      })
+    });
+    const message = await response.json();
+    if (message.msg == "1") {
+      Alert.alert("Thành công", `Xác thực OTP: ${OTPinput.join("")}`);
+      navigation.navigate("NewPasswordScreen", { email: email});
+    }
+    else Alert.alert("Thất bại", "Bạn đã nhập sai OTP")
   }
 
   return (
@@ -74,7 +109,7 @@ const OTPScreen = () => {
             <Text style={styles.resendOTPText}>Không nhận được mã?</Text>
             <TouchableTextComponent
               text="Gửi lại"
-              onPress={() => Alert.alert("Handle gửi lại OTP")}
+              onPress={sendOTP}
             />
           </View>
           <View style={styles.sendOTPButton}>
