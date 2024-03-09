@@ -4,11 +4,13 @@ import DatePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 
-type Props = {};
+type Props = {
+  remind?: boolean;
+};
 
 const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
 
-const WeekDatePicker: React.FC<Props> = (props) => {
+const WeekDatePicker: React.FC<Props> = ({ remind }) => {
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -68,7 +70,9 @@ const WeekDatePicker: React.FC<Props> = (props) => {
         )}
       </View>
       <View style={styles.eventDateContainer}>
-        <Text style={styles.eventDateText}>Sự kiện</Text>
+        <Text style={styles.eventDateText}>
+          {remind ? "Nhắc nhở" : "Sự kiện"}
+        </Text>
         <Text style={styles.eventDateTime}>
           {date.getMonth() + 1}/{date.getFullYear()}
         </Text>
@@ -138,7 +142,7 @@ const styles = StyleSheet.create({
     bottom: 10,
   },
   eventDateContainer: {
-    marginVertical: 15,
+    marginVertical: 20,
     flexDirection: "row",
     paddingLeft: 30,
   },

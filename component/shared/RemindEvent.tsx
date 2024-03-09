@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -50,58 +51,54 @@ const EventReminder: React.FC<EventListProps> = ({
     }
   };
 
-  const renderItem = ({ item }: { item: EventProps }) => (
-    <TouchableOpacity
-      style={[styles.container, blueTheme && styles.blueThemeContainer]}
-    >
-      <Image
-        source={
-          blueTheme
-            ? require("../../assets/images/shared/blueThemeEventCalendar.png")
-            : require("../../assets/images/shared/eventCalendar.png")
-        }
-        style={styles.calendarIcon}
-      />
-      <View
-        style={[
-          styles.textContainer,
-          blueTheme && styles.blueThemeTextContainer,
-        ]}
-      >
-        <Text style={[styles.name, blueTheme && styles.blueThemeName]}>
-          {item.name}
-        </Text>
-        <View style={styles.timeContainer}>
+  return (
+    <ScrollView style={[height ? { height: height } : {}]}>
+      {events.map((item, index) => (
+        <TouchableOpacity
+          style={[styles.container, blueTheme && styles.blueThemeContainer]}
+          key={index}
+        >
           <Image
             source={
               blueTheme
-                ? require("../../assets/images/shared/blueThemeClock.png")
-                : require("../../assets/images/shared/eventTimeCircle.png")
+                ? require("../../assets/images/shared/blueThemeEventCalendar.png")
+                : require("../../assets/images/shared/eventCalendar.png")
             }
-            style={styles.timeCircleIcon}
+            style={styles.calendarIcon}
           />
-          <Text style={[styles.time, blueTheme && styles.blueThemeTime]}>
-            {item.time}
-          </Text>
-        </View>
-      </View>
-      {!blueTheme && (
-        <Ionicons
-          name={getIconName(item.status)}
-          size={24}
-          color={getIconColor(item.status)}
-        />
-      )}
-    </TouchableOpacity>
-  );
-
-  return (
-    <FlatList
-      data={events}
-      renderItem={renderItem}
-      keyExtractor={(item, index) => index.toString()}
-      style={[height ? { height: height } : {}]}
-    />
+          <View
+            style={[
+              styles.textContainer,
+              blueTheme && styles.blueThemeTextContainer,
+            ]}
+          >
+            <Text style={[styles.name, blueTheme && styles.blueThemeName]}>
+              {item.name}
+            </Text>
+            <View style={styles.timeContainer}>
+              <Image
+                source={
+                  blueTheme
+                    ? require("../../assets/images/shared/blueThemeClock.png")
+                    : require("../../assets/images/shared/eventTimeCircle.png")
+                }
+                style={styles.timeCircleIcon}
+              />
+              <Text style={[styles.time, blueTheme && styles.blueThemeTime]}>
+                {item.time}
+              </Text>
+            </View>
+          </View>
+          {!blueTheme && (
+            <Ionicons
+              name={getIconName(item.status)}
+              size={24}
+              color={getIconColor(item.status)}
+            />
+          )}
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
   );
 };
 
