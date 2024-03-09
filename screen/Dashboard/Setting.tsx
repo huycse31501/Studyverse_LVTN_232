@@ -48,12 +48,12 @@ const Setting = () => {
     setLinkStatus("linked");
   };
   const handleConfirmLink = () => {
-    if (regexVault.phoneNumberValidate.test(familyLinkInfo)) {
+    if (regexVault.emailValidate.test(familyLinkInfo)) {
       setLinkStatus("pending");
       setFamilyLinkedModalVisible(false);
       console.log(familyLinkInfo);
     } else {
-      alert("Vui lòng nhập số điện thoại hợp lệ");
+      alert("Vui lòng email hợp lệ");
     }
   };
 
@@ -245,10 +245,9 @@ const Setting = () => {
                 <Text style={styles.modalIntroText}>Liên kết gia đình</Text>
                 <TextInput
                   style={styles.modalTextInput}
-                  placeholder="Số điện thoại liên kết"
+                  placeholder="Email liên kết"
                   value={familyLinkInfo}
                   onChangeText={setFamilyLinkInfo}
-                  keyboardType="phone-pad"
                 />
                 <ApplyButton
                   extraStyle={styles.modalButton}

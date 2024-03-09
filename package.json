@@ -19,6 +19,7 @@
     "@types/redux": "^3.6.0",
     "expo": "~50.0.5",
     "expo-app-loading": "^2.1.1",
+    "expo-constants": "~15.4.5",
     "expo-font": "~11.10.2",
     "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",

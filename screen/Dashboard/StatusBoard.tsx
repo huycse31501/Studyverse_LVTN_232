@@ -21,13 +21,37 @@ import { useNavigation } from "@react-navigation/native";
 import { mockUser } from "../../mockData/UserInfo";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "./Details";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
   Setting: undefined;
 }>;
 
+const getTimeDifference = (lastLogin: string) => {
+  if (!lastLogin) {
+    return "No recent login";
+  }
+
+  const lastLoginDate = new Date(lastLogin);
+  const now = new Date();
+  const timeDiff = now.getTime() - lastLoginDate.getTime();
+
+  const hoursDiff = timeDiff / (1000 * 60 * 60);
+
+  if (hoursDiff > 24) {
+    return "Trên 1 ngày";
+  } else {
+    return `${hoursDiff.toFixed(0)} giờ trước`;
+  }
+};
 const StatusDashboard = () => {
+  const familyList = useSelector(
+    (state: RootState) => state.familyMember.familyMemberList
+  );
+  const user = useSelector((state: RootState) => state.user.user);
+  console.log(familyList);
   const navigation = useNavigation<StatusBoardNavigationProp>();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
@@ -70,15 +94,7 @@ const StatusDashboard = () => {
           <View style={styles.familyStatusContainer}>
             <Text style={styles.familyStatusText}>Trạng thái gia đình </Text>
 
-            {false ? (
-              <StatusCard
-                FamilyStatusData={userStatusData}
-                onCardPress={(x) => {
-                  console.log(x);
-                  navigation.navigate("UserDetailsScreen", { user: mockUser });
-                }}
-              />
-            ) : true ? (
+            {Number(user?.familyId) === 0 ? (
               <View style={styles.familyNotLinkPlaceHolder}>
                 <Text style={styles.familyNotLinkText}>
                   Tài khoản hiện chưa liên kết gia đình
@@ -87,6 +103,25 @@ const StatusDashboard = () => {
                   <Text style={styles.linkFamilyText}>Liên kết gia đình</Text>
                 </TouchableOpacity>
               </View>
+            ) : familyList && Array.isArray(familyList) ? (
+              <StatusCard
+                FamilyStatusData={familyList.map((item: any) => ({
+                  name: item.nickName ? String(item.nickName) : "",
+                  status: item.userStatus,
+                  avatarUri:
+                    item?.role === "parent"
+                      ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                      : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                  currentStatus: item.accountStatus ? "onl" : "off",
+                  lastOnline: !item.accountStatus
+                    ? getTimeDifference(item?.lastLogin)
+                    : "Đang trực tuyến",
+                }))}
+                onCardPress={(x) => {
+                  console.log(x);
+                  navigation.navigate("UserDetailsScreen", { user: mockUser });
+                }}
+              />
             ) : (
               <View style={styles.familyNotFoundPlaceHolder}>
                 <Text style={styles.familyNotFoundText}>

@@ -8,20 +8,16 @@ import {
   ImageSourcePropType,
 } from "react-native";
 
-type FamilyStatus = {
+export type FamilyStatus = {
   name: string;
   status: string;
-  avatarUri: ImageSourcePropType;
+  avatarUri: string;
   lastOnline?: string;
   currentStatus: "onl" | "busy" | "off";
 };
 
-export type FamilyStatusData = {
-  [key: string]: FamilyStatus;
-};
-
 type StatusCardProps = {
-  FamilyStatusData: FamilyStatusData;
+  FamilyStatusData: FamilyStatus[];
   onCardPress: (status: FamilyStatus) => void;
 };
 
@@ -50,7 +46,10 @@ const StatusCard: React.FC<StatusCardProps> = ({
           style={styles.statusContainer}
           onPress={() => onCardPress(FamilyStatus)}
         >
-          <Image source={FamilyStatus.avatarUri} style={styles.avatar} />
+          <Image
+            source={{ uri: FamilyStatus.avatarUri }}
+            style={styles.avatar}
+          />
           <View style={styles.textContainer}>
             <View style={styles.nameAndStatus}>
               <View

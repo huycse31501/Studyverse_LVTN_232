@@ -1,6 +1,6 @@
-import { SET_USER, User, UserActionTypes } from '../types/actionTypes';
+import { SET_USER, User, SetUserAction } from '../types/actionTypes';
 
-export const setUser = (user: User): UserActionTypes => ({
+export const setUser = (user: User): SetUserAction => ({
   type: SET_USER,
   payload: user,
 });

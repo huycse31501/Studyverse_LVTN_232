@@ -21,7 +21,8 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import regexVault from "../../utils/regex";
 
 export interface User {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   nickname: string;
   birthdate: string;
   phoneNumber: string;
@@ -29,7 +30,8 @@ export interface User {
 }
 
 const mockUser: User = {
-  fullName: "Mai Ánh Vân",
+  firstName: "Mai",
+  lastName: "Ánh Vân",
   nickname: "Mẹ thỏ",
   birthdate: "19/03/1988",
   phoneNumber: "0935816646",
@@ -67,13 +69,22 @@ const UserInformationScreen = () => {
           alert("Vui lòng nhập số điện thoại hợp lệ");
         }
         break;
-      case "họ và tên":
-        if (regexVault.fullNameValidate.test(infoToChange)) {
+      case "họ":
+        if (regexVault.firstNameValidate.test(infoToChange)) {
           setInfoToChange("");
           setChangeInfoModal(false);
           console.log(infoToChange);
         } else {
-          alert("Vui lòng nhập họ và tên hợp lệ");
+          alert("Vui lòng nhập họ hợp lệ");
+        }
+        break;
+      case "tên":
+        if (regexVault.lastNameValidate.test(infoToChange)) {
+          setInfoToChange("");
+          setChangeInfoModal(false);
+          console.log(infoToChange);
+        } else {
+          alert("Vui lòng nhập tên hợp lệ");
         }
         break;
       case "biệt danh":
@@ -134,14 +145,27 @@ const UserInformationScreen = () => {
               </View>
               <View style={styles.textContainer}>
                 <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>
-                    Họ và tên: {mockUser.fullName}
-                  </Text>
+                  <Text style={styles.textInfo}>Họ: {mockUser.firstName}</Text>
                   <TouchableOpacity
                     style={styles.editIcon}
                     onPress={() => {
                       setChangeInfoModal(true);
-                      setCurInfoToChangeType("họ và tên");
+                      setCurInfoToChangeType("họ");
+                    }}
+                  >
+                    <Image
+                      source={require("../../assets/images/shared/edit.png")}
+                      style={styles.editIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.informationContainer}>
+                  <Text style={styles.textInfo}>Tên: {mockUser.lastName}</Text>
+                  <TouchableOpacity
+                    style={styles.editIcon}
+                    onPress={() => {
+                      setChangeInfoModal(true);
+                      setCurInfoToChangeType("tên");
                     }}
                   >
                     <Image
@@ -344,7 +368,6 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     marginLeft: "7.5%",
-    marginTop: "5%",
     paddingVertical: 20,
   },
   avatar: {
@@ -365,7 +388,7 @@ const styles = StyleSheet.create({
   },
 
   cancelButtonContainer: {
-    marginTop: 75,
+    marginTop: 30,
   },
   cancelButton: {
     width: 200,
