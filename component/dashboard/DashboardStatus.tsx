@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
 
 const AvatarIcon = require("../../assets/images/dashboard/avatar.png");
 const MessageIcon = require("../../assets/images/dashboard/bubble-chat-big.png");
@@ -18,6 +20,8 @@ const UserStatus = ({
   onMenuPress,
   onChatPress,
 }: UserStatusProps) => {
+  const user = useSelector((state: RootState) => state.user.user);
+
   const getStatusColor = () => {
     switch (status) {
       case "on":
@@ -34,7 +38,15 @@ const UserStatus = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => console.log("Avatar pressed")}>
-        <Image source={AvatarIcon} style={styles.avatarIcon} />
+        <Image
+          source={{
+            uri:
+              user?.role === "parent"
+                ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+          }}
+          style={styles.avatarIcon}
+        />
       </TouchableOpacity>
       <View style={styles.textContainer}>
         <View style={styles.statusContainer}>

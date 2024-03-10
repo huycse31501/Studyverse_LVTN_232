@@ -9,6 +9,9 @@ import {
 } from "react-native";
 
 export type FamilyStatus = {
+  email: string;
+  dob: string;
+  fullname: string;
   name: string;
   status: string;
   avatarUri: string;

@@ -14,11 +14,19 @@ import {
   Modal,
   TouchableWithoutFeedback,
   TextInput,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import ApplyButton from "../../component/shared/ApplyButton";
 import regexVault from "../../utils/regex";
+import { AppDispatch, RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
+import Constants from "expo-constants";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/actions/userActions";
+import { setWaitList } from "../../redux/actions/waitListAction";
+import { setFamilyMember } from "../../redux/actions/familyAction";
 
 export interface User {
   firstName: string;
@@ -43,6 +51,12 @@ type UserInformationScreenProp = StackNavigationProp<{
 }>;
 
 const UserInformationScreen = () => {
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.user.user);
+
   const navigation = useNavigation<UserInformationScreenProp>();
 
   const [changeInfoModal, setChangeInfoModal] = useState(false);
@@ -54,8 +68,36 @@ const UserInformationScreen = () => {
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
 
-  const handleCancelButton = () => {
+  const handleCancelButton = async () => {
     setConfirmCancelModalVisible(false);
+    try {
+      let requestCancelFamilyUrl = `http://${host}:${port}/family/outFamily`;
+      const cancelFamilyResponse = await fetch(requestCancelFamilyUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user?.email,
+        }),
+      });
+      const cancelResponse = await cancelFamilyResponse.json();
+      if (cancelResponse.msg === "1") {
+        dispatch(
+          setUser({
+            ...user,
+            familyId: "0",
+          })
+        );
+        dispatch(setWaitList([] as any));
+        dispatch(setFamilyMember([] as any));
+      } else {
+        Alert.alert("Hủy liên kết thất bại");
+      }
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Lỗi xảy ra trong quá trình hủy liên kết");
+    }
   };
 
   const handleSubmitChangeInfo = () => {
@@ -140,12 +182,20 @@ const UserInformationScreen = () => {
               </View>
               <View style={styles.userAvatarContainer}>
                 <View style={styles.card}>
-                  <Image source={mockUser.avatarUri} style={styles.avatar} />
+                  <Image
+                    source={{
+                      uri:
+                        user?.role === "parent"
+                          ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                    }}
+                    style={styles.avatar}
+                  />
                 </View>
               </View>
               <View style={styles.textContainer}>
                 <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>Họ: {mockUser.firstName}</Text>
+                  <Text style={styles.textInfo}>Họ: {user?.firstName}</Text>
                   <TouchableOpacity
                     style={styles.editIcon}
                     onPress={() => {
@@ -160,7 +210,7 @@ const UserInformationScreen = () => {
                   </TouchableOpacity>
                 </View>
                 <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>Tên: {mockUser.lastName}</Text>
+                  <Text style={styles.textInfo}>Tên: {user?.lastName}</Text>
                   <TouchableOpacity
                     style={styles.editIcon}
                     onPress={() => {
@@ -176,7 +226,7 @@ const UserInformationScreen = () => {
                 </View>
                 <View style={styles.informationContainer}>
                   <Text style={styles.textInfo}>
-                    Biệt danh: {mockUser.nickname}
+                    Biệt danh: {user?.nickName}
                   </Text>
                   <TouchableOpacity
                     style={styles.editIcon}
@@ -193,7 +243,7 @@ const UserInformationScreen = () => {
                 </View>
                 <View style={styles.informationContainer}>
                   <Text style={styles.textInfo}>
-                    Số điện thoại: {mockUser.phoneNumber}
+                    Số điện thoại: {user?.phoneNumber}
                   </Text>
                   <TouchableOpacity
                     style={styles.editIcon}
@@ -210,7 +260,7 @@ const UserInformationScreen = () => {
                 </View>
                 <View style={styles.informationContainer}>
                   <Text style={styles.textInfo}>
-                    Ngày sinh: {mockUser.birthdate}
+                    Ngày sinh: {user?.dateOfBirth}
                   </Text>
                   <TouchableOpacity
                     style={styles.editIcon}
@@ -228,13 +278,22 @@ const UserInformationScreen = () => {
               </View>
 
               <View style={styles.cancelButtonContainer}>
-                <ApplyButton
-                  label="Hủy liên kết"
-                  onPress={() => {
-                    setConfirmCancelModalVisible(true);
-                  }}
-                  extraStyle={styles.cancelButton}
-                ></ApplyButton>
+                {Number(user?.familyId) !== 0 &&
+                Number(user?.familyId) !== 1 ? (
+                  <ApplyButton
+                    label="Hủy liên kết"
+                    onPress={() => {
+                      setConfirmCancelModalVisible(true);
+                    }}
+                    extraStyle={styles.cancelButton}
+                  ></ApplyButton>
+                ) : (
+                  <>
+                    <Text style={styles.announceText}>
+                      Tài khoản chưa liên kết gia đình
+                    </Text>
+                  </>
+                )}
               </View>
             </>
           )}
@@ -498,6 +557,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 50,
     fontSize: 16,
+  },
+  announceText: {
+    fontSize: 20,
+    alignSelf: "center",
+    color: "red",
+    fontWeight: "600",
   },
 });
 

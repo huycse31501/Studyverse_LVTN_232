@@ -18,11 +18,12 @@ import regexVault from "../../utils/regex";
 import isDateValid from "../../utils/checkValidDate";
 import AuthButton from "../../component/signin-signup/AuthButton";
 import calculateAge from "../../utils/calculateAge";
+import Constants from "expo-constants";
 
-type OptionType = "Parent" | "Children";
+type OptionType = "parent" | "children";
 
 const SignUp = () => {
-  const [curSignUpType, setCurSignUpType] = useState<OptionType>("Parent");
+  const [curSignUpType, setCurSignUpType] = useState<OptionType>("parent");
   const [inputs, setInputs] = useState({
     email: {
       value: "",
@@ -55,13 +56,13 @@ const SignUp = () => {
   });
 
   const [inputValidation, setInputValidation] = useState({
-    isPhoneNumberValid: regexVault.phoneNumberValidate.test(
-      inputs.phoneNumber.value
-    ),
+    isPhoneNumberValid:
+      inputs.phoneNumber.value.length === 0 ||
+      regexVault.phoneNumberValidate.test(inputs.phoneNumber.value),
     isDOBValid:
       regexVault.DOBValidate.test(inputs.dob.value) &&
       isDateValid(inputs.dob.value) &&
-      (curSignUpType === "Parent"
+      (curSignUpType === "parent"
         ? calculateAge(inputs.dob.value) > 18
         : calculateAge(inputs.dob.value) > 6),
     isPasswordValid: regexVault.passwordValidate.test(inputs.password.value),
@@ -72,11 +73,11 @@ const SignUp = () => {
 
   useEffect(() => {
     const age = calculateAge(inputs.dob.value);
-    const isAgeValid = curSignUpType === "Parent" ? age > 18 : age > 6;
+    const isAgeValid = curSignUpType === "parent" ? age > 18 : age > 6;
     const updatedValidation = {
-      isPhoneNumberValid: regexVault.phoneNumberValidate.test(
-        inputs.phoneNumber.value
-      ),
+      isPhoneNumberValid:
+        inputs.phoneNumber.value.length === 0 ||
+        regexVault.phoneNumberValidate.test(inputs.phoneNumber.value),
       isDOBValid:
         regexVault.DOBValidate.test(inputs.dob.value) &&
         isDateValid(inputs.dob.value) &&
@@ -117,7 +118,7 @@ const SignUp = () => {
     setCurSignUpType(selectedOption);
   };
 
-  function submitHandler() {
+  async function submitHandler() {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -133,14 +134,13 @@ const SignUp = () => {
     } else if (!allFieldsValid) {
       Alert.alert("Thông báo", "Thông tin đăng ký chưa hợp lệ");
     } else {
-      console.log(inputs);
       setInputs({
         email: { value: "", required: true },
         password: { value: "", required: true },
         firstName: { value: "", required: true },
         lastName: { value: "", required: true },
         dob: { value: "", required: true },
-        signUpType: { value: "Parent", required: true },
+        signUpType: { value: "parent", required: true },
         phoneNumber: { value: "", required: false },
       });
       setInputValidation({
@@ -151,7 +151,32 @@ const SignUp = () => {
         isLastNameValid: true,
         isEmailValid: true,
       });
-      Alert.alert("Thành công", "Đăng ký thành công");
+      try {
+        let host = Constants?.expoConfig?.extra?.host;
+        let port = Constants?.expoConfig?.extra?.port;
+        const requestSignUpURL = `http://${host}:${port}/user/signup`;
+        const response = await fetch(requestSignUpURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: inputs.email.value,
+            password: inputs.password.value,
+            firstName: inputs.firstName.value,
+            lastName: inputs.lastName.value,
+            dob: inputs.dob.value,
+            signUpType: inputs.signUpType.value,
+            phoneNumber: inputs.phoneNumber.value,
+          }),
+        });
+        const message = await response.json();
+        if (message.msg == "1") {
+          Alert.alert("Thành công", "Đăng ký thành công");
+        } else Alert.alert("Thất bại", "Đăng ký thất bại");
+      } catch (e) {
+        Alert.alert("Lỗi trong quá trình đăng ký");
+      }
     }
   }
 

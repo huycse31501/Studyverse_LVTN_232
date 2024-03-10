@@ -2,6 +2,7 @@ export const SET_USER = "SET_USER";
 export const SET_FAMILY_MEMBER = "SET_FAMILY_MEMBER";
 export const SET_EVENT = "SET_EVENT";
 export const SET_WAIT_LIST = "SET_WAIT_LIST";
+export const LOGOUT = "LOGOUT";
 
 export interface User {
   userId?: string;
@@ -16,6 +17,10 @@ export interface User {
   accountStatus?: boolean;
   userStatus?: string;
   role?: string;
+}
+
+export interface LogoutAction {
+  type: typeof LOGOUT;
 }
 
 export interface familyMemberList {
@@ -43,7 +48,9 @@ export interface SetUserAction {
 
 export interface SetFamilyMemberAction {
   type: typeof SET_FAMILY_MEMBER;
-  payload: familyMemberList;
+  payload: {
+    familyMembers: User[];
+  };
 }
 
 export interface SetEventAction {
@@ -55,7 +62,7 @@ export interface SetWaitListAction {
   type: typeof SET_WAIT_LIST;
   payload: familyWaitList;
 }
-export type UserActionTypes = SetUserAction;
-export type FamilyListAction = SetFamilyMemberAction;
-export type EventListAction = SetEventAction;
-export type WaitListAction = SetWaitListAction;
+export type UserActionTypes = SetUserAction | LogoutAction;
+export type FamilyListAction = SetFamilyMemberAction | LogoutAction;
+export type EventListAction = SetEventAction | LogoutAction;
+export type WaitListAction = SetWaitListAction | LogoutAction;

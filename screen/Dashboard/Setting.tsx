@@ -13,21 +13,43 @@ import {
   Modal,
   TextInput,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import ApplyButton from "../../component/shared/ApplyButton";
 import regexVault from "../../utils/regex";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
+import { useDispatch } from "react-redux";
+import userReducer from "../../redux/reducers/userReducer";
+import { setUser } from "../../redux/actions/userActions";
+import { User } from "../../redux/types/actionTypes";
+import Constants from "expo-constants";
+import { logout } from "../../redux/actions/logoutAction";
+import { setWaitList } from "../../redux/actions/waitListAction";
+import { setFamilyMember } from "../../redux/actions/familyAction";
 
 type DetailsNavigationProp = StackNavigationProp<{
   StatusDashboard: undefined;
   FamilyInfoScreen: undefined;
   UserInformationScreen: undefined;
+  SignIn: undefined;
 }>;
 
 const Setting = () => {
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const user = useSelector((state: RootState) => state.user.user);
+  const familyList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+  const waitList = useSelector((state: RootState) => state.waitList.waitList);
+
   const navigation = useNavigation<DetailsNavigationProp>();
 
-  const [linkStatus, setLinkStatus] = useState("unlinked");
   const [familyLinkedModalVisible, setFamilyLinkedModalVisible] =
     useState(false);
   const [createFamilyModalVisible, setcreateFamilyModalVisible] =
@@ -38,23 +60,100 @@ const Setting = () => {
     setFamilyLinkedModalVisible(true);
   };
 
-  const handleUnlinkPress = () => {
-    setLinkStatus("unlinked");
+  const handleUnlinkPress = async () => {
+    try {
+      let requestUnlinkURL = `http://${host}:${port}/family/unlinkFamily`;
+
+      const unlinkFamilyResponse = await fetch(requestUnlinkURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user?.email,
+        }),
+      });
+      const unlinkResponse = await unlinkFamilyResponse.json();
+      if (unlinkResponse && unlinkResponse?.msg === "1") {
+        const newUserPayload: User = {
+          ...user,
+          familyId: String("0"),
+        };
+        dispatch(setUser(newUserPayload));
+        setcreateFamilyModalVisible(false);
+      } else {
+        Alert.alert("Hủy liên kết thất bại");
+        setcreateFamilyModalVisible(false);
+      }
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Lỗi xảy ra khi hủy liên kết");
+      setcreateFamilyModalVisible(false);
+    }
     setFamilyLinkInfo("");
   };
 
-  const handleCreateFamily = () => {
+  const handleCreateFamily = async () => {
+    try {
+      let requestCreateFamily = `http://${host}:${port}/family/createFamily`;
+
+      const createFamilyResponse = await fetch(requestCreateFamily, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user?.email,
+        }),
+      });
+      const familyIdResponse = await createFamilyResponse.json();
+      const newUserPayload: User = {
+        ...user,
+        familyId: String(familyIdResponse?.familyId),
+      };
+      dispatch(setUser(newUserPayload));
+    } catch (e) {
+      Alert.alert("Lỗi khi tạo gia đình");
+    }
+
     setcreateFamilyModalVisible(false);
-    setLinkStatus("linked");
+    setFamilyLinkInfo("");
   };
-  const handleConfirmLink = () => {
+  const handleConfirmLink = async () => {
     if (regexVault.emailValidate.test(familyLinkInfo)) {
-      setLinkStatus("pending");
-      setFamilyLinkedModalVisible(false);
-      console.log(familyLinkInfo);
+      try {
+        let requestLinkFamily = `http://${host}:${port}/family/linkFamily`;
+
+        const linkFamily = await fetch(requestLinkFamily, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user?.email,
+            familyEmail: familyLinkInfo,
+          }),
+        });
+        const familyLinkResponse = await linkFamily.json();
+        if (familyLinkResponse && familyLinkResponse?.msg == "1") {
+          const newUserPayload: User = {
+            ...user,
+            familyId: String("-1"),
+          };
+          dispatch(setUser(newUserPayload));
+        } else {
+          Alert.alert("Liên kết thất bại");
+        }
+        setFamilyLinkedModalVisible(false);
+      } catch (e) {
+        console.log(e);
+        Alert.alert("Lỗi xảy ra trong quá trình liên kết");
+        setFamilyLinkedModalVisible(false);
+      }
     } else {
       alert("Vui lòng email hợp lệ");
     }
+    setFamilyLinkInfo("");
   };
 
   const listOfAccountSetting = [
@@ -72,13 +171,13 @@ const Setting = () => {
       onPress: () => {
         setcreateFamilyModalVisible(true);
       },
-      valid: !!(linkStatus === "unlinked"),
+      valid: !!(Number(user?.familyId) === 0) && !!(user?.role === "parent"),
     },
     {
       name: "Thông tin gia đình",
       image: require("../../assets/images/dashboard/setting2.png"),
       onPress: () => navigation.navigate("FamilyInfoScreen"),
-      valid: !!(linkStatus === "linked"),
+      valid: !!(Number(user?.familyId) !== 0 && Number(user?.familyId) !== -1),
     },
     {
       name: "Mật khẩu",
@@ -102,6 +201,33 @@ const Setting = () => {
     {
       name: "Đăng xuất",
       image: require("../../assets/images/shared/logout.png"),
+      onPress: async () => {
+        try {
+          let requestlogoutUserUrl = `http://${host}:${port}/user/logout`;
+          const logoutUserResponse = await fetch(requestlogoutUserUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: user?.email,
+            }),
+          });
+          const logoutResponse = await logoutUserResponse.json();
+          if (logoutResponse.msg === "1") {
+            dispatch(setUser(null as any));
+            dispatch(setWaitList([] as any));
+            dispatch(setFamilyMember([] as any));
+          } else {
+            Alert.alert("Đăng xuất thất bại");
+          }
+        } catch (e) {
+          console.log(e);
+          Alert.alert("Lỗi xảy ra trong quá trình đăng xuất");
+        }
+        dispatch(logout());
+        navigation.navigate("SignIn");
+      },
     },
   ];
 
@@ -135,7 +261,12 @@ const Setting = () => {
           </View>
           <View style={styles.imageContainer}>
             <Image
-              source={require("../../assets/images/dashboard/avatar.png")}
+              source={{
+                uri:
+                  user?.role === "parent"
+                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+              }}
               style={styles.avatar}
             />
           </View>
@@ -167,7 +298,11 @@ const Setting = () => {
           <Text style={styles.account}>Thêm</Text>
           <View style={styles.accountSettingContainer}>
             {extraSetting.map((setting, index) => (
-              <TouchableOpacity key={index} style={styles.functionContainer}>
+              <TouchableOpacity
+                key={index}
+                style={styles.functionContainer}
+                onPress={setting.onPress}
+              >
                 <Image source={setting.image} style={styles.imageFunction} />
                 <Text style={styles.textFunction}>{setting.name}</Text>
                 <View style={styles.rightArrowContainer}>
@@ -179,7 +314,7 @@ const Setting = () => {
               </TouchableOpacity>
             ))}
           </View>
-          {linkStatus === "unlinked" && (
+          {Number(user?.familyId) === 0 && (
             <>
               <Text style={styles.linkText}>Tài khoản chưa liên kết</Text>
               <ApplyButton
@@ -190,7 +325,7 @@ const Setting = () => {
             </>
           )}
 
-          {linkStatus === "pending" && (
+          {Number(user?.familyId) === -1 && (
             <>
               <Text style={styles.pendingLinkText}>
                 Đã gửi yêu cầu liên kết
@@ -203,7 +338,7 @@ const Setting = () => {
             </>
           )}
 
-          {linkStatus === "linked" && (
+          {Number(user?.familyId) !== 0 && Number(user?.familyId) !== -1 && (
             <>
               <Text style={styles.linkedText}>
                 Tài khoản đã liên kết gia đình

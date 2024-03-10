@@ -1,9 +1,5 @@
 import { Reducer } from "redux";
-import {
-  eventList,
-  EventListAction,
-  SET_EVENT,
-} from "../types/actionTypes";
+import { eventList, EventListAction, LOGOUT, SET_EVENT } from "../types/actionTypes";
 
 export interface EventState {
   eventList: eventList | null;
@@ -23,6 +19,8 @@ export const eventReducer: Reducer<EventState, EventListAction> = (
         ...state,
         user: action.payload,
       };
+    case LOGOUT:
+      return initialState;
     default:
       return state;
   }

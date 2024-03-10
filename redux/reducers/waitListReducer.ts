@@ -1,19 +1,12 @@
 import { Reducer } from "redux";
-import {
-  familyWaitList,
-  SET_WAIT_LIST,
-  WaitListAction,
-} from "../types/actionTypes";
+import { SET_WAIT_LIST, WaitListAction, familyWaitList } from "../types/actionTypes";
 
-export interface WaitListState {
-  waitList: familyWaitList | null;
-}
-
-const initialState: WaitListState = {
-  waitList: null,
+const initialState: familyWaitList = {
+  waitList: [],
 };
 
-export const waitListReducer: Reducer<WaitListState, WaitListAction> = (
+// Reducer
+export const waitListReducer: Reducer<familyWaitList, WaitListAction> = (
   state = initialState,
   action
 ) => {
@@ -21,11 +14,9 @@ export const waitListReducer: Reducer<WaitListState, WaitListAction> = (
     case SET_WAIT_LIST:
       return {
         ...state,
-        waitList: action.payload,
+        waitList: action.payload.waitList,
       };
     default:
       return state;
   }
 };
-
-export default waitListReducer;

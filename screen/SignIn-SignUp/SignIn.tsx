@@ -16,7 +16,7 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import TouchableTextComponent from "../../component/shared/TouchableText";
 import regexVault from "../../utils/regex";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
@@ -35,8 +35,11 @@ const SignIn = () => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMemberList
+    (state: RootState) => state.familyMember.familyMembers
   );
+
+  const isFocused = useIsFocused();
+
   const waitList = useSelector((state: RootState) => state.waitList.waitList);
 
   const [requestState, setRequestState] = useState(false);
@@ -80,7 +83,6 @@ const SignIn = () => {
       if (user && Number(user.familyId) !== 0) {
         try {
           let requestFamilyListURL = `http://${host}:${port}/family/getFamilyMembers/${user.familyId}`;
-
           const familyListResponse = await fetch(requestFamilyListURL, {
             method: "GET",
             headers: {
@@ -88,27 +90,32 @@ const SignIn = () => {
             },
           });
           const familyListData = await familyListResponse.json();
+
           const data = familyListData.data;
-          const familyListPayload = data.map((item: any) => ({
-            userID: String(item.id),
-            phoneNumber: String(item.phone),
-            dateOfBirth: item.dob ? String(item.dob) : "",
-            email: String(item.email),
-            familyId: String(item.familyId),
-            firstName: String(item.firstName),
-            lastName: String(item.lastName),
-            nickName: String(item.nickName) ? String(item.nickName) : "",
-            lastLogin: String(item.lastLogin),
-            accountStatus: item.accountStatus,
-            userStatus: String(item.userStatus),
-            role: String(item.role),
-          }));
+          const familyListPayload = data
+            .map((item: any) => ({
+              userId: String(item.id),
+              phoneNumber: String(item.phone),
+              dateOfBirth: item.dob ? String(item.dob) : "",
+              email: String(item.email),
+              familyId: String(item.familyId),
+              firstName: String(item.firstName),
+              lastName: String(item.lastName),
+              nickName: String(item.nickName) ? String(item.nickName) : "",
+              lastLogin: String(item.lastLogin),
+              accountStatus: item.accountStatus,
+              userStatus: String(item.userStatus),
+              role: String(item.role),
+            }))
+            .filter((item: any) => item.userId !== String(user?.userId));
+
           dispatch(setFamilyMember(familyListPayload));
-          setRequestState(true);
         } catch (e) {
-          alert("Failed to fetch family list:");
-          setRequestState(false);
+          // Alert.alert("Failed to fetch family list:");
         }
+      } else {
+        const a: any = [];
+        dispatch(setFamilyMember(a));
       }
     };
 
@@ -117,7 +124,7 @@ const SignIn = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (user && familyList) {
+      if (user) {
         try {
           let requestWaitList = `http://${host}:${port}/family/getPendingUsers`;
           const familyWaitListResponse = await fetch(requestWaitList, {
@@ -134,7 +141,7 @@ const SignIn = () => {
           if (waitListResponse?.data) {
             const data = waitListResponse.data;
             const waitListPayload = data.map((item: any) => ({
-              userID: String(item.id),
+              userId: String(item.id),
               phoneNumber: String(item.phone),
               dateOfBirth: item.dob ? String(item.dob) : "",
               email: String(item.email),
@@ -142,11 +149,18 @@ const SignIn = () => {
               firstName: String(item.firstName),
               lastName: String(item.lastName),
               nickName: item.nickName ? String(item.nickName) : "",
+              role: String(item?.role),
             }));
             dispatch(setWaitList(waitListPayload));
+            setRequestState(true);
+          } else {
+            const waitListPayload: any = [];
+            dispatch(setWaitList(waitListPayload));
+            setRequestState(true);
           }
         } catch (e) {
-          alert("Failed to fetch family wait list:");
+          Alert.alert("Failed to fetch family wait list:");
+          setRequestState(false);
         }
       }
     };
@@ -155,10 +169,10 @@ const SignIn = () => {
   }, [familyList]);
 
   useEffect(() => {
-    if (requestState) {
+    if (user && isFocused) {
       navigation.navigate("StatusDashboard");
     }
-  }, [requestState]);
+  }, [user, isFocused, navigation]);
 
   async function submitHandler() {
     let allFieldsFilled = true;
@@ -190,7 +204,6 @@ const SignIn = () => {
           }),
         });
         const data = await response.json();
-
         if (data.msg == "1") {
           const userInformation = data.data;
           const userPayload: User = {
@@ -202,12 +215,15 @@ const SignIn = () => {
             firstName: String(userInformation?.firstName),
             lastName: String(userInformation?.lastName),
             nickName: String(userInformation?.nickName),
+            role: String(userInformation?.role),
+            accountStatus: userInformation.accountStatus,
+            userStatus: String(userInformation.userStatus),
           };
 
           dispatch(setUser(userPayload));
         } else Alert.alert("Thất bại", "Đăng nhập thất bại");
       } catch (e) {
-        alert(`Đăng nhập thất bại: ${e}`);
+        Alert.alert(`Đăng nhập thất bại: ${e}`);
       }
     }
   }

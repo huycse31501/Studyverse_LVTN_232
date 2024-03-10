@@ -27,6 +27,7 @@ import { RootState } from "../../redux/store";
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
   Setting: undefined;
+  FamilyInfoScreen: undefined;
 }>;
 
 const getTimeDifference = (lastLogin: string) => {
@@ -38,20 +39,24 @@ const getTimeDifference = (lastLogin: string) => {
   const now = new Date();
   const timeDiff = now.getTime() - lastLoginDate.getTime();
 
-  const hoursDiff = timeDiff / (1000 * 60 * 60);
+  const minutesDiff = timeDiff / (1000 * 60);
+  const hoursDiff = minutesDiff / 60;
 
   if (hoursDiff > 24) {
     return "Trên 1 ngày";
+  } else if (hoursDiff < 1) {
+    return `${minutesDiff.toFixed(0)} phút trước`;
   } else {
     return `${hoursDiff.toFixed(0)} giờ trước`;
   }
 };
 const StatusDashboard = () => {
   const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMemberList
+    (state: RootState) => state.familyMember.familyMembers
   );
   const user = useSelector((state: RootState) => state.user.user);
-  console.log(familyList);
+  // console.log(familyList);
+
   const navigation = useNavigation<StatusBoardNavigationProp>();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
@@ -71,8 +76,8 @@ const StatusDashboard = () => {
         >
           <View style={styles.statusBarContainer}>
             <UserStatus
-              userName="Mẹ Thỏ"
-              status="on"
+              userName={String(user?.nickName)}
+              status={user?.accountStatus ? "on" : "off"}
               onMenuPress={() => navigation.navigate("Setting")}
             />
           </View>
@@ -99,27 +104,44 @@ const StatusDashboard = () => {
                 <Text style={styles.familyNotLinkText}>
                   Tài khoản hiện chưa liên kết gia đình
                 </Text>
-                <TouchableOpacity style={styles.linkFamily}>
+                <TouchableOpacity
+                  style={styles.linkFamily}
+                  onPress={() => {
+                    navigation.navigate("Setting");
+                  }}
+                >
                   <Text style={styles.linkFamilyText}>Liên kết gia đình</Text>
                 </TouchableOpacity>
               </View>
-            ) : familyList && Array.isArray(familyList) ? (
+            ) : Array.isArray(familyList) && familyList.length !== 0 ? (
               <StatusCard
-                FamilyStatusData={familyList.map((item: any) => ({
+                  FamilyStatusData={familyList.map((item: any) => ({
+                  email: item.email,
+                  dob: item.dateOfBirth,
+                  fullname:
+                    item.lastName && item.firstName
+                      ? `${item.firstName} ${item.lastName}`
+                      : "",
                   name: item.nickName ? String(item.nickName) : "",
-                  status: item.userStatus,
+                  status: item?.userStatus === "null" ? "" : item?.userStatus,
                   avatarUri:
                     item?.role === "parent"
                       ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
                       : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
-                  currentStatus: item.accountStatus ? "onl" : "off",
+                  currentStatus: item?.accountStatus ? "onl" : "off",
                   lastOnline: !item.accountStatus
                     ? getTimeDifference(item?.lastLogin)
                     : "Đang trực tuyến",
                 }))}
                 onCardPress={(x) => {
-                  console.log(x);
-                  navigation.navigate("UserDetailsScreen", { user: mockUser });
+                  navigation.navigate("UserDetailsScreen", {
+                    user: {
+                      fullName: x.fullname,
+                      nickname: x.name,
+                      birthdate: x.dob,
+                      avatarUri: x.avatarUri,
+                    },
+                  });
                 }}
               />
             ) : (
@@ -127,7 +149,10 @@ const StatusDashboard = () => {
                 <Text style={styles.familyNotFoundText}>
                   Gia đình hiện chưa có thành viên
                 </Text>
-                <TouchableOpacity style={styles.linkFamily}>
+                <TouchableOpacity
+                  style={styles.linkFamily}
+                  onPress={() => navigation.navigate("FamilyInfoScreen")}
+                >
                   <Text style={styles.linkFamilyText}>Thông tin gia đình</Text>
                 </TouchableOpacity>
               </View>

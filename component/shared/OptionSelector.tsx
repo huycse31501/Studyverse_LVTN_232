@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { TouchableOpacity, Text, StyleSheet, View } from "react-native";
 
-type OptionType = "Parent" | "Children";
+type OptionType = "parent" | "children";
 
 type OptionSelectorProps = {
   onOptionChange?: (option: OptionType) => void;
 };
 
 const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
-  const [selectedOption, setSelectedOption] = useState<OptionType>("Parent");
+  const [selectedOption, setSelectedOption] = useState<OptionType>("parent");
 
   const selectOption = (option: OptionType) => {
     setSelectedOption(option);
@@ -22,15 +22,15 @@ const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
       <TouchableOpacity
         style={[
           styles.option,
-          isOptionSelected("Parent") ? styles.selected : styles.unselected,
+          isOptionSelected("parent") ? styles.selected : styles.unselected,
           styles.leftOption,
         ]}
-        onPress={() => selectOption("Parent")}
+        onPress={() => selectOption("parent")}
       >
         <Text
           style={[
             styles.text,
-            isOptionSelected("Parent")
+            isOptionSelected("parent")
               ? styles.selectedText
               : styles.unselectedText,
           ]}
@@ -42,15 +42,15 @@ const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
       <TouchableOpacity
         style={[
           styles.option,
-          isOptionSelected("Children") ? styles.selected : styles.unselected,
+          isOptionSelected("children") ? styles.selected : styles.unselected,
           styles.rightOption,
         ]}
-        onPress={() => selectOption("Children")}
+        onPress={() => selectOption("children")}
       >
         <Text
           style={[
             styles.text,
-            isOptionSelected("Children")
+            isOptionSelected("children")
               ? styles.selectedText
               : styles.unselectedText,
           ]}

@@ -10,29 +10,62 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Platform,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import FamilyInfoSwitcher from "../../component/dashboard/familyInfoSwitcher";
 import { User } from "./Details";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
+import Constants from "expo-constants";
+import { useDispatch } from "react-redux";
+import { setFamilyMember } from "../../redux/actions/familyAction";
+import { setWaitList } from "../../redux/actions/waitListAction";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
   FamilyInfoScreen: undefined;
 }>;
 
-const waitList = [
-  {
-    accountID: "0082161929",
-    fullName: "Nguyễn Minh Trúc",
-    avatarUri: require("../../assets/images/dashboard/avatar-NMT.png"),
-  },
-  {
-    accountID: "0082039123",
-    fullName: "Nguyễn Minh Tuấn",
-    avatarUri: require("../../assets/images/dashboard/avatar-NMTuan.png"),
-  },
-];
 const FamilyAcceptScreen = () => {
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+
+  const dispatch = useDispatch<AppDispatch>();
+  const waitList = useSelector((state: RootState) => state.waitList.waitList);
+  const familyMemberList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+
+  const user = useSelector((state: RootState) => state.user.user);
+
+  console.log(waitList, familyMemberList);
+
+  const waitListInput =
+    Array.isArray(waitList) && waitList.length !== 0
+      ? waitList.map((item) => ({
+          accountID: item.userId,
+          fullName: `${item.firstName} ${item.lastName}`,
+          avatarUri:
+            item?.role === "parent"
+              ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+              : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+        }))
+      : [];
+
+  //[
+  //   {
+  //     accountID: "0082161929",
+  //     fullName: "Nguyễn Minh Trúc",
+  //     avatarUri: require("../../assets/images/dashboard/avatar-NMT.png"),
+  //   },
+  //   {
+  //     accountID: "0082039123",
+  //     fullName: "Nguyễn Minh Tuấn",
+  //     avatarUri: require("../../assets/images/dashboard/avatar-NMTuan.png"),
+  //   },
+  // ];
+
   const navigation = useNavigation<FamilyInfoNavigationProp>();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
@@ -60,7 +93,12 @@ const FamilyAcceptScreen = () => {
               </TouchableOpacity>
             </View>
             <Image
-              source={require("../../assets/images/dashboard/avatar.png")}
+              source={{
+                uri:
+                  user?.role === "parent"
+                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+              }}
               style={styles.avatar}
             />
           </View>
@@ -80,12 +118,12 @@ const FamilyAcceptScreen = () => {
             />
           </View>
           <View style={styles.waitListContainer}>
-            {waitList.map((member, index) => (
+            {waitListInput.map((member, index) => (
               <View key={index} style={styles.newMember}>
                 <View style={styles.userInformationContainer}>
                   <View style={styles.card}>
                     <Image
-                      source={member.avatarUri}
+                      source={{ uri: member.avatarUri }}
                       style={styles.avatarCard}
                     />
                     <View style={styles.textContainer}>
@@ -103,7 +141,73 @@ const FamilyAcceptScreen = () => {
                           style={styles.decisionIcon}
                         ></Image>
                       </TouchableOpacity>
-                      <TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={async () => {
+                          const userToAcceptInfo = waitList?.filter(
+                            (item: any) =>
+                              item.userId === String(member.accountID)
+                          )[0];
+                          try {
+                            let acceptMemberUrl = `http://${host}:${port}/family/approveLinkFamily`;
+
+                            const acceptMember = await fetch(acceptMemberUrl, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                familyId: user?.familyId,
+                                email: userToAcceptInfo?.email,
+                                code: 1,
+                              }),
+                            });
+                            const acceptMemberResponse =
+                              await acceptMember.json();
+
+                            console.log(acceptMemberUrl, {
+                              familyId: user?.familyId,
+                              email: userToAcceptInfo?.email,
+                              code: 1,
+                            });
+                            console.log(
+                              Array.isArray(familyMemberList),
+                              Array.isArray(waitList),
+                              acceptMemberResponse
+                            );
+                            if (
+                              acceptMemberResponse &&
+                              acceptMemberResponse?.msg == "1" &&
+                              Array.isArray(familyMemberList) &&
+                              Array.isArray(waitList)
+                            ) {
+                              if (
+                                userToAcceptInfo &&
+                                typeof userToAcceptInfo === "object"
+                              ) {
+                                const updatedFamilyMemberList = [
+                                  ...familyMemberList,
+                                  userToAcceptInfo,
+                                ];
+
+                                dispatch(
+                                  setFamilyMember(updatedFamilyMemberList)
+                                );
+                              }
+
+                              const updatedWaitList = waitList.filter(
+                                (item: any) => item.userId !== member.accountID
+                              );
+                              dispatch(setWaitList(updatedWaitList));
+                              console.log(waitList, familyMemberList);
+                            } else {
+                              Alert.alert("Liên kết thất bại");
+                            }
+                          } catch (e) {
+                            console.log(e);
+                            Alert.alert("Lỗi xảy ra trong quá trình liên kết");
+                          }
+                        }}
+                      >
                         <Image
                           source={require("../../assets/images/shared/acceptIcon.png")}
                           style={styles.decisionIcon}
@@ -142,6 +246,7 @@ const styles = StyleSheet.create({
     height: 50,
     marginRight: "7.5%",
     marginTop: "6%",
+    borderRadius: 50,
   },
   familyNameContainer: {
     flexDirection: "row",
@@ -181,6 +286,7 @@ const styles = StyleSheet.create({
   avatarCard: {
     width: 50,
     height: 50,
+    borderRadius: 30,
   },
   textInfo: {
     color: "#242425",

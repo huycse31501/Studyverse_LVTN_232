@@ -1,5 +1,7 @@
 import React from "react";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 interface SwitcherProps {
   type: "List" | "WaitList";
@@ -12,6 +14,8 @@ const FamilyInfoSwitcher = ({
   onListPress,
   onWaitListPress,
 }: SwitcherProps) => {
+  const waitList = useSelector((state: RootState) => state.waitList.waitList);
+
   return (
     <View style={styles.container}>
       <TouchableOpacity disabled={type === "List"} onPress={onListPress}>
@@ -34,7 +38,11 @@ const FamilyInfoSwitcher = ({
               type === "WaitList" ? [styles.text, styles.bold] : styles.text
             }
           >
-            CHỜ DUYỆT (2)
+            {`CHỜ DUYỆT ${
+              Array.isArray(waitList) && waitList.length !== 0
+                ? `(${waitList.length})`
+                : ""
+            }`}
           </Text>
           {type === "WaitList" && <View style={styles.underline} />}
         </View>

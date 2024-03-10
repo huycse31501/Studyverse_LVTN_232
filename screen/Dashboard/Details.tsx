@@ -22,7 +22,7 @@ export interface User {
   fullName: string;
   nickname: string;
   birthdate: string;
-  avatarUri: ImageSourcePropType;
+  avatarUri: string;
 }
 
 type UserDetailsRouteProp = RouteProp<RootStackParamList, "UserDetailsScreen">;
@@ -71,7 +71,7 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
               </View>
               <View style={styles.userInformationContainer}>
                 <View style={styles.card}>
-                  <Image source={user.avatarUri} style={styles.avatar} />
+                  <Image source={{uri: user.avatarUri}} style={styles.avatar} />
                   <View style={styles.textContainer}>
                     <Text style={styles.textInfo}>
                       Họ và tên: {user.fullName}

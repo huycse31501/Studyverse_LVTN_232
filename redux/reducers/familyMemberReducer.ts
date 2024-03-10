@@ -1,19 +1,15 @@
 import { Reducer } from "redux";
-import {
-  familyMemberList,
-  FamilyListAction,
-  SET_FAMILY_MEMBER,
-} from "../types/actionTypes";
+import { SET_FAMILY_MEMBER, SetFamilyMemberAction, User } from "../types/actionTypes";
 
-export interface FamilyState {
-  familyMemberList: familyMemberList | null;
+export interface FamilyMemberState {
+  familyMembers: User[];
 }
 
-const initialState: FamilyState = {
-  familyMemberList: null,
+const initialState: FamilyMemberState = {
+  familyMembers: [],
 };
 
-export const familyReducer: Reducer<FamilyState, FamilyListAction> = (
+export const familyMemberReducer: Reducer<FamilyMemberState, SetFamilyMemberAction> = (
   state = initialState,
   action
 ) => {
@@ -21,11 +17,9 @@ export const familyReducer: Reducer<FamilyState, FamilyListAction> = (
     case SET_FAMILY_MEMBER:
       return {
         ...state,
-        familyMemberList: action.payload,
+        familyMembers: action.payload.familyMembers,
       };
     default:
       return state;
   }
 };
-
-export default familyReducer;

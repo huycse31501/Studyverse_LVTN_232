@@ -14,6 +14,8 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import FamilyInfoSwitcher from "../../component/dashboard/familyInfoSwitcher";
 import { User } from "./Details";
+import { RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
@@ -24,34 +26,26 @@ type FamilyInfoProp = {
   listOfMember?: User[];
 };
 
-const listOfMember: User[] = [
-  {
-    fullName: "Nguyễn Mai Anh",
-    nickname: "Phô mai",
-    birthdate: "20/02/2012",
-    avatarUri: require("../../assets/images/dashboard/avatar-details.png"),
-  },
-  {
-    fullName: "Nguyễn Văn Bố",
-    nickname: "Bố Panda",
-    avatarUri: require("../../assets/images/dashboard/avatar-2.png"),
-    birthdate: "20/01/1988",
-  },
-  {
-    fullName: "Nguyễn Văn Anh",
-    nickname: "Anh cá sấu ",
-    avatarUri: require("../../assets/images/dashboard/avatar-3.png"),
-    birthdate: "20/01/2004",
-  },
-  {
-    fullName: "Nguyễn Thị Mẹ",
-    nickname: "Mẹ thỏ ",
-    avatarUri: require("../../assets/images/dashboard/avatar.png"),
-    birthdate: "20/01/1994",
-  },
-];
 const FamilyInfoScreen = () => {
+  const familyList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+  const user = useSelector((state: RootState) => state.user.user);
+
   const navigation = useNavigation<FamilyInfoNavigationProp>();
+
+  const listOfMember =
+    Array.isArray(familyList) && familyList.length !== 0
+      ? familyList.map((item) => ({
+          fullName: `${item.firstName} ${item.lastName}`,
+          nickName: `${item.nickName}`,
+          birthday: `${item.dateOfBirth}`,
+          avatarUri:
+            item?.role === "parent"
+              ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+              : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+        }))
+      : [];
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
       <KeyboardAvoidingView
@@ -78,7 +72,12 @@ const FamilyInfoScreen = () => {
               </TouchableOpacity>
             </View>
             <Image
-              source={require("../../assets/images/dashboard/avatar.png")}
+              source={{
+                uri:
+                  user?.role === "parent"
+                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+              }}
               style={styles.avatar}
             />
           </View>
@@ -99,11 +98,11 @@ const FamilyInfoScreen = () => {
           </View>
           <View style={styles.familyList}>
             {listOfMember.map((member, index) => (
-              <View  key={index} style={styles.familyMember}>
+              <View key={index} style={styles.familyMember}>
                 <View style={styles.userInformationContainer}>
                   <View style={styles.card}>
                     <Image
-                      source={member.avatarUri}
+                      source={{ uri: member.avatarUri }}
                       style={styles.avatarCard}
                     />
                     <View style={styles.textContainer}>
@@ -111,10 +110,10 @@ const FamilyInfoScreen = () => {
                         Họ và tên: {member.fullName}
                       </Text>
                       <Text style={styles.textInfo}>
-                        Biệt danh: {member.nickname}
+                        Biệt danh: {member.nickName}
                       </Text>
                       <Text style={styles.textInfo}>
-                        Ngày sinh: {member.birthdate}
+                        Ngày sinh: {member.birthday}
                       </Text>
                     </View>
                   </View>
@@ -149,6 +148,7 @@ const styles = StyleSheet.create({
     height: 50,
     marginRight: "7.5%",
     marginTop: "6%",
+    borderRadius: 50,
   },
   familyNameContainer: {
     flexDirection: "row",
