@@ -115,7 +115,7 @@ const StatusDashboard = () => {
               </View>
             ) : Array.isArray(familyList) && familyList.length !== 0 ? (
               <StatusCard
-                  FamilyStatusData={familyList.map((item: any) => ({
+                FamilyStatusData={familyList.map((item: any) => ({
                   email: item.email,
                   dob: item.dateOfBirth,
                   fullname:
@@ -136,6 +136,7 @@ const StatusDashboard = () => {
                 onCardPress={(x) => {
                   navigation.navigate("UserDetailsScreen", {
                     user: {
+                      email: x.email,
                       fullName: x.fullname,
                       nickname: x.name,
                       birthdate: x.dob,

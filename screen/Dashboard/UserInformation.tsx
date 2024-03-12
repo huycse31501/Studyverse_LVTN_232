@@ -124,7 +124,6 @@ const UserInformationScreen = () => {
         if (regexVault.lastNameValidate.test(infoToChange)) {
           setInfoToChange("");
           setChangeInfoModal(false);
-          console.log(infoToChange);
         } else {
           alert("Vui lòng nhập tên hợp lệ");
         }
@@ -133,7 +132,6 @@ const UserInformationScreen = () => {
         if (regexVault.firstNameValidate.test(infoToChange)) {
           setInfoToChange("");
           setChangeInfoModal(false);
-          console.log(infoToChange);
         } else {
           alert("Vui lòng nhập biệt danh hợp lệ");
         }
@@ -142,7 +140,6 @@ const UserInformationScreen = () => {
         if (regexVault.DOBValidate.test(infoToChange)) {
           setInfoToChange("");
           setChangeInfoModal(false);
-          console.log(infoToChange);
         } else {
           alert("Vui lòng nhập ngày sinh hợp lệ");
         }

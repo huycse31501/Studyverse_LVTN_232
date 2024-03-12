@@ -13,12 +13,19 @@ import {
   Platform,
   Modal,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import ApplyButton from "../../component/shared/ApplyButton";
+import Constants from "expo-constants";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
+import { useDispatch } from "react-redux";
+import { setFamilyMember } from "../../redux/actions/familyAction";
 
 export interface User {
+  email: string;
   fullName: string;
   nickname: string;
   birthdate: string;
@@ -32,12 +39,49 @@ interface UserDetailsScreenProps {
   navigation: StackNavigationProp<RootStackParamList, "UserDetailsScreen">;
 }
 const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = route.params;
-
+  const userInfo = useSelector((state: RootState) => state.user.user);
+  const familyMemberList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
 
-  const handleCancelButton = () => {
+  const handleCancelButton = async () => {
+    try {
+      let kickMemberUrl = `http://${host}:${port}/family/kickMember`;
+
+      const kickMember = await fetch(kickMemberUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userEmail: userInfo?.email,
+          memberEmail: user.email,
+          familyId: userInfo?.familyId,
+        }),
+      });
+      const kickMemberResponse = await kickMember.json();
+      if (kickMemberResponse && kickMemberResponse?.msg == "1") {
+        dispatch(
+          setFamilyMember(
+            familyMemberList.filter((item: any) => item.email !== user.email)
+          )
+        );
+        navigation.navigate("StatusDashboard");
+      } else {
+        Alert.alert("Hủy liên kết thất bại");
+      }
+      setConfirmCancelModalVisible(false);
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Lỗi xảy ra trong quá trình hủy liên kết");
+      setConfirmCancelModalVisible(false);
+    }
     setConfirmCancelModalVisible(false);
   };
   return (
@@ -71,7 +115,10 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
               </View>
               <View style={styles.userInformationContainer}>
                 <View style={styles.card}>
-                  <Image source={{uri: user.avatarUri}} style={styles.avatar} />
+                  <Image
+                    source={{ uri: user.avatarUri }}
+                    style={styles.avatar}
+                  />
                   <View style={styles.textContainer}>
                     <Text style={styles.textInfo}>
                       Họ và tên: {user.fullName}

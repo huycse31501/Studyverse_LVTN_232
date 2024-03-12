@@ -39,7 +39,6 @@ const FamilyAcceptScreen = () => {
 
   const user = useSelector((state: RootState) => state.user.user);
 
-  console.log(waitList, familyMemberList);
 
   const waitListInput =
     Array.isArray(waitList) && waitList.length !== 0
@@ -135,7 +134,45 @@ const FamilyAcceptScreen = () => {
                       </Text>
                     </View>
                     <View style={styles.decisionIconContainer}>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={async () => {
+                          const userToAcceptInfo = waitList?.filter(
+                            (item: any) =>
+                              item.userId === String(member.accountID)
+                          )[0];
+                          try {
+                            let declineMemberUrl = `http://${host}:${port}/family/approveLinkFamily`;
+
+                            const declinceMember = await fetch(declineMemberUrl, {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                familyId: user?.familyId,
+                                email: userToAcceptInfo?.email,
+                                code: 0,
+                              }),
+                            });
+                            const declinceMemberResponse =
+                              await declinceMember.json();
+
+                            if (
+                              declinceMemberResponse &&
+                              declinceMemberResponse?.msg == "1" &&
+                              Array.isArray(waitList)
+                            ) {
+
+                              const updatedWaitList = waitList.filter(
+                                (item: any) => item.userId !== member.accountID
+                              );
+                              dispatch(setWaitList(updatedWaitList));
+                            } else {
+                              Alert.alert("Hủy liên kết thất bại");
+                            }
+                          } catch (e) {
+                            Alert.alert("Lỗi xảy ra trong quá trình hủy liên kết");
+                          }
+                        }}>
                         <Image
                           source={require("../../assets/images/shared/declineIcon.png")}
                           style={styles.decisionIcon}
@@ -164,16 +201,6 @@ const FamilyAcceptScreen = () => {
                             const acceptMemberResponse =
                               await acceptMember.json();
 
-                            console.log(acceptMemberUrl, {
-                              familyId: user?.familyId,
-                              email: userToAcceptInfo?.email,
-                              code: 1,
-                            });
-                            console.log(
-                              Array.isArray(familyMemberList),
-                              Array.isArray(waitList),
-                              acceptMemberResponse
-                            );
                             if (
                               acceptMemberResponse &&
                               acceptMemberResponse?.msg == "1" &&
@@ -198,12 +225,10 @@ const FamilyAcceptScreen = () => {
                                 (item: any) => item.userId !== member.accountID
                               );
                               dispatch(setWaitList(updatedWaitList));
-                              console.log(waitList, familyMemberList);
                             } else {
                               Alert.alert("Liên kết thất bại");
                             }
                           } catch (e) {
-                            console.log(e);
                             Alert.alert("Lỗi xảy ra trong quá trình liên kết");
                           }
                         }}
