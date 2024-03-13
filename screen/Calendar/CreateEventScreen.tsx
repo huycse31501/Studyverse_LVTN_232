@@ -16,6 +16,8 @@ import { RootStackParamList } from "../../component/navigator/appNavigator";
 import DatePickerBlue from "../../component/shared/DatePickerCalendar";
 import TimePicker from "../../component/shared/TimePicker";
 import ToggleSwitch from "toggle-switch-react-native";
+import { TextInput } from "react-native-gesture-handler";
+import ApplyButton from "../../component/shared/ApplyButton";
 
 type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
 
@@ -38,10 +40,11 @@ const options: Option[] = [
 const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   //   const { user, eventRemindList, eventList, routeBefore } = route.params;
   const [isEventLoopEnabled, setIsEventLoopEnabled] = useState(false);
-  const toggleSwitch = () =>
-    setIsEventLoopEnabled((previousState) => !previousState);
+  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
+  const [notiValue, setNotiValue] = useState("");
 
   const [selectedLoopValue, setSelectedLoopValue] = useState("daily");
+
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
@@ -123,6 +126,30 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               ))}
             </View>
           )}
+          <View style={styles.eventNotiContainer}>
+            <ToggleSwitch
+              isOn={isNotiEnabled}
+              onColor="#4CD964"
+              offColor="#e0dddd"
+              size="large"
+              onToggle={() => setIsNotiEnabled(!isNotiEnabled)}
+              circleColor={"#FFFFFF"}
+            />
+            <Text style={styles.eventLoopText}>Nhắc nhở</Text>
+          </View>
+          <Text style={styles.noteText}>Note</Text>
+
+          <View style={styles.textNoticeContainer}>
+            <TextInput
+              value={notiValue}
+              onChangeText={setNotiValue}
+              style={styles.noticeInput}
+            />
+          </View>
+          <ApplyButton
+            label="Tạo sự kiện"
+            extraStyle={{ width: "50%", marginTop: 50, marginBottom: 30 }}
+          />
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -162,7 +189,7 @@ const styles = StyleSheet.create({
   },
   eventLoopContainer: {
     flexDirection: "row",
-    paddingLeft: 20,
+    paddingLeft: 30,
   },
   eventLoopText: {
     alignSelf: "center",
@@ -179,7 +206,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
-    paddingVertical: 5,
+    paddingTop: 5,
   },
   circle: {
     height: 30,
@@ -219,6 +246,33 @@ const styles = StyleSheet.create({
     height: 15,
     top: "25%",
     left: "20%",
+  },
+  eventNotiContainer: {
+    flexDirection: "row",
+    paddingLeft: 30,
+    marginTop: 30,
+  },
+  textNoticeContainer: {
+    backgroundColor: "#e0e6f0",
+    padding: 10,
+    borderRadius: 10,
+    width: 330,
+    height: 80,
+    marginTop: 5,
+    marginLeft: 30,
+  },
+  noticeInput: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#413636",
+  },
+  noteText: {
+    fontSize: 20,
+    color: "#1E293B",
+    fontWeight: "600",
+    paddingLeft: 30,
+    marginTop: 30,
+    marginBottom: 10,
   },
 });
 

@@ -44,7 +44,7 @@ export type RootStackParamList = {
     eventList: EventInfo[];
     routeBefore: string;
   };
-  CreateEventScreen: undefined,
+  CreateEventScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -53,7 +53,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="CreateEventScreen"
+        initialRouteName="EventInfoScreen"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
@@ -76,7 +76,7 @@ const AppNavigator = () => {
           name="UserInformationScreen"
           component={UserInformationScreen}
         />
-        
+
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} />
         <Stack.Screen name="EventRemindScreen" component={EventRemindScreen} />
         <Stack.Screen name="CreateEventScreen" component={CreateEventScreen} />

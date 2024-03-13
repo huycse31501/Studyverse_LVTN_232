@@ -6,11 +6,12 @@ import DatePicker, {
 
 type Props = {
   remind?: boolean;
+  onDateSelect?: (date: Date) => void;
 };
 
 const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
 
-const WeekDatePicker: React.FC<Props> = ({ remind }) => {
+const WeekDatePicker: React.FC<Props> = ({ remind, onDateSelect }) => {
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -20,8 +21,15 @@ const WeekDatePicker: React.FC<Props> = ({ remind }) => {
     setShowPicker(false);
     setDate(currentDate);
     setSelectedDate(currentDate);
+    onDateSelect?.(currentDate);
   };
 
+  const onDatePress = (dateItem: Date) => {
+    setSelectedDate(dateItem);
+    if (onDateSelect) {
+      onDateSelect(dateItem);
+    }
+  };
   const generateWeekDates = (selectedDate: Date): Date[] => {
     let startOfWeek = new Date(selectedDate);
     startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
@@ -36,15 +44,15 @@ const WeekDatePicker: React.FC<Props> = ({ remind }) => {
 
   const renderDate = (dateItem: Date, dayOfWeek: string) => {
     const isSelected =
-      dateItem.getDate() === date.getDate() &&
-      dateItem.getMonth() === date.getMonth() &&
-      dateItem.getFullYear() === date.getFullYear();
+      dateItem.getDate() === selectedDate.getDate() &&
+      dateItem.getMonth() === selectedDate.getMonth() &&
+      dateItem.getFullYear() === selectedDate.getFullYear();
 
     return (
       <TouchableOpacity
         key={dateItem.toISOString()}
         style={[styles.date, isSelected && styles.selectedDate]}
-        onPress={() => setDate(dateItem)}
+        onPress={() => onDatePress(dateItem)}
       >
         <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
           {dateItem.getDate()}

@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -28,6 +28,12 @@ interface EventInfoScreenProps {
 }
 const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   //   const { user, eventRemindList, eventList, routeBefore } = route.params;
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    console.log(date);
+  };
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
       <KeyboardAvoidingView
@@ -59,7 +65,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             />
           </View>
           <View style={styles.weekDatePickerContainer}>
-            <WeekDatePicker />
+            <WeekDatePicker onDateSelect={handleDateSelect}/>
           </View>
           <View style={styles.eventContainer}>
             <EventTimeline data={eventSampleData} height={200} />
