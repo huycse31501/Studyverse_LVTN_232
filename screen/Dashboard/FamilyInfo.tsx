@@ -16,6 +16,7 @@ import FamilyInfoSwitcher from "../../component/dashboard/familyInfoSwitcher";
 import { User } from "./Details";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
@@ -46,8 +47,11 @@ const FamilyInfoScreen = () => {
               : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
         }))
       : [];
+
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}

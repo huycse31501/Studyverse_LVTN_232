@@ -21,6 +21,7 @@ import Constants from "expo-constants";
 import { useDispatch } from "react-redux";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { setWaitList } from "../../redux/actions/waitListAction";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
@@ -64,10 +65,11 @@ const FamilyAcceptScreen = () => {
   //     avatarUri: require("../../assets/images/dashboard/avatar-NMTuan.png"),
   //   },
   // ];
+  const insets = useSafeAreaInsets();
 
   const navigation = useNavigation<FamilyInfoNavigationProp>();
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}

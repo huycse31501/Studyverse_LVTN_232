@@ -1,7 +1,7 @@
 type EventInfo = {
   timeStart: string;
   timeEnd: string;
-  task: string;
+  task: string[];
   images?: string[];
 };
 

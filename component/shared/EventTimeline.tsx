@@ -81,33 +81,22 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
               <Text style={styles.time}>{event.timeStart}</Text>
               <Text style={styles.time}>{event.timeEnd}</Text>
             </View>
-            <View style={styles.taskContainer}>
-              <View style={styles.taskBlock}>
-                <Text style={styles.task}>{event.task}</Text>
-                {getTimeUntilNextEvent(event.timeStart) && (
-                  <View style={styles.countdownContainer}>
-                    <Text style={styles.countdown}>
-                      {getTimeUntilNextEvent(event.timeStart)}
-                    </Text>
-                  </View>
-                )}
+            {event.task.map((task, index) => (
+              <View style={styles.taskContainer} key={index}>
+                <View style={styles.taskBlock}>
+                  <Text style={styles.task}>
+                    {task}
+                  </Text>
+                  {getTimeUntilNextEvent(event.timeStart) && (
+                    <View style={styles.countdownContainer}>
+                      <Text style={styles.countdown}>
+                        {getTimeUntilNextEvent(event.timeStart)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
-              {event.images &&
-                event.images
-                  .slice(0, 3)
-                  .map((image, imgIndex) => (
-                    <Image
-                      key={imgIndex}
-                      source={{ uri: image }}
-                      style={styles.image}
-                    />
-                  ))}
-              {event.images && event.images.length > 3 && (
-                <Text style={styles.moreImages}>
-                  +{event.images.length - 3}
-                </Text>
-              )}
-            </View>
+            ))}
           </View>
         ))}
       </ScrollView>
@@ -143,6 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF2D55",
     borderRadius: 14,
     padding: 10,
+    marginHorizontal: 3,
   },
   taskBlock: {
     flex: 1,

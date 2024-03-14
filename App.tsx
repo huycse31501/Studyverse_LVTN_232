@@ -5,6 +5,7 @@ import AppNavigator from "./component/navigator/appNavigator";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import TimePicker from "./component/shared/TimePicker";
+import BlackBorderTextInputField from "./component/shared/BlackBorderInputField";
 
 export default function App() {
   return (
@@ -21,6 +22,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F9F9F9",
-    // marginTop: 200,
   },
 });

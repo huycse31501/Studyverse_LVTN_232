@@ -21,6 +21,7 @@ import eventSampleData from "../../mockData/EventData";
 import EventReminder, { EventProps } from "../../component/shared/RemindEvent";
 import mockEventReminder from "../../mockData/EventReminder";
 import ApplyButton from "../../component/shared/ApplyButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type EventRemindProp = RouteProp<RootStackParamList, "EventRemindScreen">;
 
@@ -51,8 +52,11 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
     setSelectedDate(date);
     console.log(date);
   };
+  
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}

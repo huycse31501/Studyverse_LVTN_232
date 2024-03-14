@@ -20,17 +20,20 @@ const DatePickerBlue: React.FC<Props> = () => {
     setSelectedDate(currentDate);
   };
 
-  const generateWeekDates = (selectedDate: Date): Date[] => {
-    let startOfWeek = new Date(selectedDate);
-    startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
-    return Array.from({ length: 7 }).map((_, index) => {
-      let date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + index);
-      return date;
-    });
+  const generateFourDaySpan = (selectedDate: Date): Date[] => {
+    let dates = [];
+    let dayOfWeek = selectedDate.getDay();
+    let startIndex = dayOfWeek === 0 || dayOfWeek === 1 ? -1 : -2;
+
+    for (let i = startIndex; i < startIndex + 4; i++) {
+      let newDate = new Date(selectedDate);
+      newDate.setDate(selectedDate.getDate() + i);
+      dates.push(newDate);
+    }
+    return dates;
   };
 
-  const weekDates = generateWeekDates(date);
+  const fourDaySpan = generateFourDaySpan(selectedDate);
 
   const renderDate = (dateItem: Date, dayOfWeek: string) => {
     const isSelected =
@@ -77,7 +80,7 @@ const DatePickerBlue: React.FC<Props> = () => {
         </TouchableOpacity>
       </View>
       <View style={styles.weekDates}>
-        {weekDates.map((dateItem, index) =>
+        {fourDaySpan.map((dateItem, index) =>
           renderDate(dateItem, daysOfWeek[index])
         )}
       </View>

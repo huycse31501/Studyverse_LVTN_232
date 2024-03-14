@@ -18,6 +18,8 @@ import TimePicker from "../../component/shared/TimePicker";
 import ToggleSwitch from "toggle-switch-react-native";
 import { TextInput } from "react-native-gesture-handler";
 import ApplyButton from "../../component/shared/ApplyButton";
+import BlackBorderTextInputField from "../../component/shared/BlackBorderInputField";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
 
@@ -42,12 +44,12 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   const [isEventLoopEnabled, setIsEventLoopEnabled] = useState(false);
   const [isNotiEnabled, setIsNotiEnabled] = useState(false);
   const [notiValue, setNotiValue] = useState("");
+  const insets = useSafeAreaInsets();
 
   const [selectedLoopValue, setSelectedLoopValue] = useState("daily");
 
-
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 25 }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -73,6 +75,10 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             </View>
           </View>
           <Text style={styles.headerText}>Thêm sự kiện</Text>
+          <View style={styles.eventNameContainer}>
+            <Text style={styles.timePickerText}>Tên sự kiện</Text>
+            <BlackBorderTextInputField placeHolder="Sự kiện" isValid />
+          </View>
           <DatePickerBlue />
           <Text style={styles.timePickerText}>Chọn khung giờ</Text>
           <View style={{ height: 150 }}>
@@ -172,6 +178,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#FF2D58",
   },
+  eventNameContainer: {},
   headerText: {
     alignSelf: "center",
     color: "#1E293B",
@@ -185,7 +192,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     paddingLeft: 30,
     marginTop: 10,
-    marginBottom: 15,
+    marginBottom: 20,
   },
   eventLoopContainer: {
     flexDirection: "row",
