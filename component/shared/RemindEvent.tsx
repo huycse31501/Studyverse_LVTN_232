@@ -22,12 +22,14 @@ export interface EventListProps {
   events: EventProps[];
   blueTheme?: boolean;
   height?: number;
+  onEventItemPress?: (item: EventProps) => void;
 }
 
 const EventReminder: React.FC<EventListProps> = ({
   events,
   blueTheme,
   height,
+  onEventItemPress,
 }) => {
   const getIconName = (status: EventStatus) => {
     switch (status) {
@@ -57,6 +59,7 @@ const EventReminder: React.FC<EventListProps> = ({
         <TouchableOpacity
           style={[styles.container, blueTheme && styles.blueThemeContainer]}
           key={index}
+          onPress={() => onEventItemPress?.(item)}
         >
           <Image
             source={

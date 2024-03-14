@@ -53,7 +53,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="EventInfoScreen"
+        initialRouteName="EventRemindScreen"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },

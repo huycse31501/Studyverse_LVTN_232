@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet, StyleProp, ViewStyle, TextStyle } from "react-native";
+import { EventProps } from "./RemindEvent";
 
 type ApplyButtonProps = {
   label: string;
