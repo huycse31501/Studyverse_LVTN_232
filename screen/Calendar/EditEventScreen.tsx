@@ -23,10 +23,10 @@ import BlackBorderTextInputField from "../../component/shared/BlackBorderInputFi
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import regexVault from "../../utils/regex";
 
-type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
+type EditEventRouteProp = RouteProp<RootStackParamList, "EditEventScreen">;
 
-interface CreateEventScreenProps {
-  route: CreateEventRouteProp;
+interface EditEventScreenProps {
+  route: EditEventRouteProp;
   navigation: StackNavigationProp<RootStackParamList, "FamilyInfoScreen">;
 }
 
@@ -35,21 +35,19 @@ type Option = {
   value: string;
 };
 
-const options: Option[] = [
-  { label: "Hằng ngày", value: "0" },
-  { label: "Hằng tuần", value: "1" },
-  { label: "Hằng tháng", value: "2" },
-];
-
 const notiOptions: Option[] = [
   { label: "Trước 15 phút", value: "15" },
   { label: "Trước 30 phút", value: "30" },
   { label: "Trước 45 phút", value: "45" },
   { label: "Trước 1 giờ", value: "60" },
 ];
-const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
-  //   const { user, eventRemindList, eventList, routeBefore } = route.params;
 
+const mockData = {
+  defaultName: "defaultName",
+  isLoop: false,
+};
+const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
+  const insets = useSafeAreaInsets();
   const getCurrentDateFormatted = () => {
     const date = new Date();
     return [
@@ -71,14 +69,13 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
     }
     return true;
   };
-  const [isEventLoopEnabled, setIsEventLoopEnabled] = useState(false);
-  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
-  const [selectedLoopValue, setSelectedLoopValue] = useState("");
+
   const [selectedNotiValue, setSelectedNotiValue] = useState("");
+  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
 
   const [inputs, setInputs] = useState({
     eventName: {
-      value: "",
+      value: "defaultName",
       required: true,
     },
     eventDate: {
@@ -93,14 +90,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       value: "",
       required: true,
     },
-    isLoop: {
-      value: "false",
-      required: true,
-    },
-    loopInterval: {
-      value: "",
-      required: isEventLoopEnabled,
-    },
     isNoti: {
       value: undefined,
       required: true,
@@ -110,7 +99,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       required: isNotiEnabled,
     },
     noteText: {
-      value: "",
+      value: "defaultName",
       required: false,
     },
   });
@@ -129,11 +118,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
 
   const handleEndTimeChange = (endTime: string) => {
     inputChangedHandler("eventEndTime", endTime);
-  };
-
-  const setSelectedLoopValueAndInput = (value: string) => {
-    setSelectedLoopValue(value);
-    inputChangedHandler("loopInterval", value);
   };
 
   const setSelectedNotiValueAndInput = (value: string) => {
@@ -188,14 +172,14 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
     }
 
     if (!allFieldsFilled) {
-      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin tạo sự kiện");
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin chỉnh sửa sự kiện");
     } else if (!allFieldsValid) {
       if (inputValidation.isEventNameValid === false) {
         Alert.alert("Thông báo", "Tên sự kiện không hợp lệ");
       } else if (inputValidation.isNoteTextValid === false) {
         Alert.alert("Thông báo", "Ghi chú sự kiện không hợp lệ");
       } else if (inputValidation.isStartDateValid === false) {
-        Alert.alert("Bạn không thể tạo sự kiện trong quá khứ");
+        Alert.alert("Bạn không thể chỉnh sửa sự kiện về quá khứ");
       }
     } else {
       setInputs({
@@ -214,14 +198,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         eventEndTime: {
           value: "",
           required: true,
-        },
-        isLoop: {
-          value: "false",
-          required: true,
-        },
-        loopInterval: {
-          value: "",
-          required: isEventLoopEnabled,
         },
         isNoti: {
           value: undefined,
@@ -243,7 +219,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       });
     }
   }
-  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
@@ -271,7 +246,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={styles.headerText}>Thêm sự kiện</Text>
+          <Text style={styles.headerText}>Thông tin sự kiện</Text>
           <View style={styles.eventNameContainer}>
             <Text style={styles.timePickerText}>Tên sự kiện</Text>
             <BlackBorderTextInputField
@@ -283,69 +258,32 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               }}
             />
           </View>
-          <DatePickerBlue
-            onDateSelect={(selectedDate) => {
-              inputChangedHandler("eventDate", selectedDate);
-            }}
-          />
-          <Text style={styles.timePickerText}>Chọn khung giờ</Text>
-          <View style={{ height: 150 }}>
-            <TimePicker
-              onStartTimeSelect={handleStartTimeChange}
-              onEndTimeSelect={handleEndTimeChange}
-            />
-          </View>
-          <View style={styles.eventLoopContainer}>
-            <ToggleSwitch
-              isOn={isEventLoopEnabled}
-              onColor="#4CD964"
-              offColor="#e0dddd"
-              size="large"
-              onToggle={() => {
-                inputChangedHandler("isLoop", String(!isEventLoopEnabled));
-                setIsEventLoopEnabled(!isEventLoopEnabled);
-              }}
-              circleColor={"#FFFFFF"}
-            />
-            <Text style={styles.eventLoopText}>Lặp lại</Text>
-          </View>
-          {isEventLoopEnabled && (
-            <View style={styles.loopChoiceContainer}>
-              {options.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={styles.radioButtonContainer}
-                  onPress={() => setSelectedLoopValueAndInput(option.value)}
-                >
-                  <View style={styles.circleContainer}>
-                    <View
-                      style={[
-                        selectedLoopValue === option.value
-                          ? styles.checkedCircle
-                          : styles.circle,
-                        ,
-                      ]}
-                    />
-                    {selectedLoopValue === option.value && (
-                      <Image
-                        source={require("../../assets/images/shared/checkIcon.png")}
-                        style={styles.checkedIcon}
-                      />
-                    )}
-                  </View>
-                  <Text
-                    style={[
-                      styles.label,
-                      selectedLoopValue === option.value &&
-                        styles.selectedLabel,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+          {mockData.isLoop ? (
+            <>
+              <View style={styles.eventLoopInfoContainer}>
+                <Text style={styles.eventLoopInfoText}>
+                  Đây là sự kiện có lặp lại nên bạn không thể thay đổi ngày và
+                  giờ diễn ra
+                </Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <DatePickerBlue
+                onDateSelect={(selectedDate) => {
+                  inputChangedHandler("eventDate", selectedDate);
+                }}
+              />
+              <Text style={styles.timePickerText}>Chọn khung giờ</Text>
+              <View style={{ height: 150 }}>
+                <TimePicker
+                  onStartTimeSelect={handleStartTimeChange}
+                  onEndTimeSelect={handleEndTimeChange}
+                />
+              </View>
+            </>
           )}
+
           <View style={styles.eventNotiContainer}>
             <ToggleSwitch
               isOn={isNotiEnabled}
@@ -398,6 +336,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             </View>
           )}
           <Text style={styles.noteText}>Note</Text>
+
           <View style={styles.textNoticeContainer}>
             <TextInput
               value={inputs.noteText.value}
@@ -405,11 +344,38 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               style={styles.noticeInput}
             />
           </View>
-          <ApplyButton
-            label="Tạo sự kiện"
-            extraStyle={{ width: "50%", marginTop: 50, marginBottom: 30 }}
-            onPress={submitHandler}
-          />
+          <View
+            style={{
+              marginTop: isNotiEnabled == false && mockData.isLoop ? 150 : 50,
+              marginBottom: 30,
+              flexDirection: "row",
+              marginHorizontal: 30,
+            }}
+          >
+            <ApplyButton
+              label="Lưu sự kiện"
+              extraStyle={{
+                width: "45%",
+                marginRight: 10,
+              }}
+              onPress={submitHandler}
+            />
+            <ApplyButton
+              label="Xóa sự kiện"
+              extraStyle={{
+                width: "45%",
+                marginLeft: 10,
+                backgroundColor: "#F9F9F9",
+                borderWidth: 2,
+                borderRadius: 30,
+                borderColor: "#0e0d0d7a",
+              }}
+              extraTextStyle={{
+                color: "#2c2929",
+              }}
+              onPress={submitHandler}
+            />
+          </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -448,10 +414,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  eventLoopContainer: {
-    flexDirection: "row",
-    paddingLeft: 30,
-  },
   eventLoopText: {
     alignSelf: "center",
     color: "#1E293B",
@@ -459,10 +421,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginLeft: 25,
   },
-  loopChoiceContainer: {
-    marginTop: 30,
-    marginLeft: 30,
-  },
+
   radioButtonContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -511,7 +470,7 @@ const styles = StyleSheet.create({
   eventNotiContainer: {
     flexDirection: "row",
     paddingLeft: 30,
-    marginTop: 30,
+    marginTop: 15,
   },
   textNoticeContainer: {
     backgroundColor: "#e0e6f0",
@@ -535,6 +494,20 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 10,
   },
+  eventLoopInfoContainer: {
+    marginVertical: 20,
+    marginHorizontal: 24,
+  },
+  eventLoopInfoText: {
+    alignSelf: "center",
+    fontSize: 18,
+    color: "#FF2D58",
+    fontWeight: "500",
+  },
+  loopChoiceContainer: {
+    marginTop: 30,
+    marginLeft: 30,
+  },
 });
 
-export default CreateEventScreen;
+export default EditEventScreen;

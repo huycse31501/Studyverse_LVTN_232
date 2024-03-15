@@ -9,7 +9,15 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-const TimePicker: React.FC = () => {
+type TimePickerProps = {
+  onStartTimeSelect?: (time: string) => void;
+  onEndTimeSelect?: (time: string) => void;
+};
+
+const TimePicker: React.FC<TimePickerProps> = ({
+  onStartTimeSelect,
+  onEndTimeSelect,
+}) => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [isStartTimePickerVisible, setStartTimePickerVisibility] =
@@ -38,13 +46,18 @@ const TimePicker: React.FC = () => {
       .padStart(2, "0")}`;
     setStartTime(formattedTime);
     setStartTimePickerVisibility(false);
+
+    if (onStartTimeSelect) {
+      onStartTimeSelect(formattedTime);
+    }
   };
 
   const handleEndTimeConfirm = (date: Date) => {
-    const formattedTime = `${date.getHours()}:${date
+    const formattedTime = `${date.getHours().toString().padStart(2, "0")}:${date
       .getMinutes()
       .toString()
       .padStart(2, "0")}`;
+
     const startTimeDate = getTimeDate(startTime);
     if (date > startTimeDate) {
       setEndTime(formattedTime);
@@ -55,6 +68,10 @@ const TimePicker: React.FC = () => {
       setEndTime("");
     }
     setEndTimePickerVisibility(false);
+
+    if (onEndTimeSelect) {
+      onEndTimeSelect(formattedTime);
+    }
   };
 
   return (

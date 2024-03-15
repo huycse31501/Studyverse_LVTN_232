@@ -4,11 +4,13 @@ import DatePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 
-type Props = {};
+type Props = {
+  onDateSelect?: (dateStr: string) => void;
+};
 
 const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
 
-const DatePickerBlue: React.FC<Props> = () => {
+const DatePickerBlue: React.FC<Props> = ({ onDateSelect }) => {
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -18,6 +20,14 @@ const DatePickerBlue: React.FC<Props> = () => {
     setShowPicker(false);
     setDate(currentDate);
     setSelectedDate(currentDate);
+    if (onDateSelect) {
+      const formattedDate = [
+        currentDate.getDate().toString().padStart(2, '0'),
+        (currentDate.getMonth() + 1).toString().padStart(2, '0'),
+        currentDate.getFullYear()
+      ].join('/');
+      onDateSelect(formattedDate);
+    }
   };
 
   const generateFourDaySpan = (selectedDate: Date): Date[] => {
@@ -41,11 +51,24 @@ const DatePickerBlue: React.FC<Props> = () => {
       dateItem.getMonth() === date.getMonth() &&
       dateItem.getFullYear() === date.getFullYear();
 
+      const onDatePress = () => {
+        setSelectedDate(dateItem);
+        setDate(dateItem);
+        if (onDateSelect) {
+          const formattedDate = [
+            dateItem.getDate().toString().padStart(2, '0'),
+            (dateItem.getMonth() + 1).toString().padStart(2, '0'),
+            dateItem.getFullYear()
+          ].join('/');
+          onDateSelect(formattedDate); 
+        }
+      };
+
     return (
       <TouchableOpacity
         key={dateItem.toISOString()}
         style={[styles.date, isSelected && styles.selectedDate]}
-        onPress={() => setDate(dateItem)}
+        onPress={onDatePress}
       >
         <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
           {dateItem.getDate()}

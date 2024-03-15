@@ -7,6 +7,7 @@ const regexVault = {
   lastNameValidate: /^[A-Za-zÀ-ÖØ-öø-ỹ_\s]{2,20}$/,
   fullNameValidate: /^[A-Za-zÀ-ÖØ-öø-ỹ_\s]{8,20}$/,
   passwordValidate: /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,20}$/,
+  preventxssValidate: /[^a-zA-Z0-9 .-]{1,30}/g,
 };
 
 export default regexVault;

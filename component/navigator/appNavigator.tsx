@@ -20,6 +20,7 @@ import EventInfo from "../type/EventInfo";
 import EventInfoScreen from "../../screen/Calendar/CalendarDashboard";
 import EventRemindScreen from "../../screen/Calendar/EventRemindScreen";
 import CreateEventScreen from "../../screen/Calendar/CreateEventScreen";
+import EditEventScreen from "../../screen/Calendar/EditEventScreen";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -45,6 +46,7 @@ export type RootStackParamList = {
     routeBefore: string;
   };
   CreateEventScreen: undefined;
+  EditEventScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -53,7 +55,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="CreateEventScreen"
+        initialRouteName="EditEventScreen"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },
@@ -80,6 +82,7 @@ const AppNavigator = () => {
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} />
         <Stack.Screen name="EventRemindScreen" component={EventRemindScreen} />
         <Stack.Screen name="CreateEventScreen" component={CreateEventScreen} />
+        <Stack.Screen name="EditEventScreen" component={EditEventScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
