@@ -35,18 +35,19 @@ export type RootStackParamList = {
   FamilyAcceptScreen: undefined;
   UserInformationScreen: undefined;
   EventInfoScreen: {
-    user: User;
-    eventRemindList: EventProps[];
-    eventList: EventInfo[];
+    userId: number;
     routeBefore: string;
   };
   EventRemindScreen: {
-    user: User;
-    eventList: EventInfo[];
+    userId: number;
     routeBefore: string;
   };
-  CreateEventScreen: undefined;
-  EditEventScreen: undefined;
+  CreateEventScreen: {
+    userId: number;
+  };
+  EditEventScreen: {
+    userId: number;
+  };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -55,7 +56,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="EditEventScreen"
+        initialRouteName="SignIn"
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: "#FFFFFF" },

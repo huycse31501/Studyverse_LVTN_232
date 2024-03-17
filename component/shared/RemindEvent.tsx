@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 export type EventStatus = "complete" | "pending" | "incomplete";
 
 export interface EventProps {
+  eventId?: string;
   name: string;
   time: string;
   status: EventStatus;

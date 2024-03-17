@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
@@ -22,12 +23,15 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import BlackBorderTextInputField from "../../component/shared/BlackBorderInputField";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import regexVault from "../../utils/regex";
+import Constants from "expo-constants";
+import DateInputField from "../../component/signin-signup/DateInputField";
+import isDateValid from "../../utils/checkValidDate";
 
 type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
 
 interface CreateEventScreenProps {
   route: CreateEventRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "FamilyInfoScreen">;
+  navigation: StackNavigationProp<RootStackParamList, "CreateEventScreen">;
 }
 
 type Option = {
@@ -36,9 +40,9 @@ type Option = {
 };
 
 const options: Option[] = [
-  { label: "Hằng ngày", value: "0" },
-  { label: "Hằng tuần", value: "1" },
-  { label: "Hằng tháng", value: "2" },
+  { label: "Hằng ngày", value: "1" },
+  { label: "Hằng tuần", value: "2" },
+  { label: "Hằng tháng", value: "3" },
 ];
 
 const notiOptions: Option[] = [
@@ -47,8 +51,12 @@ const notiOptions: Option[] = [
   { label: "Trước 45 phút", value: "45" },
   { label: "Trước 1 giờ", value: "60" },
 ];
+
 const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
-  //   const { user, eventRemindList, eventList, routeBefore } = route.params;
+  const { userId } = route.params;
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+  const [isLoading, setIsLoading] = useState(false);
 
   const getCurrentDateFormatted = () => {
     const date = new Date();
@@ -59,6 +67,28 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
     ].join("/");
   };
 
+  const isEndLoopDateValid = (
+    eventDateStr: string,
+    endLoopDateStr: string
+  ): boolean => {
+    const parseDate = (dateStr: string) => {
+      const [day, month, year] = dateStr.split("/").map(Number);
+      return new Date(year, month - 1, day);
+    };
+
+    const eventDate = parseDate(eventDateStr);
+    const endLoopDate = parseDate(endLoopDateStr);
+
+    const threeMonthsLater = new Date(
+      eventDate.getFullYear(),
+      eventDate.getMonth() + 3,
+      1
+    );
+
+    threeMonthsLater.setDate(threeMonthsLater.getDate() - 1);
+
+    return endLoopDate >= eventDate && endLoopDate <= threeMonthsLater;
+  };
   const validateValidDate = (checkDate: string) => {
     const [day, month, year] = checkDate.split("/");
     const eventDate = new Date(+year, +month - 1, +day);
@@ -94,16 +124,20 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       required: true,
     },
     isLoop: {
-      value: "false",
-      required: true,
+      value: false,
+      required: false,
     },
     loopInterval: {
       value: "",
       required: isEventLoopEnabled,
     },
+    endLoopDate: {
+      value: "",
+      required: isEventLoopEnabled,
+    },
     isNoti: {
-      value: undefined,
-      required: true,
+      value: false,
+      required: false,
     },
     notiBefore: {
       value: "",
@@ -121,6 +155,10 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
     ),
     isNoteTextValid: regexVault.preventxssValidate.test(inputs.noteText.value),
     isStartDateValid: validateValidDate(inputs.eventDate.value),
+    isEndLoopDateValid: isEventLoopEnabled
+      ? isEndLoopDateValid(inputs.eventDate.value, inputs.endLoopDate.value) &&
+        regexVault.DOBValidate.test(inputs.endLoopDate.value)
+      : true,
   });
 
   const handleStartTimeChange = (startTime: string) => {
@@ -150,6 +188,12 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         inputs.eventName.value.length === 0 ||
         regexVault.preventxssValidate.test(inputs.eventName.value),
       isStartDateValid: validateValidDate(inputs.eventDate.value),
+      isEndLoopDateValid: isEventLoopEnabled
+        ? isEndLoopDateValid(
+            inputs.eventDate.value,
+            inputs.endLoopDate.value
+          ) && regexVault.DOBValidate.test(inputs.endLoopDate.value)
+        : true,
     };
     setInputValidation(updatedValidation);
   }, [inputs]);
@@ -176,7 +220,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   }
 
   async function submitHandler() {
-    console.log(inputs);
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -196,57 +239,104 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         Alert.alert("Thông báo", "Ghi chú sự kiện không hợp lệ");
       } else if (inputValidation.isStartDateValid === false) {
         Alert.alert("Bạn không thể tạo sự kiện trong quá khứ");
+      } else if (!inputValidation.isEndLoopDateValid) {
+        Alert.alert(
+          "Thông báo",
+          "Ngày kết thúc lặp phải nằm trong khoảng thời gian từ ngày sự kiện đến 3 tháng sau"
+        );
       }
     } else {
-      setInputs({
-        eventName: {
-          value: "",
-          required: true,
-        },
-        eventDate: {
-          value: "",
-          required: true,
-        },
-        eventStartTime: {
-          value: "",
-          required: true,
-        },
-        eventEndTime: {
-          value: "",
-          required: true,
-        },
-        isLoop: {
-          value: "false",
-          required: true,
-        },
-        loopInterval: {
-          value: "",
-          required: isEventLoopEnabled,
-        },
-        isNoti: {
-          value: undefined,
-          required: true,
-        },
-        notiBefore: {
-          value: "",
-          required: isNotiEnabled,
-        },
-        noteText: {
-          value: "",
-          required: false,
-        },
-      });
-      setInputValidation({
-        isEventNameValid: true,
-        isNoteTextValid: true,
-        isStartDateValid: true,
-      });
+      let requestCreateEventURL = `http://${host}:${port}/event/createEvent`;
+      try {
+        const response = await fetch(requestCreateEventURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: inputs.eventName.value,
+            day: inputs.eventDate.value,
+            timeStart: inputs.eventStartTime.value,
+            timeEnd: inputs.eventEndTime.value,
+            loopMode: inputs.isLoop.value ? inputs.loopInterval.value : 0,
+            endDate: inputs.endLoopDate.value,
+            isRemind: inputs.isNoti.value,
+            remindTime: inputs.notiBefore.value,
+            note: inputs.noteText.value,
+            userId: userId,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.msg == "1") {
+          setIsLoading(false);
+          navigation.navigate("EventInfoScreen", {
+            userId: Number(userId),
+            routeBefore: "createEvent",
+          });
+        } else {
+          setIsLoading(false);
+          Alert.alert("Thất bại", "Tạo sự kiện thất bại");
+        }
+      } catch (e) {
+        setIsLoading(false);
+        Alert.alert(`Tạo sự kiện thất bại`);
+      }
+
+      // setInputs({
+      //   eventName: {
+      //     value: "",
+      //     required: true,
+      //   },
+      //   eventDate: {
+      //     value: "",
+      //     required: true,
+      //   },
+      //   eventStartTime: {
+      //     value: "",
+      //     required: true,
+      //   },
+      //   eventEndTime: {
+      //     value: "",
+      //     required: true,
+      //   },
+      //   isLoop: {
+      //     value: "false",
+      //     required: true,
+      //   },
+      //   loopInterval: {
+      //     value: "",
+      //     required: isEventLoopEnabled,
+      //   },
+      //   endLoopDate: {
+      //     value: "",
+      //     required: isEventLoopEnabled,
+      //   },
+      //   isNoti: {
+      //     value: undefined,
+      //     required: true,
+      //   },
+      //   notiBefore: {
+      //     value: "",
+      //     required: isNotiEnabled,
+      //   },
+      //   noteText: {
+      //     value: "",
+      //     required: false,
+      //   },
+      // });
+      // setInputValidation({
+      //   isEventNameValid: true,
+      //   isNoteTextValid: true,
+      //   isStartDateValid: true,
+      //   isEndLoopDateValid: true,
+      // });
     }
   }
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -265,7 +355,12 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             <View style={styles.backButtonContainer}>
               <TouchableOpacity
                 style={styles.backButton}
-                // onPress={() => navigation.navigate("Setting")}
+                onPress={() =>
+                  navigation.navigate("EventInfoScreen", {
+                    userId: Number(userId),
+                    routeBefore: "createEvent",
+                  })
+                }
               >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
@@ -344,6 +439,17 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
                   </Text>
                 </TouchableOpacity>
               ))}
+              <View style={styles.endLoopContainer}>
+                <DateInputField
+                  required
+                  isValid
+                  placeHolder="Ngày kết thúc lặp"
+                  dateStr={inputs.endLoopDate.value}
+                  textInputConfig={{
+                    onChangeText: inputChangedHandler.bind(this, "endLoopDate"),
+                  }}
+                />
+              </View>
             </View>
           )}
           <View style={styles.eventNotiContainer}>
@@ -412,6 +518,11 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
           />
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -534,6 +645,20 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     marginTop: 30,
     marginBottom: 10,
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  endLoopContainer: {
+    width: "85%",
+    marginVertical: 20,
   },
 });
 

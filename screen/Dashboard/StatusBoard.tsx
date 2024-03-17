@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -17,17 +17,22 @@ import UserStatus from "../../component/dashboard/DashboardStatus";
 import eventSampleData from "../../mockData/EventData";
 import EventTimeline from "../../component/shared/EventTimeline";
 import Footer from "../../component/shared/Footer";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { mockUser } from "../../mockData/UserInfo";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "./Details";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import Constants from "expo-constants";
+import { Event, GroupedEvent } from "../Calendar/CalendarDashboard";
 
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
   Setting: undefined;
   FamilyInfoScreen: undefined;
+  CreateEventScreen: {
+    userId: number;
+  };
 }>;
 
 const getTimeDifference = (lastLogin: string) => {
@@ -51,6 +56,8 @@ const getTimeDifference = (lastLogin: string) => {
   }
 };
 const StatusDashboard = () => {
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
@@ -58,6 +65,87 @@ const StatusDashboard = () => {
   // console.log(familyList);
 
   const navigation = useNavigation<StatusBoardNavigationProp>();
+
+  const [listOfEvent, setListOfEvent] = useState([]);
+  const requestEventList = async () => {
+    let requestCreateEventURL = `http://${host}:${port}/event/${user?.userId}`;
+    try {
+      const response = await fetch(requestCreateEventURL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      return [];
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        try {
+          const events = await requestEventList();
+          const selectedDateString = new Date().toLocaleDateString("en-GB");
+
+          const filteredAndFormattedEvents = events
+            .map((event: any) => {
+              const startDateObj = new Date(event.timeStart);
+              const endDateObj = new Date(event.timeEnd);
+
+              const startDate = startDateObj.toLocaleDateString("en-GB");
+              const endDate = endDateObj.toLocaleDateString("en-GB");
+              const startTime = startDateObj.toTimeString().substring(0, 5);
+              const endTime = endDateObj.toTimeString().substring(0, 5);
+
+              return {
+                startDate,
+                endDate,
+                startTime,
+                endTime,
+                name: event.name,
+              };
+            })
+            .filter((event: any) => {
+              return (
+                event.startDate === selectedDateString &&
+                event.endDate === selectedDateString
+              );
+            });
+          setListOfEvent(filteredAndFormattedEvents);
+        } catch (e) {
+          console.error("Error fetching events:", e);
+        }
+      })();
+    }, [])
+  );
+
+  const groupEvents = (events: Event[]): GroupedEvent[] => {
+    const groupedEvents = events.reduce(
+      (accumulator: { [key: string]: GroupedEvent }, currentEvent: Event) => {
+        const timeKey = `${currentEvent.startTime}-${currentEvent.endTime}`;
+
+        if (!accumulator[timeKey]) {
+          accumulator[timeKey] = {
+            timeStart: currentEvent.startTime,
+            timeEnd: currentEvent.endTime,
+            task: [currentEvent.name],
+          };
+        } else {
+          accumulator[timeKey].task.push(currentEvent.name);
+        }
+
+        return accumulator;
+      },
+      {}
+    );
+
+    return Object.values(groupedEvents);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
       <KeyboardAvoidingView
@@ -83,14 +171,21 @@ const StatusDashboard = () => {
           </View>
           <View style={styles.eventContainer}>
             <Text style={styles.eventHeader}>Sự kiện hôm nay</Text>
-            {true ? (
-              <EventTimeline data={eventSampleData} height={200} />
+            {listOfEvent.length !== 0 ? (
+              <EventTimeline data={groupEvents(listOfEvent)} height={200} />
             ) : (
               <View style={styles.eventPlaceHolder}>
                 <Text style={styles.eventNotFound}>
-                  Hiện chưa có sự kiện để hiển thị
+                  Hôm nay bạn không có sự kiện gì
                 </Text>
-                <TouchableOpacity style={styles.addTask}>
+                <TouchableOpacity
+                  style={styles.addTask}
+                  onPress={() =>
+                    navigation.navigate("CreateEventScreen", {
+                      userId: Number(user?.userId),
+                    })
+                  }
+                >
                   <Text style={styles.addTaskText}>Thêm sự kiện</Text>
                 </TouchableOpacity>
               </View>
@@ -116,6 +211,7 @@ const StatusDashboard = () => {
             ) : Array.isArray(familyList) && familyList.length !== 0 ? (
               <StatusCard
                 FamilyStatusData={familyList.map((item: any) => ({
+                  userId: item.userId,
                   email: item.email,
                   dob: item.dateOfBirth,
                   fullname:
@@ -136,11 +232,7 @@ const StatusDashboard = () => {
                 onCardPress={(x) => {
                   navigation.navigate("UserDetailsScreen", {
                     user: {
-                      email: x.email,
-                      fullName: x.fullname,
-                      nickname: x.name,
-                      birthdate: x.dob,
-                      avatarUri: x.avatarUri,
+                      userId: Number(x.userId)
                     },
                   });
                 }}

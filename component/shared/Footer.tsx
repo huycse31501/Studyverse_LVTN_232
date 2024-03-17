@@ -1,5 +1,9 @@
 import React from "react";
 import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
 
 const icons = [
   {
@@ -24,13 +28,31 @@ const icons = [
   },
 ];
 
+type FooterNavigateProp = StackNavigationProp<{
+  EventInfoScreen: {
+    userId: number;
+    routeBefore: string;
+  };
+}>;
+
 const Footer = () => {
+  const user = useSelector((state: RootState) => state.user.user);
+  const navigation = useNavigation<FooterNavigateProp>();
+
   return (
     <View style={styles.container}>
       {icons.map((icon) => (
         <TouchableOpacity
           key={icon.id}
-          onPress={icon.onPress}
+          onPress={
+            icon.id == "1"
+              ? () =>
+                  navigation.navigate("EventInfoScreen", {
+                    userId: Number(user?.userId),
+                    routeBefore: "statusboard",
+                  })
+              : icon.onPress
+          }
           style={styles.iconWrapper}
         >
           <Image source={icon.uri} style={styles.icon} />

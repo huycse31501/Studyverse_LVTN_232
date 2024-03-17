@@ -25,11 +25,7 @@ import { useDispatch } from "react-redux";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 
 export interface User {
-  email: string;
-  fullName: string;
-  nickname: string;
-  birthdate: string;
-  avatarUri: string;
+  userId: number;
 }
 
 type UserDetailsRouteProp = RouteProp<RootStackParamList, "UserDetailsScreen">;
@@ -47,6 +43,14 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
   const familyMemberList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
+
+  const totalList = userInfo
+    ? [...familyMemberList, userInfo]
+    : familyMemberList;
+  const memberToRender = totalList.filter(
+    (user) => user.userId === String(user.userId)
+  )[0];
+
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
 
@@ -61,7 +65,7 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
         },
         body: JSON.stringify({
           userEmail: userInfo?.email,
-          memberEmail: user.email,
+          memberEmail: memberToRender.email,
           familyId: userInfo?.familyId,
         }),
       });
@@ -69,7 +73,9 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
       if (kickMemberResponse && kickMemberResponse?.msg == "1") {
         dispatch(
           setFamilyMember(
-            familyMemberList.filter((item: any) => item.email !== user.email)
+            familyMemberList.filter(
+              (item: any) => item.email !== memberToRender.email
+            )
           )
         );
         navigation.navigate("StatusDashboard");
@@ -116,24 +122,42 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
               <View style={styles.userInformationContainer}>
                 <View style={styles.card}>
                   <Image
-                    source={{ uri: user.avatarUri }}
+                    source={{
+                      uri:
+                        memberToRender?.role === "parent"
+                          ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                    }}
                     style={styles.avatar}
                   />
                   <View style={styles.textContainer}>
                     <Text style={styles.textInfo}>
-                      Họ và tên: {user.fullName}
+                      Họ và tên: {memberToRender.firstName + " " + memberToRender.lastName}
                     </Text>
                     <Text style={styles.textInfo}>
-                      Biệt danh: {user.nickname}
+                      Biệt danh: {memberToRender.nickName}
                     </Text>
                     <Text style={styles.textInfo}>
-                      Ngày sinh: {user.birthdate}
+                      Ngày sinh: {memberToRender.dateOfBirth}
                     </Text>
                   </View>
                 </View>
               </View>
-              <View style={styles.activityContainer}>
-                <TouchableOpacity style={styles.activityButton}>
+              <View
+                style={[
+                  styles.activityContainer,
+                  userInfo?.role === "children" && { marginTop: 120 },
+                ]}
+              >
+                <TouchableOpacity
+                  style={styles.activityButton}
+                  onPress={() => {
+                    navigation.navigate("EventInfoScreen", {
+                      userId: user.userId,
+                      routeBefore: "familyMemberDetails",
+                    });
+                  }}
+                >
                   <Text style={styles.activityText}>Thời gian biểu</Text>
 
                   <Image
@@ -142,15 +166,25 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.activityButton}>
-                  <Text style={styles.activityText}>Huy hiệu</Text>
-                  <Image
-                    source={require("../../assets/images/dashboard/badgeIcon.png")}
-                    style={styles.activityIcon}
-                  />
-                </TouchableOpacity>
+                {userInfo?.role === "parent" && (
+                  <TouchableOpacity style={styles.activityButton}>
+                    <Text style={styles.activityText}>Huy hiệu</Text>
+                    <Image
+                      source={require("../../assets/images/dashboard/badgeIcon.png")}
+                      style={styles.activityIcon}
+                    />
+                  </TouchableOpacity>
+                )}
 
-                <TouchableOpacity style={styles.activityButton}>
+                <TouchableOpacity
+                  style={styles.activityButton}
+                  onPress={() => {
+                    navigation.navigate("EventRemindScreen", {
+                      userId: user.userId,
+                      routeBefore: "familyMemberDetails",
+                    });
+                  }}
+                >
                   <Text style={styles.activityText}>Nhắc nhở</Text>
                   <Image
                     source={require("../../assets/images/dashboard/remindIcon.png")}
@@ -158,22 +192,26 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.activityButton}>
-                  <Text style={styles.activityText}>Hoạt động mạng</Text>
-                  <Image
-                    source={require("../../assets/images/dashboard/networkIcon.png")}
-                    style={styles.activityIcon}
-                  />
-                </TouchableOpacity>
+                {userInfo?.role === "parent" && (
+                  <TouchableOpacity style={styles.activityButton}>
+                    <Text style={styles.activityText}>Hoạt động mạng</Text>
+                    <Image
+                      source={require("../../assets/images/dashboard/networkIcon.png")}
+                      style={styles.activityIcon}
+                    />
+                  </TouchableOpacity>
+                )}
               </View>
               <View style={styles.cancelButtonContainer}>
-                <ApplyButton
-                  label="Hủy liên kết"
-                  onPress={() => {
-                    setConfirmCancelModalVisible(true);
-                  }}
-                  extraStyle={styles.cancelButton}
-                ></ApplyButton>
+                {userInfo?.role === "parent" && (
+                  <ApplyButton
+                    label="Hủy liên kết"
+                    onPress={() => {
+                      setConfirmCancelModalVisible(true);
+                    }}
+                    extraStyle={styles.cancelButton}
+                  ></ApplyButton>
+                )}
               </View>
             </>
           )}

@@ -1,6 +1,10 @@
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -12,6 +16,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Modal,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
@@ -22,6 +27,9 @@ import EventReminder, { EventProps } from "../../component/shared/RemindEvent";
 import mockEventReminder from "../../mockData/EventReminder";
 import ApplyButton from "../../component/shared/ApplyButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Constants from "expo-constants";
+import { RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
 
 type EventRemindProp = RouteProp<RootStackParamList, "EventRemindScreen">;
 
@@ -30,12 +38,97 @@ interface EventRemindScreenProps {
   navigation: StackNavigationProp<RootStackParamList, "EventRemindScreen">;
 }
 const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
-  //   const { user, eventRemindList, eventList, routeBefore } = route.params;
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+  const { userId, routeBefore } = route.params;
+
+  const user = useSelector((state: RootState) => state.user.user);
+  const familyList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+  const totalList = user ? [...familyList, user] : familyList;
+  const memberToRender = totalList.filter(
+    (user) => user.userId === String(userId)
+  )[0];
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [refreshEventList, setRefreshEventList] = useState(false);
 
   const [curEventChange, setCurEventChange] = useState<EventProps>();
+  const [listOfEvent, setListOfEvent] = useState([]);
 
+  const requestEventList = async () => {
+    let requestCreateEventURL = `http://${host}:${port}/event/${userId}`;
+    try {
+      const response = await fetch(requestCreateEventURL, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      return [];
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      (async () => {
+        try {
+          const events = await requestEventList();
+          const selectedDateString = selectedDate.toLocaleDateString("en-GB");
+          const eventReminderList = events
+            .filter((event: any) => event.remindTime !== 0)
+            .map((event: any) => {
+              const startDateObj = new Date(event.timeStart);
+              const startDate = startDateObj.toLocaleDateString("en-GB");
+
+              const startTime = startDateObj.toTimeString().substring(0, 5);
+
+              const currentDateTime = new Date();
+
+              let status = "";
+              if (event.success) {
+                status = "complete";
+              } else if (startDateObj < currentDateTime) {
+                status = "incomplete";
+              } else {
+                status = "pending";
+              }
+              return {
+                eventId: event.id,
+                date: startDate,
+                time: startTime,
+                name: event.name,
+                status,
+              };
+            })
+            .filter((event: any) => {
+              return event.date === selectedDateString;
+            });
+          const eventReminderListInput = eventReminderList.map((event: any) => {
+            return {
+              eventId: event.eventId,
+              time: event.time,
+              name: event.name,
+              status: event.status,
+            };
+          });
+          setListOfEvent(eventReminderListInput);
+        } catch (e) {
+          console.error("Error fetching events:", e);
+        }
+      })();
+    }, [selectedDate, userId, refreshEventList])
+  );
+  useEffect(() => {
+    if (refreshEventList) {
+      setRefreshEventList(false);
+    }
+  }, [refreshEventList]);
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
 
@@ -44,15 +137,32 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
     setConfirmCancelModalVisible(true);
   };
 
-  const handleCancelButton = () => {
-    console.log(curEventChange);
-    setConfirmCancelModalVisible(false);
+  const handleCancelButton = async () => {
+    let requestUpdateEventStateURL = `http://${host}:${port}/event/${curEventChange?.eventId}/updateStatus`;
+    try {
+      const response = await fetch(requestUpdateEventStateURL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      if (data.msg === "1") {
+        setRefreshEventList(true);
+
+        setConfirmCancelModalVisible(false);
+      } else {
+        console.log("Lỗi khi gọi API");
+      }
+    } catch (e) {
+      Alert.alert("Có lỗi xảy ra trong quá trình cập nhật");
+    }
   };
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    console.log(date);
   };
-  
+
   const insets = useSafeAreaInsets();
 
   return (
@@ -75,13 +185,37 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
             <View style={styles.backButtonContainer}>
               <TouchableOpacity
                 style={styles.backButton}
-                // onPress={() => navigation.navigate("Setting")}
+                onPress={
+                  routeBefore === "EventInfoScreen"
+                    ? () =>
+                        navigation.navigate("EventInfoScreen", {
+                          userId: userId,
+                          routeBefore: "EventRemindScreen",
+                        })
+                    : routeBefore === "familyMemberDetails"
+                    ? () =>
+                        navigation.navigate("UserDetailsScreen", {
+                          user: {
+                            userId: userId,
+                          },
+                        })
+                    : () =>
+                        navigation.navigate("EventInfoScreen", {
+                          userId: userId,
+                          routeBefore: "EventRemindScreen",
+                        })
+                }
               >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
             </View>
             <Image
-              source={require("../../assets/images/dashboard/avatar.png")}
+              source={{
+                uri:
+                  memberToRender?.role === "parent"
+                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+              }}
               style={styles.avatar}
             />
           </View>
@@ -89,7 +223,7 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
             <WeekDatePicker remind onDateSelect={handleDateSelect} />
           </View>
           <EventReminder
-            events={mockEventReminder}
+            events={listOfEvent}
             height={450}
             onEventItemPress={handleEventPress}
           />
@@ -159,6 +293,7 @@ const styles = StyleSheet.create({
     height: 50,
     marginRight: "7.5%",
     marginTop: "6%",
+    borderRadius: 500,
   },
   weekDatePickerContainer: {
     marginBottom: 10,

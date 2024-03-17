@@ -9,7 +9,7 @@ const eventSampleData: EventInfo[] = [
 
   {
     timeStart: "8:30",
-    timeEnd: "9:00",
+    timeEnd: "9:30",
     task: ["Họp phụ huynh Bin"],
   },
   {

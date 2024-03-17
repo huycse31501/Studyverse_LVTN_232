@@ -27,6 +27,7 @@ const DateInputField = ({
   textInputConfig,
   dateStr,
   signUpType,
+  isLitmitCurrentDate
 }: DateInputFieldProps) => {
   const [date, setDate] = useState(new Date());
   const [isPickerShow, setIsPickerShow] = useState(false);
@@ -127,7 +128,7 @@ const DateInputField = ({
           mode="date"
           display="default"
           onChange={onChange}
-          maximumDate={new Date()}
+          maximumDate={isLitmitCurrentDate ? new Date() : new Date(2100,0,1)}
           minimumDate={new Date(1900, 0, 1)}
         />
       )}

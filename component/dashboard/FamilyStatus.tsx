@@ -17,6 +17,7 @@ export type FamilyStatus = {
   avatarUri: string;
   lastOnline?: string;
   currentStatus: "onl" | "busy" | "off";
+  userId?: number;
 };
 
 type StatusCardProps = {

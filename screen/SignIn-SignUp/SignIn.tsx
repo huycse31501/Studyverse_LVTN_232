@@ -7,6 +7,7 @@ import {
   Platform,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import AuthButton from "../../component/signin-signup/AuthButton";
@@ -31,6 +32,8 @@ type ForgotPasswordNavigationProp = StackNavigationProp<{
 }>;
 
 const SignIn = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigation = useNavigation<ForgotPasswordNavigationProp>();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user.user);
@@ -111,6 +114,8 @@ const SignIn = () => {
 
           dispatch(setFamilyMember(familyListPayload));
         } catch (e) {
+          setIsLoading(false);
+
           // Alert.alert("Failed to fetch family list:");
         }
       } else {
@@ -153,12 +158,16 @@ const SignIn = () => {
             }));
             dispatch(setWaitList(waitListPayload));
             setRequestState(true);
+            setIsLoading(false);
           } else {
             const waitListPayload: any = [];
             dispatch(setWaitList(waitListPayload));
             setRequestState(true);
+            setIsLoading(false);
           }
         } catch (e) {
+          setIsLoading(false);
+
           Alert.alert("Failed to fetch family wait list:");
           setRequestState(false);
         }
@@ -175,6 +184,7 @@ const SignIn = () => {
   }, [user, isFocused, navigation]);
 
   async function submitHandler() {
+    setIsLoading(true);
     let allFieldsFilled = true;
     for (const [key, value] of Object.entries(inputs)) {
       if (value.required && !value.value) {
@@ -184,6 +194,8 @@ const SignIn = () => {
     }
 
     if (!allFieldsFilled) {
+      setIsLoading(false);
+
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin đăng nhập");
     } else {
       setInputs({
@@ -203,6 +215,7 @@ const SignIn = () => {
             password: inputs.password.value,
           }),
         });
+
         const data = await response.json();
         if (data.msg == "1") {
           const userInformation = data.data;
@@ -221,15 +234,25 @@ const SignIn = () => {
           };
 
           dispatch(setUser(userPayload));
-        } else Alert.alert("Thất bại", "Đăng nhập thất bại");
+        } else {
+          setIsLoading(false);
+          Alert.alert("Thất bại", "Đăng nhập thất bại");
+        }
       } catch (e) {
+        setIsLoading(false);
+
         Alert.alert(`Đăng nhập thất bại: ${e}`);
       }
     }
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 70 }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: 70,
+      }}
+    >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -237,11 +260,11 @@ const SignIn = () => {
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           resetScrollToCoords={{ x: 0, y: 0 }}
-          scrollEnabled={true}
+          scrollEnabled={!isLoading}
           extraHeight={120}
           extraScrollHeight={120}
           enableOnAndroid={true}
-          enableAutomaticScroll={true}
+          enableAutomaticScroll={!isLoading}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.authButton}>
@@ -281,6 +304,11 @@ const SignIn = () => {
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -304,6 +332,16 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: "25%",
     marginBottom: "7.5%",
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 

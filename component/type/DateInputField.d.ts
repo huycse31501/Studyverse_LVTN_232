@@ -6,7 +6,8 @@ interface DateInputFieldProps {
   isValid: boolean;
   textInputConfig?: TextInputProps;
   dateStr?: string;
-  signUpType: OptionType;
+  signUpType?: OptionType;
+  isLitmitCurrentDate?: boolean;
 }
 
 export default DateInputFieldProps;

@@ -248,6 +248,7 @@ const SignUp = () => {
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(this, "dob"),
               }}
+              isLitmitCurrentDate
             />
             <OptionSelector onOptionChange={handleOptionChange} />
             <TextInputField
