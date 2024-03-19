@@ -27,6 +27,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import Constants from "expo-constants";
+import { formatDate } from "../../utils/formatDate";
 
 type EventInfoRouteProp = RouteProp<RootStackParamList, "EventInfoScreen">;
 export interface Event {
@@ -41,6 +42,13 @@ export interface GroupedEvent {
   timeStart: string;
   timeEnd: string;
   task: string[];
+}
+
+export interface DateCountMap {
+  [date: string]: {
+    date: string;
+    countEvent: number;
+  };
 }
 
 interface EventInfoScreenProps {
@@ -60,114 +68,14 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
     (user) => user.userId === String(userId)
   )[0];
 
+  const [eventsData, setEventsData] = useState([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [listOfEvent, setListOfEvent] = useState([]);
   const [listOfRemindEvent, setListOfRemindEvent] = useState([]);
+  const [listOfEventCount, setListOfEventCount] = useState([]);
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
-
-  const requestEventList = async () => {
-    let requestCreateEventURL = `http://${host}:${port}/event/${userId}`;
-    try {
-      const response = await fetch(requestCreateEventURL, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-      return data;
-    } catch (e) {
-      return [];
-    }
-  };
-  const insets = useSafeAreaInsets();
-  useFocusEffect(
-    useCallback(() => {
-      (async () => {
-        try {
-          const events = await requestEventList();
-          const selectedDateString = selectedDate.toLocaleDateString("en-GB");
-
-          const filteredAndFormattedEvents = events
-            .map((event: any) => {
-              const startDateObj = new Date(event.timeStart);
-              const endDateObj = new Date(event.timeEnd);
-
-              const startDate = startDateObj.toLocaleDateString("en-GB");
-              const endDate = endDateObj.toLocaleDateString("en-GB");
-              const startTime = startDateObj.toTimeString().substring(0, 5);
-              const endTime = endDateObj.toTimeString().substring(0, 5);
-
-              return {
-                startDate,
-                endDate,
-                startTime,
-                endTime,
-                name: event.name,
-              };
-            })
-            .filter((event: any) => {
-              return (
-                event.startDate === selectedDateString &&
-                event.endDate === selectedDateString
-              );
-            });
-          setListOfEvent(filteredAndFormattedEvents);
-
-          const eventReminderList = events
-            .filter((event: any) => event.remindTime !== 0)
-            .map((event: any) => {
-              const startDateObj = new Date(event.timeStart);
-              const startDate = startDateObj.toLocaleDateString("en-GB");
-
-              const startTime = startDateObj.toTimeString().substring(0, 5);
-
-              const currentDateTime = new Date();
-
-              let status = "";
-              if (event.success) {
-                status = "complete";
-              } else if (startDateObj < currentDateTime) {
-                status = "incomplete";
-              } else {
-                status = "pending";
-              }
-
-              return {
-                date: startDate,
-                time: startTime,
-                name: event.name,
-                status,
-              };
-            })
-            .filter((event: any) => {
-              const today = new Date();
-              const tomorrow = new Date(today);
-              tomorrow.setDate(tomorrow.getDate() + 1);
-
-              const dd = String(tomorrow.getDate()).padStart(2, "0");
-              const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
-              const yyyy = tomorrow.getFullYear();
-              const formattedTomorrow = `${dd}/${mm}/${yyyy}`;
-              return event.date === formattedTomorrow;
-            });
-          const eventReminderListInput = eventReminderList.map((event: any) => {
-            return {
-              time: event.time,
-              name: event.name,
-              status: event.status,
-            };
-          });
-          setListOfRemindEvent(eventReminderListInput);
-        } catch (e) {
-          console.error("Error fetching events:", e);
-        }
-      })();
-    }, [selectedDate, userId])
-  );
 
   const groupEvents = (events: Event[]): GroupedEvent[] => {
     const groupedEvents = events.reduce(
@@ -192,6 +100,131 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
     return Object.values(groupedEvents);
   };
 
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    const requestEventList = async () => {
+      let requestCreateEventURL = `http://${host}:${port}/event/${userId}`;
+      try {
+        const response = await fetch(requestCreateEventURL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        setEventsData(data);
+      } catch (e) {
+        console.error("Error fetching events:", e);
+      }
+    };
+    requestEventList();
+  }, []);
+
+  useEffect(() => {
+    const processData = () => {
+      const selectedDateString = selectedDate.toLocaleDateString("en-GB");
+
+      const filteredAndFormattedEvents = eventsData
+        .map((event: any) => {
+          const startDateObj = new Date(event.timeStart);
+          const endDateObj = new Date(event.timeEnd);
+
+          const startDate = startDateObj.toLocaleDateString("en-GB");
+          const endDate = endDateObj.toLocaleDateString("en-GB");
+          const startTime = startDateObj.toTimeString().substring(0, 5);
+          const endTime = endDateObj.toTimeString().substring(0, 5);
+
+          return {
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            name: event.name,
+          };
+        })
+        .filter((event: any) => {
+          return (
+            event.startDate === selectedDateString &&
+            event.endDate === selectedDateString
+          );
+        });
+
+      setListOfEvent(filteredAndFormattedEvents as any);
+    };
+
+    processData();
+  }, [selectedDate, eventsData]);
+
+  useEffect(() => {
+    const processData = () => {
+      const eventCount = Object.values(
+        eventsData
+          .map((event: any) => ({
+            date: formatDate(event.timeStart.split("T")[0]),
+          }))
+          .reduce((acc: DateCountMap, currentValue: any) => {
+            const { date } = currentValue;
+            if (acc[date]) {
+              acc[date].countEvent += 1;
+            } else {
+              acc[date] = { date, countEvent: 1 };
+            }
+            return acc;
+          }, {} as DateCountMap)
+      );
+
+      const eventReminderList = eventsData
+        .filter((event: any) => event.remindTime !== 0)
+        .map((event: any) => {
+          const startDateObj = new Date(event.timeStart);
+          const startDate = startDateObj.toLocaleDateString("en-GB");
+
+          const startTime = startDateObj.toTimeString().substring(0, 5);
+
+          const currentDateTime = new Date();
+
+          let status = "";
+          if (event.success) {
+            status = "complete";
+          } else if (startDateObj < currentDateTime) {
+            status = "incomplete";
+          } else {
+            status = "pending";
+          }
+
+          return {
+            date: startDate,
+            time: startTime,
+            name: event.name,
+            status,
+          };
+        })
+        .filter((event: any) => {
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+
+          const dd = String(tomorrow.getDate()).padStart(2, "0");
+          const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+          const yyyy = tomorrow.getFullYear();
+          const formattedTomorrow = `${dd}/${mm}/${yyyy}`;
+          return event.date === formattedTomorrow;
+        });
+      const eventReminderListInput = eventReminderList.map((event: any) => {
+        return {
+          time: event.time,
+          name: event.name,
+          status: event.status,
+        };
+      });
+      setListOfRemindEvent(eventReminderListInput as any);
+      setListOfEventCount(eventCount as any);
+    };
+
+    processData();
+  }, [eventsData]);
+
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
@@ -213,7 +246,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
               <TouchableOpacity
                 style={styles.backButton}
                 onPress={
-                  routeBefore === "statusboard"
+                  memberToRender.userId === user?.userId
                     ? () => navigation.navigate("StatusDashboard")
                     : () =>
                         navigation.navigate("UserDetailsScreen", {
@@ -237,7 +270,10 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             />
           </View>
           <View style={styles.weekDatePickerContainer}>
-            <WeekDatePicker onDateSelect={handleDateSelect} />
+            <WeekDatePicker
+              listOfEventCount={listOfEventCount}
+              onDateSelect={handleDateSelect}
+            />
           </View>
           <View style={styles.eventContainer}>
             {listOfEvent.length !== 0 ? (
@@ -245,7 +281,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             ) : (
               <View style={styles.eventPlaceHolder}>
                 <Text style={styles.eventNotFound}>
-                  Hôm nay bạn không có sự kiện gì
+                  Ngày đang chọn không có sự kiện gì
                 </Text>
                 <TouchableOpacity
                   style={styles.addTask}

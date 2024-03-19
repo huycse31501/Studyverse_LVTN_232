@@ -3,15 +3,23 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import DatePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { DateCountMap } from "../../screen/Calendar/CalendarDashboard";
+import { formatDate } from "../../utils/formatDate";
+import { formatDateObj } from "../../utils/formatDateObjToString";
 
 type Props = {
   remind?: boolean;
+  listOfEventCount?: DateCountMap[];
   onDateSelect?: (date: Date) => void;
 };
 
 const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
 
-const WeekDatePicker: React.FC<Props> = ({ remind, onDateSelect }) => {
+const WeekDatePicker: React.FC<Props> = ({
+  remind,
+  onDateSelect,
+  listOfEventCount,
+}) => {
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -48,6 +56,12 @@ const WeekDatePicker: React.FC<Props> = ({ remind, onDateSelect }) => {
       dateItem.getMonth() === selectedDate.getMonth() &&
       dateItem.getFullYear() === selectedDate.getFullYear();
 
+    const formattedDateItem = formatDateObj(dateItem);
+
+    const matchingEventCount = listOfEventCount?.find(
+      (eventCount) => String(eventCount.date) === String(formattedDateItem)
+    )?.countEvent;
+
     return (
       <TouchableOpacity
         key={dateItem.toISOString()}
@@ -65,7 +79,19 @@ const WeekDatePicker: React.FC<Props> = ({ remind, onDateSelect }) => {
         >
           {dayOfWeek}
         </Text>
-        {isSelected && <View style={styles.dot} />}
+        {isSelected && !listOfEventCount && <View style={styles.dot} />}
+        {listOfEventCount && matchingEventCount ? (
+          <Text
+            style={[
+              styles.eventCount,
+              !isSelected && { color: "rgba(222,73,110,0.75)" },
+            ]}
+          >
+            {String(matchingEventCount)}
+          </Text>
+        ) : (
+          <View style={styles.emptyEventSpace}></View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -149,6 +175,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 10,
   },
+  eventCount: {
+    height: 30,
+
+    fontSize: 16,
+    color: "#DE496E",
+    fontWeight: "700",
+    paddingRight: 0,
+    paddingTop: 5,
+  },
   eventDateContainer: {
     marginVertical: 20,
     flexDirection: "row",
@@ -176,6 +211,9 @@ const styles = StyleSheet.create({
   datePickerLogo: {
     width: 35,
     height: 35,
+  },
+  emptyEventSpace: {
+    height: 30,
   },
 });
 
