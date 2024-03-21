@@ -109,6 +109,7 @@ const SignIn = () => {
               accountStatus: item.accountStatus,
               userStatus: String(item.userStatus),
               role: String(item.role),
+              avatarId: String(item.avatar),
             }))
             .filter((item: any) => item.userId !== String(user?.userId));
 
@@ -155,6 +156,7 @@ const SignIn = () => {
               lastName: String(item.lastName),
               nickName: item.nickName ? String(item.nickName) : "",
               role: String(item?.role),
+              avatarId: String(item.avatar),
             }));
             dispatch(setWaitList(waitListPayload));
             setRequestState(true);
@@ -231,6 +233,7 @@ const SignIn = () => {
             role: String(userInformation?.role),
             accountStatus: userInformation.accountStatus,
             userStatus: String(userInformation.userStatus),
+            avatarId: String(userInformation.avatar),
           };
 
           dispatch(setUser(userPayload));

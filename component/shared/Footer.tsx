@@ -66,16 +66,18 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#EFEFF4",
+    backgroundColor: "rgba(239, 242, 244, 0.75)",
     paddingLeft: 10,
-    shadowColor: "rgba(0,0,0,0.5)",
+    borderTopWidth: 0,
+    borderTopColor: "rgba(0, 0, 0, 0.1)",
+    shadowColor: "rgba(0,0,0,0.1)",
     shadowOffset: {
       width: 0,
-      height: -2,
+      height: -1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 20,
+    shadowRadius: 2,
+    elevation: 5,
   },
   iconWrapper: {
     padding: 10,

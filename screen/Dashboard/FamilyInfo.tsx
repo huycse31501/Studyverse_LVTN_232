@@ -17,6 +17,7 @@ import { User } from "./Details";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { avatarList } from "../../utils/listOfAvatar";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
@@ -41,10 +42,7 @@ const FamilyInfoScreen = () => {
           fullName: `${item.firstName} ${item.lastName}`,
           nickName: `${item.nickName}`,
           birthday: `${item.dateOfBirth}`,
-          avatarUri:
-            item?.role === "parent"
-              ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-              : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+          avatarUri: avatarList[Number(item?.avatarId) - 1] ?? avatarList[0],
         }))
       : [];
 
@@ -77,10 +75,7 @@ const FamilyInfoScreen = () => {
             </View>
             <Image
               source={{
-                uri:
-                  user?.role === "parent"
-                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
               }}
               style={styles.avatar}
             />

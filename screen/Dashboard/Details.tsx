@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useDispatch } from "react-redux";
 import { setFamilyMember } from "../../redux/actions/familyAction";
+import { avatarList } from "../../utils/listOfAvatar";
 
 export interface User {
   userId: number;
@@ -124,9 +125,7 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   <Image
                     source={{
                       uri:
-                        memberToRender?.role === "parent"
-                          ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                      avatarList[Number(memberToRender?.avatarId) - 1] ?? avatarList[0]
                     }}
                     style={styles.avatar}
                   />

@@ -18,13 +18,13 @@ import eventSampleData from "../../mockData/EventData";
 import EventTimeline from "../../component/shared/EventTimeline";
 import Footer from "../../component/shared/Footer";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { mockUser } from "../../mockData/UserInfo";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "./Details";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import Constants from "expo-constants";
 import { Event, GroupedEvent } from "../Calendar/CalendarDashboard";
+import { avatarList } from "../../utils/listOfAvatar";
 
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
@@ -221,9 +221,7 @@ const StatusDashboard = () => {
                   name: item.nickName ? String(item.nickName) : "",
                   status: item?.userStatus === "null" ? "" : item?.userStatus,
                   avatarUri:
-                    item?.role === "parent"
-                      ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                      : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                    avatarList[Number(item?.avatarId) - 1] ?? avatarList[0],
                   currentStatus: item?.accountStatus ? "onl" : "off",
                   lastOnline: !item.accountStatus
                     ? getTimeDifference(item?.lastLogin)
@@ -232,7 +230,7 @@ const StatusDashboard = () => {
                 onCardPress={(x) => {
                   navigation.navigate("UserDetailsScreen", {
                     user: {
-                      userId: Number(x.userId)
+                      userId: Number(x.userId),
                     },
                   });
                 }}

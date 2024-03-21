@@ -22,6 +22,7 @@ import { useDispatch } from "react-redux";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { setWaitList } from "../../redux/actions/waitListAction";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { avatarList } from "../../utils/listOfAvatar";
 
 type FamilyInfoNavigationProp = StackNavigationProp<{
   Setting: undefined;
@@ -47,9 +48,7 @@ const FamilyAcceptScreen = () => {
           accountID: item.userId,
           fullName: `${item.firstName} ${item.lastName}`,
           avatarUri:
-            item?.role === "parent"
-              ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-              : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+          avatarList[Number(item?.avatarId) - 1] ?? avatarList[0]
         }))
       : [];
 
@@ -96,9 +95,7 @@ const FamilyAcceptScreen = () => {
             <Image
               source={{
                 uri:
-                  user?.role === "parent"
-                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                avatarList[Number(user?.avatarId) - 1] ?? avatarList[0]
               }}
               style={styles.avatar}
             />

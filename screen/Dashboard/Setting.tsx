@@ -28,6 +28,7 @@ import Constants from "expo-constants";
 import { logout } from "../../redux/actions/logoutAction";
 import { setWaitList } from "../../redux/actions/waitListAction";
 import { setFamilyMember } from "../../redux/actions/familyAction";
+import { avatarList } from "../../utils/listOfAvatar";
 
 type DetailsNavigationProp = StackNavigationProp<{
   StatusDashboard: undefined;
@@ -262,10 +263,7 @@ const Setting = () => {
           <View style={styles.imageContainer}>
             <Image
               source={{
-                uri:
-                  user?.role === "parent"
-                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
               }}
               style={styles.avatar}
             />

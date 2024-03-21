@@ -28,6 +28,7 @@ import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import Constants from "expo-constants";
 import { formatDate } from "../../utils/formatDate";
+import { avatarList } from "../../utils/listOfAvatar";
 
 type EventInfoRouteProp = RouteProp<RootStackParamList, "EventInfoScreen">;
 export interface Event {
@@ -73,6 +74,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   const [listOfEvent, setListOfEvent] = useState([]);
   const [listOfRemindEvent, setListOfRemindEvent] = useState([]);
   const [listOfEventCount, setListOfEventCount] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
@@ -220,6 +222,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
       });
       setListOfRemindEvent(eventReminderListInput as any);
       setListOfEventCount(eventCount as any);
+      setIsLoading(false);
     };
 
     processData();
@@ -261,10 +264,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             </View>
             <Image
               source={{
-                uri:
-                  memberToRender?.role === "parent"
-                    ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
               }}
               style={styles.avatar}
             />
@@ -276,25 +276,26 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             />
           </View>
           <View style={styles.eventContainer}>
-            {listOfEvent.length !== 0 ? (
-              <EventTimeline data={groupEvents(listOfEvent)} height={200} />
-            ) : (
-              <View style={styles.eventPlaceHolder}>
-                <Text style={styles.eventNotFound}>
-                  Ngày đang chọn không có sự kiện gì
-                </Text>
-                <TouchableOpacity
-                  style={styles.addTask}
-                  onPress={() =>
-                    navigation.navigate("CreateEventScreen", {
-                      userId: userId,
-                    })
-                  }
-                >
-                  <Text style={styles.addTaskText}>Thêm sự kiện</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            {!isLoading &&
+              (listOfEvent.length !== 0 ? (
+                <EventTimeline data={groupEvents(listOfEvent)} height={200} />
+              ) : (
+                <View style={styles.eventPlaceHolder}>
+                  <Text style={styles.eventNotFound}>
+                    Ngày đang chọn không có sự kiện gì
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.addTask}
+                    onPress={() =>
+                      navigation.navigate("CreateEventScreen", {
+                        userId: userId,
+                      })
+                    }
+                  >
+                    <Text style={styles.addTaskText}>Thêm sự kiện</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
           </View>
           <View
             style={[

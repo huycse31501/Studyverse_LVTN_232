@@ -17,6 +17,7 @@ export interface User {
   accountStatus?: boolean;
   userStatus?: string;
   role?: string;
+  avatarId?: string;
 }
 
 export interface LogoutAction {

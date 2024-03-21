@@ -27,6 +27,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/actions/userActions";
 import { setWaitList } from "../../redux/actions/waitListAction";
 import { setFamilyMember } from "../../redux/actions/familyAction";
+import { avatarList } from "../../utils/listOfAvatar";
 
 export interface User {
   firstName: string;
@@ -182,9 +183,7 @@ const UserInformationScreen = () => {
                   <Image
                     source={{
                       uri:
-                        user?.role === "parent"
-                          ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                          : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+                        avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
                     }}
                     style={styles.avatar}
                   />

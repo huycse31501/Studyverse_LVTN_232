@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
+import { avatarList } from "../../utils/listOfAvatar";
 
 const AvatarIcon = require("../../assets/images/dashboard/avatar.png");
 const MessageIcon = require("../../assets/images/dashboard/bubble-chat-big.png");
@@ -40,10 +41,7 @@ const UserStatus = ({
       <TouchableOpacity onPress={() => console.log("Avatar pressed")}>
         <Image
           source={{
-            uri:
-              user?.role === "parent"
-                ? "https://img.freepik.com/free-photo/cute-ai-generated-cartoon-bunny_23-2150288870.jpg"
-                : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdkYe42R9zF530Q3WcApmRDpP6YfQ6Ykexa3clwEWlIw&s",
+            uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
           }}
           style={styles.avatarIcon}
         />
