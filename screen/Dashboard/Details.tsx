@@ -48,13 +48,13 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
   const totalList = userInfo
     ? [...familyMemberList, userInfo]
     : familyMemberList;
+
   const memberToRender = totalList.filter(
-    (user) => user.userId === String(user.userId)
+    (userDetails) => userDetails.userId === String(user.userId)
   )[0];
 
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
-
   const handleCancelButton = async () => {
     try {
       let kickMemberUrl = `http://${host}:${port}/family/kickMember`;
@@ -72,13 +72,6 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
       });
       const kickMemberResponse = await kickMember.json();
       if (kickMemberResponse && kickMemberResponse?.msg == "1") {
-        dispatch(
-          setFamilyMember(
-            familyMemberList.filter(
-              (item: any) => item.email !== memberToRender.email
-            )
-          )
-        );
         navigation.navigate("StatusDashboard");
       } else {
         Alert.alert("Hủy liên kết thất bại");
@@ -125,13 +118,15 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   <Image
                     source={{
                       uri:
-                      avatarList[Number(memberToRender?.avatarId) - 1] ?? avatarList[0]
+                        avatarList[Number(memberToRender?.avatarId) - 1] ??
+                        avatarList[0],
                     }}
                     style={styles.avatar}
                   />
                   <View style={styles.textContainer}>
                     <Text style={styles.textInfo}>
-                      Họ và tên: {memberToRender.firstName + " " + memberToRender.lastName}
+                      Họ và tên:{" "}
+                      {memberToRender.firstName + " " + memberToRender.lastName}
                     </Text>
                     <Text style={styles.textInfo}>
                       Biệt danh: {memberToRender.nickName}

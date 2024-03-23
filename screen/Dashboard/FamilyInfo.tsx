@@ -18,23 +18,22 @@ import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { avatarList } from "../../utils/listOfAvatar";
+import { RootStackParamList } from "../../component/navigator/appNavigator";
 
-type FamilyInfoNavigationProp = StackNavigationProp<{
-  Setting: undefined;
-  FamilyAcceptScreen: undefined;
-}>;
+type FamilyInfoNavigationProp = RouteProp<
+  RootStackParamList,
+  "FamilyInfoScreen"
+>;
 
-type FamilyInfoProp = {
-  listOfMember?: User[];
-};
-
-const FamilyInfoScreen = () => {
+interface FamilyInfoScreenProps {
+  route: FamilyInfoNavigationProp;
+  navigation: StackNavigationProp<RootStackParamList, "FamilyInfoScreen">;
+}
+const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
   const user = useSelector((state: RootState) => state.user.user);
-
-  const navigation = useNavigation<FamilyInfoNavigationProp>();
 
   const listOfMember =
     Array.isArray(familyList) && familyList.length !== 0
@@ -68,7 +67,11 @@ const FamilyInfoScreen = () => {
             <View style={styles.backButtonContainer}>
               <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => navigation.navigate("Setting")}
+                onPress={
+                  route?.params?.routeBefore === "dashboard"
+                    ? () => navigation.navigate("StatusDashboard")
+                    : () => navigation.navigate("Setting")
+                }
               >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>

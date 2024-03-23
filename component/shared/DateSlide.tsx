@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import DatePicker, {
   DateTimePickerEvent,
@@ -24,20 +24,28 @@ const WeekDatePicker: React.FC<Props> = ({
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
 
-  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    const currentDate = selectedDate || date;
-    setShowPicker(false);
-    setDate(currentDate);
-    setSelectedDate(currentDate);
-    onDateSelect?.(currentDate);
-  };
+  const onDateChange = useCallback(
+    (event: DateTimePickerEvent, selectedDate?: Date) => {
+      const currentDate = selectedDate || date;
+      setShowPicker(false);
+      setDate(currentDate);
+      setSelectedDate(currentDate);
+      onDateSelect?.(currentDate);
+    },
+    [date, onDateSelect]
+  );
 
-  const onDatePress = (dateItem: Date) => {
-    setSelectedDate(dateItem);
-    if (onDateSelect) {
-      onDateSelect(dateItem);
-    }
-  };
+  const onDatePress = useCallback(
+    (dateItem: Date) => {
+      setSelectedDate(dateItem);
+      setDate(dateItem);
+      if (onDateSelect) {
+        onDateSelect(dateItem);
+      }
+    },
+    [onDateSelect]
+  );
+
   const generateWeekDates = (selectedDate: Date): Date[] => {
     let startOfWeek = new Date(selectedDate);
     startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
@@ -48,7 +56,7 @@ const WeekDatePicker: React.FC<Props> = ({
     });
   };
 
-  const weekDates = generateWeekDates(date);
+  const weekDates = useMemo(() => generateWeekDates(date), [date]);
 
   const renderDate = (dateItem: Date, dayOfWeek: string) => {
     const isSelected =
@@ -123,10 +131,12 @@ const WeekDatePicker: React.FC<Props> = ({
 
       {showPicker && (
         <DatePicker
+          key={`date-picker-${date.toISOString()}`}
           value={date}
           mode="date"
           display="default"
           onChange={onDateChange}
+          onTouchCancel={() => setShowPicker(false)}
         />
       )}
     </View>
@@ -217,4 +227,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WeekDatePicker;
+export default React.memo(WeekDatePicker);

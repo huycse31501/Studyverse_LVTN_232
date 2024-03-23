@@ -30,13 +30,16 @@ export type RootStackParamList = {
   StatusDashboard: undefined;
   UserDetailsScreen: { user: User };
   Setting: undefined;
-  FamilyInfoScreen: undefined;
+  FamilyInfoScreen: {
+    routeBefore?: string;
+  };
   NewPasswordScreen: undefined;
   FamilyAcceptScreen: undefined;
   UserInformationScreen: undefined;
   EventInfoScreen: {
     userId: number;
     routeBefore: string;
+    newEventCreated?: boolean;
   };
   EventRemindScreen: {
     userId: number;

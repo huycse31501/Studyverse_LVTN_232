@@ -1,8 +1,8 @@
 type EventInfo = {
-  timeStart: string;
-  timeEnd: string;
-  task: string[];
-  images?: string[];
+  startTime: string;
+  endTime: string;
+  name: string;
+  tags?: Number[];
 };
 
 export default EventInfo;

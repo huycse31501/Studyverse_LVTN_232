@@ -41,14 +41,12 @@ const FamilyAcceptScreen = () => {
 
   const user = useSelector((state: RootState) => state.user.user);
 
-
   const waitListInput =
     Array.isArray(waitList) && waitList.length !== 0
       ? waitList.map((item) => ({
           accountID: item.userId,
           fullName: `${item.firstName} ${item.lastName}`,
-          avatarUri:
-          avatarList[Number(item?.avatarId) - 1] ?? avatarList[0]
+          avatarUri: avatarList[Number(item?.avatarId) - 1] ?? avatarList[0],
         }))
       : [];
 
@@ -94,8 +92,7 @@ const FamilyAcceptScreen = () => {
             </View>
             <Image
               source={{
-                uri:
-                avatarList[Number(user?.avatarId) - 1] ?? avatarList[0]
+                uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
               }}
               style={styles.avatar}
             />
@@ -133,7 +130,8 @@ const FamilyAcceptScreen = () => {
                       </Text>
                     </View>
                     <View style={styles.decisionIconContainer}>
-                      <TouchableOpacity onPress={async () => {
+                      <TouchableOpacity
+                        onPress={async () => {
                           const userToAcceptInfo = waitList?.filter(
                             (item: any) =>
                               item.userId === String(member.accountID)
@@ -141,17 +139,20 @@ const FamilyAcceptScreen = () => {
                           try {
                             let declineMemberUrl = `http://${host}:${port}/family/approveLinkFamily`;
 
-                            const declinceMember = await fetch(declineMemberUrl, {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({
-                                familyId: user?.familyId,
-                                email: userToAcceptInfo?.email,
-                                code: 0,
-                              }),
-                            });
+                            const declinceMember = await fetch(
+                              declineMemberUrl,
+                              {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                  familyId: user?.familyId,
+                                  email: userToAcceptInfo?.email,
+                                  code: 0,
+                                }),
+                              }
+                            );
                             const declinceMemberResponse =
                               await declinceMember.json();
 
@@ -160,7 +161,6 @@ const FamilyAcceptScreen = () => {
                               declinceMemberResponse?.msg == "1" &&
                               Array.isArray(waitList)
                             ) {
-
                               const updatedWaitList = waitList.filter(
                                 (item: any) => item.userId !== member.accountID
                               );
@@ -169,9 +169,12 @@ const FamilyAcceptScreen = () => {
                               Alert.alert("Hủy liên kết thất bại");
                             }
                           } catch (e) {
-                            Alert.alert("Lỗi xảy ra trong quá trình hủy liên kết");
+                            Alert.alert(
+                              "Lỗi xảy ra trong quá trình hủy liên kết"
+                            );
                           }
-                        }}>
+                        }}
+                      >
                         <Image
                           source={require("../../assets/images/shared/declineIcon.png")}
                           style={styles.decisionIcon}
@@ -321,7 +324,9 @@ const styles = StyleSheet.create({
   },
   decisionIconContainer: {
     flexDirection: "row",
-    marginLeft: "5%",
+    position: "absolute",
+    right: 10,
+    top: 30,
   },
   decisionIcon: {
     width: 30,

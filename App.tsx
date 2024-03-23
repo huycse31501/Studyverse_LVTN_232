@@ -4,8 +4,7 @@ import React from "react";
 import AppNavigator from "./component/navigator/appNavigator";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
-import TimePicker from "./component/shared/TimePicker";
-import BlackBorderTextInputField from "./component/shared/BlackBorderInputField";
+
 
 export default function App() {
   return (

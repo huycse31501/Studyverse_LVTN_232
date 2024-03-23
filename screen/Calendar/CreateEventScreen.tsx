@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -26,6 +26,8 @@ import regexVault from "../../utils/regex";
 import Constants from "expo-constants";
 import DateInputField from "../../component/signin-signup/DateInputField";
 import isDateValid from "../../utils/checkValidDate";
+import { formatTime } from "../../utils/timeFormat";
+import MemberTagList from "../../component/EventRelated/tagFamilyMember";
 
 type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
 
@@ -106,13 +108,15 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   const [selectedLoopValue, setSelectedLoopValue] = useState("");
   const [selectedNotiValue, setSelectedNotiValue] = useState("");
 
+  const currentDateFormatted = useMemo(getCurrentDateFormatted, []);
+
   const [inputs, setInputs] = useState({
     eventName: {
       value: "",
       required: true,
     },
     eventDate: {
-      value: getCurrentDateFormatted(),
+      value: currentDateFormatted,
       required: true,
     },
     eventStartTime: {
@@ -147,6 +151,10 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       value: "",
       required: false,
     },
+    tags: {
+      value: "[]",
+      required: false,
+    },
   });
 
   const [inputValidation, setInputValidation] = useState({
@@ -162,11 +170,11 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   });
 
   const handleStartTimeChange = (startTime: string) => {
-    inputChangedHandler("eventStartTime", startTime);
+    inputChangedHandler("eventStartTime", formatTime(startTime));
   };
 
   const handleEndTimeChange = (endTime: string) => {
-    inputChangedHandler("eventEndTime", endTime);
+    inputChangedHandler("eventEndTime", formatTime(endTime));
   };
 
   const setSelectedLoopValueAndInput = (value: string) => {
@@ -177,6 +185,18 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   const setSelectedNotiValueAndInput = (value: string) => {
     setSelectedNotiValue(value);
     inputChangedHandler("notiBefore", value);
+  };
+
+  const handleSelectedMembersChange = (selectedMemberIds: number[]) => {
+    const selectedMembersString = `[${selectedMemberIds.join(",")}]`;
+
+    setInputs((currentInputs) => ({
+      ...currentInputs,
+      tags: {
+        ...currentInputs.tags,
+        value: selectedMembersString,
+      },
+    }));
   };
 
   useEffect(() => {
@@ -196,28 +216,81 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         : true,
     };
     setInputValidation(updatedValidation);
-  }, [inputs]);
+  }, [
+    inputs.eventName.value,
+    inputs.noteText.value,
+    inputs.eventDate.value,
+    inputs.endLoopDate.value,
+    isEventLoopEnabled,
+  ]);
 
-  function inputChangedHandler(
-    inputIdentifier: keyof typeof inputs,
-    enteredValue: string
-  ) {
-    setInputs((curInputs) => {
-      const currentInput = curInputs[inputIdentifier];
+  const inputChangedHandler = useCallback(
+    (inputIdentifier: keyof typeof inputs, enteredValue: string) => {
+      setInputs((curInputs) => {
+        const currentInput = curInputs[inputIdentifier];
+        if (currentInput) {
+          return {
+            ...curInputs,
+            [inputIdentifier]: {
+              ...currentInput,
+              value: enteredValue,
+            },
+          };
+        }
+        return curInputs;
+      });
+    },
+    []
+  );
 
-      if (currentInput) {
-        return {
-          ...curInputs,
-          [inputIdentifier]: {
-            ...currentInput,
-            value: enteredValue,
-          },
-        };
-      }
-
-      return curInputs;
+  const resetInputs = () => {
+    setInputs({
+      eventName: {
+        value: "",
+        required: true,
+      },
+      eventDate: {
+        value: currentDateFormatted,
+        required: true,
+      },
+      eventStartTime: {
+        value: "",
+        required: true,
+      },
+      eventEndTime: {
+        value: "",
+        required: true,
+      },
+      isLoop: {
+        value: false,
+        required: false,
+      },
+      loopInterval: {
+        value: "",
+        required: isEventLoopEnabled,
+      },
+      endLoopDate: {
+        value: "",
+        required: isEventLoopEnabled,
+      },
+      isNoti: {
+        value: false,
+        required: false,
+      },
+      notiBefore: {
+        value: "",
+        required: isNotiEnabled,
+      },
+      noteText: {
+        value: "",
+        required: false,
+      },
+      tags: {
+        value: "[]",
+        required: false,
+      },
     });
-  }
+  };
 
   async function submitHandler() {
     let allFieldsFilled = true;
@@ -264,15 +337,19 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             remindTime: inputs.notiBefore.value,
             note: inputs.noteText.value,
             userId: userId,
+            tagUsers: inputs.tags.value,
           }),
         });
 
         const data = await response.json();
+
         if (data.msg == "1") {
           setIsLoading(false);
+          resetInputs();
           navigation.navigate("EventInfoScreen", {
             userId: Number(userId),
             routeBefore: "createEvent",
+            newEventCreated: true,
           });
         } else {
           setIsLoading(false);
@@ -282,59 +359,9 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         setIsLoading(false);
         Alert.alert(`Tạo sự kiện thất bại`);
       }
-
-      // setInputs({
-      //   eventName: {
-      //     value: "",
-      //     required: true,
-      //   },
-      //   eventDate: {
-      //     value: "",
-      //     required: true,
-      //   },
-      //   eventStartTime: {
-      //     value: "",
-      //     required: true,
-      //   },
-      //   eventEndTime: {
-      //     value: "",
-      //     required: true,
-      //   },
-      //   isLoop: {
-      //     value: "false",
-      //     required: true,
-      //   },
-      //   loopInterval: {
-      //     value: "",
-      //     required: isEventLoopEnabled,
-      //   },
-      //   endLoopDate: {
-      //     value: "",
-      //     required: isEventLoopEnabled,
-      //   },
-      //   isNoti: {
-      //     value: undefined,
-      //     required: true,
-      //   },
-      //   notiBefore: {
-      //     value: "",
-      //     required: isNotiEnabled,
-      //   },
-      //   noteText: {
-      //     value: "",
-      //     required: false,
-      //   },
-      // });
-      // setInputValidation({
-      //   isEventNameValid: true,
-      //   isNoteTextValid: true,
-      //   isStartDateValid: true,
-      //   isEndLoopDateValid: true,
-      // });
     }
   }
   const insets = useSafeAreaInsets();
-
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
@@ -355,11 +382,13 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             <View style={styles.backButtonContainer}>
               <TouchableOpacity
                 style={styles.backButton}
-                onPress={() =>
+                onPress={() => {
+                  resetInputs();
                   navigation.navigate("EventInfoScreen", {
                     userId: Number(userId),
                     routeBefore: "createEvent",
                   })
+                }
                 }
               >
                 <Text style={styles.backButtonText}>Back</Text>
@@ -378,11 +407,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               }}
             />
           </View>
-          <DatePickerBlue
-            onDateSelect={(selectedDate) => {
-              inputChangedHandler("eventDate", selectedDate);
-            }}
-          />
+
           <Text style={styles.timePickerText}>Chọn khung giờ</Text>
           <View style={{ height: 150 }}>
             <TimePicker
@@ -390,6 +415,12 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               onEndTimeSelect={handleEndTimeChange}
             />
           </View>
+
+          <DatePickerBlue
+            onDateSelect={(selectedDate) => {
+              inputChangedHandler("eventDate", selectedDate);
+            }}
+          />
           <View style={styles.eventLoopContainer}>
             <ToggleSwitch
               isOn={isEventLoopEnabled}
@@ -503,6 +534,13 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               ))}
             </View>
           )}
+          <Text style={styles.noteText}>Những người liên quan đến sự kiện</Text>
+          <View style={styles.memberChoiceContainer}>
+            <MemberTagList
+              excludeId={userId}
+              onSelectedMembersChange={handleSelectedMembersChange}
+            />
+          </View>
           <Text style={styles.noteText}>Note</Text>
           <View style={styles.textNoticeContainer}>
             <TextInput
@@ -562,6 +600,7 @@ const styles = StyleSheet.create({
   eventLoopContainer: {
     flexDirection: "row",
     paddingLeft: 30,
+    marginTop: 20,
   },
   eventLoopText: {
     alignSelf: "center",
@@ -659,6 +698,9 @@ const styles = StyleSheet.create({
   endLoopContainer: {
     width: "85%",
     marginVertical: 20,
+  },
+  memberChoiceContainer: {
+    paddingLeft: 25,
   },
 });
 

@@ -7,28 +7,19 @@ import {
   StyleSheet,
   ImageSourcePropType,
 } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { User } from "../../screen/Dashboard/Details";
+import { useNavigation } from "@react-navigation/native";
+import { avatarList } from "../../utils/listOfAvatar";
+import { getTimeDifference } from "../../utils/takeTimeDif";
 
-export type FamilyStatus = {
-  email: string;
-  dob: string;
-  fullname: string;
-  name: string;
-  status: string;
-  avatarUri: string;
-  lastOnline?: string;
-  currentStatus: "onl" | "busy" | "off";
-  userId?: number;
-};
+type StatusCardNavigationProp = StackNavigationProp<{
+  UserDetailsScreen: { user: User };
+}>;
 
-type StatusCardProps = {
-  FamilyStatusData: FamilyStatus[];
-  onCardPress: (status: FamilyStatus) => void;
-};
-
-const StatusCard: React.FC<StatusCardProps> = ({
-  FamilyStatusData,
-  onCardPress,
-}) => {
+const StatusCard: React.FC = ({}) => {
   const getCurrentStatusColor = (currentStatus: "onl" | "busy" | "off") => {
     switch (currentStatus) {
       case "onl":
@@ -42,16 +33,30 @@ const StatusCard: React.FC<StatusCardProps> = ({
     }
   };
 
+  const memberStatusData = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+  const navigation = useNavigation<StatusCardNavigationProp>();
+
   return (
     <View style={styles.cardContainer}>
-      {Object.values(FamilyStatusData).map((FamilyStatus, index) => (
+      {Object.values(memberStatusData).map((memberStatus, index) => (
         <TouchableOpacity
           key={index}
           style={styles.statusContainer}
-          onPress={() => onCardPress(FamilyStatus)}
+          onPress={() => {
+            navigation.navigate("UserDetailsScreen", {
+              user: {
+                userId: Number(memberStatus.userId),
+              },
+            });
+          }}
         >
           <Image
-            source={{ uri: FamilyStatus.avatarUri }}
+            source={{
+              uri:
+                avatarList[Number(memberStatus?.avatarId) - 1] ?? avatarList[0],
+            }}
             style={styles.avatar}
           />
           <View style={styles.textContainer}>
@@ -61,17 +66,28 @@ const StatusCard: React.FC<StatusCardProps> = ({
                   styles.statusIndicator,
                   {
                     backgroundColor: getCurrentStatusColor(
-                      FamilyStatus.currentStatus
+                      memberStatus?.accountStatus ? "onl" : "off"
                     ),
                   },
                 ]}
               />
-              <Text style={styles.name}>{FamilyStatus.name}</Text>
+              <Text style={styles.name}>
+                {memberStatus?.nickName ? String(memberStatus.nickName) : ""}
+              </Text>
             </View>
-            <Text style={styles.status}>{FamilyStatus.status}</Text>
+            <Text style={styles.status}>
+              {memberStatus?.userStatus === "null" ||
+              !memberStatus.accountStatus
+                ? ""
+                : memberStatus?.userStatus}
+            </Text>
           </View>
-          {FamilyStatus.lastOnline && (
-            <Text style={styles.lastOnline}>{FamilyStatus.lastOnline}</Text>
+          {memberStatus?.lastLogin && (
+            <Text style={styles.lastOnline}>
+              {!memberStatus.accountStatus
+                ? getTimeDifference(memberStatus?.lastLogin)
+                : "Đang trực tuyến"}
+            </Text>
           )}
         </TouchableOpacity>
       ))}

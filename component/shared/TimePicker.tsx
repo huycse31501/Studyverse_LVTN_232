@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Image,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 type TimePickerProps = {
@@ -31,74 +24,65 @@ const TimePicker: React.FC<TimePickerProps> = ({
     return timeDate;
   };
 
-  const showStartTimePicker = () => {
-    setStartTimePickerVisibility(true);
-  };
-
-  const showEndTimePicker = () => {
-    setEndTimePickerVisibility(true);
-  };
-
-  const handleStartTimeConfirm = (date: Date) => {
-    const formattedTime = `${date.getHours()}:${date
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
-    setStartTime(formattedTime);
-    setStartTimePickerVisibility(false);
-
-    if (onStartTimeSelect) {
-      onStartTimeSelect(formattedTime);
-    }
-  };
-
-  const handleEndTimeConfirm = (date: Date) => {
-    const formattedTime = `${date.getHours().toString().padStart(2, "0")}:${date
+  const formatTime = (date: Date): string =>
+    `${date.getHours().toString().padStart(2, "0")}:${date
       .getMinutes()
       .toString()
       .padStart(2, "0")}`;
 
-    const startTimeDate = getTimeDate(startTime);
-    if (date > startTimeDate) {
-      setEndTime(formattedTime);
+  const handleTimeConfirm = (date: Date, isStart: boolean) => {
+    const formattedTime = formatTime(date);
+
+    if (isStart) {
+      setStartTimePickerVisibility(false);
     } else {
       setEndTimePickerVisibility(false);
-
-      Alert.alert("Giờ kết thúc phải sau giờ bắt đầu");
-      setEndTime("");
     }
-    setEndTimePickerVisibility(false);
 
-    if (onEndTimeSelect) {
-      onEndTimeSelect(formattedTime);
-    }
+    setTimeout(() => {
+      if (isStart) {
+        setStartTime(formattedTime);
+        onStartTimeSelect?.(formattedTime);
+      } else {
+        const startTimeDate = getTimeDate(startTime);
+        if (date > startTimeDate) {
+          setEndTime(formattedTime);
+          onEndTimeSelect?.(formattedTime);
+        } else {
+          Alert.alert("Giờ kết thúc phải sau giờ bắt đầu");
+        }
+      }
+    }, 10);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={showStartTimePicker} style={styles.timeButton}>
+      <TouchableOpacity
+        onPress={() => setStartTimePickerVisibility(true)}
+        style={styles.timeButton}
+      >
         <Text style={styles.label}>From</Text>
         <Text style={styles.time}>{startTime || ""}</Text>
       </TouchableOpacity>
-      <Image
-        source={require("../../assets/images/dashboard/right-arrow.png")}
-        style={styles.arrow}
-      />
-      <TouchableOpacity onPress={showEndTimePicker} style={styles.timeButton}>
+      <TouchableOpacity
+        onPress={() => startTime && setEndTimePickerVisibility(true)}
+        style={styles.timeButton}
+        disabled={!startTime}
+      >
         <Text style={styles.label}>To</Text>
         <Text style={styles.time}>{endTime || ""}</Text>
       </TouchableOpacity>
       <DateTimePickerModal
         isVisible={isStartTimePickerVisible}
         mode="time"
-        onConfirm={handleStartTimeConfirm}
+        onConfirm={(date) => handleTimeConfirm(date, true)}
         onCancel={() => setStartTimePickerVisibility(false)}
         date={startTime ? getTimeDate(startTime) : new Date()}
       />
       <DateTimePickerModal
-        isVisible={startTime.length != 0 && isEndTimePickerVisible}
+        isVisible={isEndTimePickerVisible}
         mode="time"
-        onConfirm={handleEndTimeConfirm}
+        onConfirm={(date) => handleTimeConfirm(date, false)}
         onCancel={() => setEndTimePickerVisibility(false)}
         date={endTime ? getTimeDate(endTime) : new Date()}
       />

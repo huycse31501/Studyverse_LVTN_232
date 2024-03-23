@@ -29,20 +29,23 @@ import { useSelector } from "react-redux";
 import Constants from "expo-constants";
 import { formatDate } from "../../utils/formatDate";
 import { avatarList } from "../../utils/listOfAvatar";
-
-type EventInfoRouteProp = RouteProp<RootStackParamList, "EventInfoScreen">;
+import { current } from "@reduxjs/toolkit";
+import { mapUserIdsToAvatarIds } from "../../utils/mapUserIdToAvatarId";
+import { isEqual } from 'lodash';
 export interface Event {
   endDate: string;
   endTime: string;
   name: string;
   startDate: string;
   startTime: string;
+  tags?: Number[];
 }
 
 export interface GroupedEvent {
   timeStart: string;
   timeEnd: string;
   task: string[];
+  tags?: Number[];
 }
 
 export interface DateCountMap {
@@ -52,9 +55,11 @@ export interface DateCountMap {
   };
 }
 
+type EventInfoRouteProp = RouteProp<RootStackParamList, "EventInfoScreen">;
+
 interface EventInfoScreenProps {
   route: EventInfoRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "FamilyInfoScreen">;
+  navigation: StackNavigationProp<RootStackParamList, "EventInfoScreen">;
 }
 const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
@@ -75,32 +80,21 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   const [listOfRemindEvent, setListOfRemindEvent] = useState([]);
   const [listOfEventCount, setListOfEventCount] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const handleDateSelect = (date: Date) => {
+  const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
-  };
+  }, []);
 
-  const groupEvents = (events: Event[]): GroupedEvent[] => {
-    const groupedEvents = events.reduce(
-      (accumulator: { [key: string]: GroupedEvent }, currentEvent: Event) => {
-        const timeKey = `${currentEvent.startTime}-${currentEvent.endTime}`;
-
-        if (!accumulator[timeKey]) {
-          accumulator[timeKey] = {
-            timeStart: currentEvent.startTime,
-            timeEnd: currentEvent.endTime,
-            task: [currentEvent.name],
-          };
-        } else {
-          accumulator[timeKey].task.push(currentEvent.name);
-        }
-
-        return accumulator;
-      },
-      {}
-    );
-
-    return Object.values(groupedEvents);
-  };
+  const onBackPress = useCallback(() => {
+    if (memberToRender.userId === user?.userId) {
+      navigation.navigate("StatusDashboard");
+    } else {
+      navigation.navigate("UserDetailsScreen", {
+        user: {
+          userId: userId,
+        },
+      });
+    }
+  }, [navigation, memberToRender.userId, user?.userId, userId]);
 
   const insets = useSafeAreaInsets();
 
@@ -115,13 +109,15 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
           },
         });
         const data = await response.json();
-        setEventsData(data);
+        if (!isEqual(data, eventsData)) {
+          setEventsData(data);
+        }
       } catch (e) {
         console.error("Error fetching events:", e);
       }
     };
     requestEventList();
-  }, []);
+  }, [host, port, userId, route.params?.newEventCreated]);
 
   useEffect(() => {
     const processData = () => {
@@ -143,6 +139,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             startTime,
             endTime,
             name: event.name,
+            tags: mapUserIdsToAvatarIds(totalList, event.tagUsers),
           };
         })
         .filter((event: any) => {
@@ -246,19 +243,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
         >
           <View style={styles.header}>
             <View style={styles.backButtonContainer}>
-              <TouchableOpacity
-                style={styles.backButton}
-                onPress={
-                  memberToRender.userId === user?.userId
-                    ? () => navigation.navigate("StatusDashboard")
-                    : () =>
-                        navigation.navigate("UserDetailsScreen", {
-                          user: {
-                            userId: userId,
-                          },
-                        })
-                }
-              >
+              <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
             </View>
@@ -278,7 +263,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
           <View style={styles.eventContainer}>
             {!isLoading &&
               (listOfEvent.length !== 0 ? (
-                <EventTimeline data={groupEvents(listOfEvent)} height={200} />
+                <EventTimeline data={listOfEvent} height={200} />
               ) : (
                 <View style={styles.eventPlaceHolder}>
                   <Text style={styles.eventNotFound}>
@@ -400,7 +385,6 @@ const styles = StyleSheet.create({
   weekDatePickerContainer: {},
   eventContainer: {
     paddingHorizontal: 30,
-    paddingVertical: 10,
   },
   remindContainer: {
     paddingLeft: 30,
@@ -409,6 +393,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: "#1E293B",
     fontWeight: "700",
+    marginTop: 20,
   },
   remindNotForgetText: {
     color: "#575A61",

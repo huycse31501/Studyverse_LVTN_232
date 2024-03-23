@@ -12,61 +12,47 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import StatusCard from "../../component/dashboard/FamilyStatus";
-import { userStatusData } from "../../mockData/FamilyStatus";
 import UserStatus from "../../component/dashboard/DashboardStatus";
-import eventSampleData from "../../mockData/EventData";
 import EventTimeline from "../../component/shared/EventTimeline";
 import Footer from "../../component/shared/Footer";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { User } from "./Details";
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import Constants from "expo-constants";
 import { Event, GroupedEvent } from "../Calendar/CalendarDashboard";
-import { avatarList } from "../../utils/listOfAvatar";
+import { useDispatch } from "react-redux";
+import { setFamilyMember } from "../../redux/actions/familyAction";
+import { mapUserIdsToAvatarIds } from "../../utils/mapUserIdToAvatarId";
 
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
   Setting: undefined;
-  FamilyInfoScreen: undefined;
+  FamilyInfoScreen: {
+    routeBefore?: string;
+  };
   CreateEventScreen: {
     userId: number;
   };
 }>;
 
-const getTimeDifference = (lastLogin: string) => {
-  if (!lastLogin) {
-    return "No recent login";
-  }
-
-  const lastLoginDate = new Date(lastLogin);
-  const now = new Date();
-  const timeDiff = now.getTime() - lastLoginDate.getTime();
-
-  const minutesDiff = timeDiff / (1000 * 60);
-  const hoursDiff = minutesDiff / 60;
-
-  if (hoursDiff > 24) {
-    return "Trên 1 ngày";
-  } else if (hoursDiff < 1) {
-    return `${minutesDiff.toFixed(0)} phút trước`;
-  } else {
-    return `${hoursDiff.toFixed(0)} giờ trước`;
-  }
-};
 const StatusDashboard = () => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
+
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
   const user = useSelector((state: RootState) => state.user.user);
-  // console.log(familyList);
 
   const navigation = useNavigation<StatusBoardNavigationProp>();
 
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [intervalId, setIntervalId] = useState(null);
   const [listOfEvent, setListOfEvent] = useState([]);
+
   const requestEventList = async () => {
     let requestCreateEventURL = `http://${host}:${port}/event/${user?.userId}`;
     try {
@@ -107,6 +93,7 @@ const StatusDashboard = () => {
                 startTime,
                 endTime,
                 name: event.name,
+                tags: mapUserIdsToAvatarIds(familyList, event.tagUsers),
               };
             })
             .filter((event: any) => {
@@ -114,7 +101,13 @@ const StatusDashboard = () => {
                 event.startDate === selectedDateString &&
                 event.endDate === selectedDateString
               );
-            });
+            })
+            .map((event: any) => ({
+              startTime: event.startTime,
+              endTime: event.endTime,
+              name: event.name,
+              tags: event.tags,
+            }));
           setListOfEvent(filteredAndFormattedEvents);
         } catch (e) {
           console.error("Error fetching events:", e);
@@ -122,29 +115,54 @@ const StatusDashboard = () => {
       })();
     }, [])
   );
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let requestFamilyListURL = `http://${host}:${port}/family/getFamilyMembers/${user?.familyId}`;
+        const familyListResponse = await fetch(requestFamilyListURL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const familyListData = await familyListResponse.json();
 
-  const groupEvents = (events: Event[]): GroupedEvent[] => {
-    const groupedEvents = events.reduce(
-      (accumulator: { [key: string]: GroupedEvent }, currentEvent: Event) => {
-        const timeKey = `${currentEvent.startTime}-${currentEvent.endTime}`;
+        const data = familyListData.data;
+        const familyListPayload = data
+          .map((item: any) => ({
+            userId: String(item.id),
+            phoneNumber: String(item.phone),
+            dateOfBirth: item.dob ? String(item.dob) : "",
+            email: String(item.email),
+            familyId: String(item.familyId),
+            firstName: String(item.firstName),
+            lastName: String(item.lastName),
+            nickName: String(item.nickName) ? String(item.nickName) : "",
+            lastLogin: String(item.lastLogin),
+            accountStatus: item.accountStatus,
+            userStatus: String(item.userStatus),
+            role: String(item.role),
+            avatarId: String(item.avatar),
+          }))
+          .filter((item: any) => item.userId !== String(user?.userId));
 
-        if (!accumulator[timeKey]) {
-          accumulator[timeKey] = {
-            timeStart: currentEvent.startTime,
-            timeEnd: currentEvent.endTime,
-            task: [currentEvent.name],
-          };
-        } else {
-          accumulator[timeKey].task.push(currentEvent.name);
-        }
+        dispatch(setFamilyMember(familyListPayload));
+      } catch (e) {
+        console.log("Error while fetching family lists");
+      }
+    };
+    let id: number | null = null;
 
-        return accumulator;
-      },
-      {}
-    );
+    if (user) {
+      id = setInterval(fetchData, 1000) as unknown as number;
+    }
 
-    return Object.values(groupedEvents);
-  };
+    return () => {
+      if (id) {
+        clearInterval(id);
+      }
+    };
+  }, [user]);
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
@@ -172,7 +190,7 @@ const StatusDashboard = () => {
           <View style={styles.eventContainer}>
             <Text style={styles.eventHeader}>Sự kiện hôm nay</Text>
             {listOfEvent.length !== 0 ? (
-              <EventTimeline data={groupEvents(listOfEvent)} height={200} />
+              <EventTimeline data={listOfEvent} height={200} />
             ) : (
               <View style={styles.eventPlaceHolder}>
                 <Text style={styles.eventNotFound}>
@@ -209,32 +227,7 @@ const StatusDashboard = () => {
                 </TouchableOpacity>
               </View>
             ) : Array.isArray(familyList) && familyList.length !== 0 ? (
-              <StatusCard
-                FamilyStatusData={familyList.map((item: any) => ({
-                  userId: item.userId,
-                  email: item.email,
-                  dob: item.dateOfBirth,
-                  fullname:
-                    item.lastName && item.firstName
-                      ? `${item.firstName} ${item.lastName}`
-                      : "",
-                  name: item.nickName ? String(item.nickName) : "",
-                  status: item?.userStatus === "null" ? "" : item?.userStatus,
-                  avatarUri:
-                    avatarList[Number(item?.avatarId) - 1] ?? avatarList[0],
-                  currentStatus: item?.accountStatus ? "onl" : "off",
-                  lastOnline: !item.accountStatus
-                    ? getTimeDifference(item?.lastLogin)
-                    : "Đang trực tuyến",
-                }))}
-                onCardPress={(x) => {
-                  navigation.navigate("UserDetailsScreen", {
-                    user: {
-                      userId: Number(x.userId),
-                    },
-                  });
-                }}
-              />
+              <StatusCard />
             ) : (
               <View style={styles.familyNotFoundPlaceHolder}>
                 <Text style={styles.familyNotFoundText}>
@@ -242,7 +235,11 @@ const StatusDashboard = () => {
                 </Text>
                 <TouchableOpacity
                   style={styles.linkFamily}
-                  onPress={() => navigation.navigate("FamilyInfoScreen")}
+                  onPress={() =>
+                    navigation.navigate("FamilyInfoScreen", {
+                      routeBefore: "dashboard",
+                    })
+                  }
                 >
                   <Text style={styles.linkFamilyText}>Thông tin gia đình</Text>
                 </TouchableOpacity>

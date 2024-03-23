@@ -22,10 +22,10 @@ const DatePickerBlue: React.FC<Props> = ({ onDateSelect }) => {
     setSelectedDate(currentDate);
     if (onDateSelect) {
       const formattedDate = [
-        currentDate.getDate().toString().padStart(2, '0'),
-        (currentDate.getMonth() + 1).toString().padStart(2, '0'),
-        currentDate.getFullYear()
-      ].join('/');
+        currentDate.getDate().toString().padStart(2, "0"),
+        (currentDate.getMonth() + 1).toString().padStart(2, "0"),
+        currentDate.getFullYear(),
+      ].join("/");
       onDateSelect(formattedDate);
     }
   };
@@ -51,18 +51,18 @@ const DatePickerBlue: React.FC<Props> = ({ onDateSelect }) => {
       dateItem.getMonth() === date.getMonth() &&
       dateItem.getFullYear() === date.getFullYear();
 
-      const onDatePress = () => {
-        setSelectedDate(dateItem);
-        setDate(dateItem);
-        if (onDateSelect) {
-          const formattedDate = [
-            dateItem.getDate().toString().padStart(2, '0'),
-            (dateItem.getMonth() + 1).toString().padStart(2, '0'),
-            dateItem.getFullYear()
-          ].join('/');
-          onDateSelect(formattedDate); 
-        }
-      };
+    const onDatePress = () => {
+      setSelectedDate(dateItem);
+      setDate(dateItem);
+      if (onDateSelect) {
+        const formattedDate = [
+          dateItem.getDate().toString().padStart(2, "0"),
+          (dateItem.getMonth() + 1).toString().padStart(2, "0"),
+          dateItem.getFullYear(),
+        ].join("/");
+        onDateSelect(formattedDate);
+      }
+    };
 
     return (
       <TouchableOpacity
