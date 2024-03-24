@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   status: {
     fontSize: 15,
     fontWeight: "400",
-    color: "#C2C1C1",
+    color: "#b6adad",
   },
   lastOnline: {
     fontSize: 14,

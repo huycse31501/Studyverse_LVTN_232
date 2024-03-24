@@ -50,12 +50,11 @@ const StatusDashboard = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const [intervalId, setIntervalId] = useState(null);
   const [listOfEvent, setListOfEvent] = useState([]);
   const requestEventList = async () => {
-    let requestCreateEventURL = `http://${host}:${port}/event/${user?.userId}`;
+    let requestUserEventURL = `http://${host}:${port}/event/${user?.userId}`;
     try {
-      const response = await fetch(requestCreateEventURL, {
+      const response = await fetch(requestUserEventURL, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +67,6 @@ const StatusDashboard = () => {
       return [];
     }
   };
-
   useFocusEffect(
     useCallback(() => {
       (async () => {
@@ -110,7 +108,7 @@ const StatusDashboard = () => {
           console.error("Error fetching events:", e);
         }
       })();
-    }, [])
+    }, [user, familyList])
   );
   useEffect(() => {
     const fetchData = async () => {
@@ -145,7 +143,7 @@ const StatusDashboard = () => {
 
         dispatch(setFamilyMember(familyListPayload));
       } catch (e) {
-        console.log("Error while fetching family lists");
+        console.log("Error while fetching family lists", e);
       }
     };
     let id: number | null = null;
@@ -160,7 +158,6 @@ const StatusDashboard = () => {
       }
     };
   }, [user]);
-
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 50 }}>
       <KeyboardAvoidingView

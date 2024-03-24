@@ -28,6 +28,8 @@ import { setUser } from "../../redux/actions/userActions";
 import { setWaitList } from "../../redux/actions/waitListAction";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { avatarList } from "../../utils/listOfAvatar";
+import { formatDate } from "../../utils/formatDate";
+import { formatDateInUserInformation } from "../../utils/formatDateStrtoDateStr";
 
 export interface User {
   firstName: string;
@@ -38,18 +40,14 @@ export interface User {
   avatarUri: ImageSourcePropType;
 }
 
-const mockUser: User = {
-  firstName: "Mai",
-  lastName: "Ánh Vân",
-  nickname: "Mẹ thỏ",
-  birthdate: "19/03/1988",
-  phoneNumber: "0935816646",
-  avatarUri: require("../../assets/images/dashboard/avatar.png"),
-};
-
 type UserInformationScreenProp = StackNavigationProp<{
   StatusDashboard: undefined;
+  Setting: undefined;
 }>;
+
+type InformationProp = {
+  routeBefore?: string;
+};
 
 const UserInformationScreen = () => {
   let host = Constants?.expoConfig?.extra?.host;
@@ -101,28 +99,107 @@ const UserInformationScreen = () => {
     }
   };
 
-  const handleSubmitChangeInfo = () => {
+  const handleSubmitChangeInfo = async () => {
     switch (curInfoToChangeType) {
       case "số điện thoại":
         if (regexVault.phoneNumberValidate.test(infoToChange)) {
+          try {
+            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            const cancelFamilyResponse = await fetch(changeInfoUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user?.email,
+                phoneNumber: infoToChange,
+              }),
+            });
+            const changeInfoResponse = await cancelFamilyResponse.json();
+            if (changeInfoResponse.msg === "1") {
+              dispatch(
+                setUser({
+                  ...user,
+                  phoneNumber: infoToChange,
+                })
+              );
+            } else {
+              Alert.alert("Lỗi xảy ra trong quá trình thay đổi số điện thoại");
+            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert("Lỗi xảy ra trong quá trình thay đổi số điện thoại");
+          }
           setInfoToChange("");
           setChangeInfoModal(false);
-          console.log(infoToChange);
         } else {
           alert("Vui lòng nhập số điện thoại hợp lệ");
         }
         break;
       case "họ":
         if (regexVault.firstNameValidate.test(infoToChange)) {
+          try {
+            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            const cancelFamilyResponse = await fetch(changeInfoUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user?.email,
+                firstName: infoToChange,
+              }),
+            });
+            const changeInfoResponse = await cancelFamilyResponse.json();
+            if (changeInfoResponse.msg === "1") {
+              dispatch(
+                setUser({
+                  ...user,
+                  firstName: infoToChange,
+                })
+              );
+            } else {
+              Alert.alert("Lỗi xảy ra trong quá trình thay đổi họ");
+            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert("Lỗi xảy ra trong quá trình thay đổi họ");
+          }
           setInfoToChange("");
           setChangeInfoModal(false);
-          console.log(infoToChange);
         } else {
           alert("Vui lòng nhập họ hợp lệ");
         }
         break;
       case "tên":
         if (regexVault.lastNameValidate.test(infoToChange)) {
+          try {
+            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            const cancelFamilyResponse = await fetch(changeInfoUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user?.email,
+                lastName: infoToChange,
+              }),
+            });
+            const changeInfoResponse = await cancelFamilyResponse.json();
+            if (changeInfoResponse.msg === "1") {
+              dispatch(
+                setUser({
+                  ...user,
+                  lastName: infoToChange,
+                })
+              );
+            } else {
+              Alert.alert("Lỗi xảy ra trong quá trình thay đổi tên");
+            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert("Lỗi xảy ra trong quá trình thay đổi tên");
+          }
           setInfoToChange("");
           setChangeInfoModal(false);
         } else {
@@ -131,6 +208,33 @@ const UserInformationScreen = () => {
         break;
       case "biệt danh":
         if (regexVault.firstNameValidate.test(infoToChange)) {
+          try {
+            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            const cancelFamilyResponse = await fetch(changeInfoUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user?.email,
+                nickName: infoToChange,
+              }),
+            });
+            const changeInfoResponse = await cancelFamilyResponse.json();
+            if (changeInfoResponse.msg === "1") {
+              dispatch(
+                setUser({
+                  ...user,
+                  nickName: infoToChange,
+                })
+              );
+            } else {
+              Alert.alert("Lỗi xảy ra trong quá trình thay đổi biệt danh");
+            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert("Lỗi xảy ra trong quá trình thay đổi biệt danh");
+          }
           setInfoToChange("");
           setChangeInfoModal(false);
         } else {
@@ -139,6 +243,34 @@ const UserInformationScreen = () => {
         break;
       case "ngày sinh":
         if (regexVault.DOBValidate.test(infoToChange)) {
+          try {
+            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            const cancelFamilyResponse = await fetch(changeInfoUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: user?.email,
+                birthday: infoToChange,
+              }),
+            });
+
+            const changeInfoResponse = await cancelFamilyResponse.json();
+            if (changeInfoResponse.msg === "1") {
+              dispatch(
+                setUser({
+                  ...user,
+                  dateOfBirth: infoToChange,
+                })
+              );
+            } else {
+              Alert.alert("Lỗi xảy ra trong quá trình thay đổi ngày sinh");
+            }
+          } catch (e) {
+            console.log(e);
+            Alert.alert("Lỗi xảy ra trong quá trình thay đổi ngày sinh");
+          }
           setInfoToChange("");
           setChangeInfoModal(false);
         } else {
@@ -165,134 +297,129 @@ const UserInformationScreen = () => {
           enableAutomaticScroll={true}
           keyboardShouldPersistTaps="handled"
         >
-          {mockUser && (
-            <>
-              <View style={styles.backButtonContainer}>
-                <TouchableOpacity
-                  style={styles.backButton}
-                  onPress={() => navigation.navigate("StatusDashboard")}
-                >
-                  <Text style={styles.backButtonText}>Back</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>Thông tin cá nhân</Text>
-              </View>
-              <View style={styles.userAvatarContainer}>
-                <View style={styles.card}>
-                  <Image
-                    source={{
-                      uri:
-                        avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
-                    }}
-                    style={styles.avatar}
-                  />
-                </View>
-              </View>
-              <View style={styles.textContainer}>
-                <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>Họ: {user?.firstName}</Text>
-                  <TouchableOpacity
-                    style={styles.editIcon}
-                    onPress={() => {
-                      setChangeInfoModal(true);
-                      setCurInfoToChangeType("họ");
-                    }}
-                  >
-                    <Image
-                      source={require("../../assets/images/shared/edit.png")}
-                      style={styles.editIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>Tên: {user?.lastName}</Text>
-                  <TouchableOpacity
-                    style={styles.editIcon}
-                    onPress={() => {
-                      setChangeInfoModal(true);
-                      setCurInfoToChangeType("tên");
-                    }}
-                  >
-                    <Image
-                      source={require("../../assets/images/shared/edit.png")}
-                      style={styles.editIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>
-                    Biệt danh: {user?.nickName}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.editIcon}
-                    onPress={() => {
-                      setChangeInfoModal(true);
-                      setCurInfoToChangeType("biệt danh");
-                    }}
-                  >
-                    <Image
-                      source={require("../../assets/images/shared/edit.png")}
-                      style={styles.editIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>
-                    Số điện thoại: {user?.phoneNumber}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.editIcon}
-                    onPress={() => {
-                      setChangeInfoModal(true);
-                      setCurInfoToChangeType("số điện thoại");
-                    }}
-                  >
-                    <Image
-                      source={require("../../assets/images/shared/edit.png")}
-                      style={styles.editIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.informationContainer}>
-                  <Text style={styles.textInfo}>
-                    Ngày sinh: {user?.dateOfBirth}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.editIcon}
-                    onPress={() => {
-                      setChangeInfoModal(true);
-                      setCurInfoToChangeType("ngày sinh");
-                    }}
-                  >
-                    <Image
-                      source={require("../../assets/images/shared/edit.png")}
-                      style={styles.editIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
+          <View style={styles.backButtonContainer}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.navigate("Setting")}
+            >
+              <Text style={styles.backButtonText}>Back</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Thông tin cá nhân</Text>
+          </View>
+          <View style={styles.userAvatarContainer}>
+            <View style={styles.card}>
+              <Image
+                source={{
+                  uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
+                }}
+                style={styles.avatar}
+              />
+            </View>
+          </View>
+          <View style={styles.textContainer}>
+            <View style={styles.informationContainer}>
+              <Text style={styles.textInfo}>Họ: {user?.firstName}</Text>
+              <TouchableOpacity
+                style={styles.editIcon}
+                onPress={() => {
+                  setChangeInfoModal(true);
+                  setCurInfoToChangeType("họ");
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/shared/edit.png")}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.informationContainer}>
+              <Text style={styles.textInfo}>Tên: {user?.lastName}</Text>
+              <TouchableOpacity
+                style={styles.editIcon}
+                onPress={() => {
+                  setChangeInfoModal(true);
+                  setCurInfoToChangeType("tên");
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/shared/edit.png")}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.informationContainer}>
+              <Text style={styles.textInfo}>Biệt danh: {user?.nickName}</Text>
+              <TouchableOpacity
+                style={styles.editIcon}
+                onPress={() => {
+                  setChangeInfoModal(true);
+                  setCurInfoToChangeType("biệt danh");
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/shared/edit.png")}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.informationContainer}>
+              <Text style={styles.textInfo}>
+                Số điện thoại: {user?.phoneNumber}
+              </Text>
+              <TouchableOpacity
+                style={styles.editIcon}
+                onPress={() => {
+                  setChangeInfoModal(true);
+                  setCurInfoToChangeType("số điện thoại");
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/shared/edit.png")}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.informationContainer}>
+              <Text style={styles.textInfo}>
+                Ngày sinh:{" "}
+                {user?.dateOfBirth
+                  ? formatDateInUserInformation(user?.dateOfBirth)
+                  : "Ngày sinh chưa xác định"}
+              </Text>
+              <TouchableOpacity
+                style={styles.editIcon}
+                onPress={() => {
+                  setChangeInfoModal(true);
+                  setCurInfoToChangeType("ngày sinh");
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/shared/edit.png")}
+                  style={styles.editIcon}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-              <View style={styles.cancelButtonContainer}>
-                {Number(user?.familyId) !== 0 &&
-                Number(user?.familyId) !== 1 ? (
-                  <ApplyButton
-                    label="Hủy liên kết"
-                    onPress={() => {
-                      setConfirmCancelModalVisible(true);
-                    }}
-                    extraStyle={styles.cancelButton}
-                  ></ApplyButton>
-                ) : (
-                  <>
-                    <Text style={styles.announceText}>
-                      Tài khoản chưa liên kết gia đình
-                    </Text>
-                  </>
-                )}
-              </View>
-            </>
-          )}
+          <View style={styles.cancelButtonContainer}>
+            {Number(user?.familyId) !== 0 && Number(user?.familyId) !== 1 ? (
+              <ApplyButton
+                label="Hủy liên kết"
+                onPress={() => {
+                  setConfirmCancelModalVisible(true);
+                }}
+                extraStyle={styles.cancelButton}
+              ></ApplyButton>
+            ) : (
+              <>
+                <Text style={styles.announceText}>
+                  Tài khoản chưa liên kết gia đình
+                </Text>
+              </>
+            )}
+          </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
       <Modal

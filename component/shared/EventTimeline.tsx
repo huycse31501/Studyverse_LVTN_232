@@ -38,7 +38,7 @@ const EventTimeline = ({
   height,
   userId,
   routeBefore,
-  fromFooter
+  fromFooter,
 }: EventTimelineProps) => {
   const navigation = useNavigation<EventTimeLineNavigationProp>();
   const [currentTime, setCurrentTime] = useState("");
@@ -85,7 +85,7 @@ const EventTimeline = ({
   const calculateTimeUntilEvent = (diff: number): string => {
     const minutesUntilEvent = Math.floor(diff / 60000);
     const hoursUntilEvent = Math.floor(minutesUntilEvent / 60);
-    const remainingMinutes = minutesUntilEvent % 60;
+    const remainingMinutes = (minutesUntilEvent % 60) + 1;
 
     let timeString = "";
     if (hoursUntilEvent > 0) {
@@ -97,7 +97,7 @@ const EventTimeline = ({
 
     return timeString ? `Sau ${timeString}` : "";
   };
-  
+
   return (
     <View style={[styles.container, height ? { height: height } : {}]}>
       <ScrollView
