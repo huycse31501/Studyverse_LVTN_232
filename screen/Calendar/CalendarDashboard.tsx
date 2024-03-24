@@ -31,7 +31,7 @@ import { formatDate } from "../../utils/formatDate";
 import { avatarList } from "../../utils/listOfAvatar";
 import { current } from "@reduxjs/toolkit";
 import { mapUserIdsToAvatarIds } from "../../utils/mapUserIdToAvatarId";
-import { isEqual } from 'lodash';
+import { filter, isEqual } from "lodash";
 export interface Event {
   endDate: string;
   endTime: string;
@@ -64,7 +64,8 @@ interface EventInfoScreenProps {
 const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-  const { userId, routeBefore } = route.params;
+  const { userId, routeBefore, fromFooter } = route.params;
+
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
@@ -140,6 +141,10 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             endTime,
             name: event.name,
             tags: mapUserIdsToAvatarIds(totalList, event.tagUsers),
+            remindTime: event.remindTime,
+            note: event.note,
+            isLoop: event.loop,
+            tagsToEdit: event.tagUsers,
           };
         })
         .filter((event: any) => {
@@ -148,7 +153,6 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             event.endDate === selectedDateString
           );
         });
-
       setListOfEvent(filteredAndFormattedEvents as any);
     };
 
@@ -249,7 +253,9 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             </View>
             <Image
               source={{
-                uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
+                uri:
+                  avatarList[Number(memberToRender.avatarId) - 1] ??
+                  avatarList[0],
               }}
               style={styles.avatar}
             />
@@ -263,7 +269,13 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
           <View style={styles.eventContainer}>
             {!isLoading &&
               (listOfEvent.length !== 0 ? (
-                <EventTimeline data={listOfEvent} height={200} />
+                <EventTimeline
+                  data={listOfEvent}
+                  height={200}
+                  userId={Number(userId)}
+                  routeBefore={routeBefore}
+                  fromFooter={fromFooter}
+                />
               ) : (
                 <View style={styles.eventPlaceHolder}>
                   <Text style={styles.eventNotFound}>

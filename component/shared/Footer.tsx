@@ -32,6 +32,8 @@ type FooterNavigateProp = StackNavigationProp<{
   EventInfoScreen: {
     userId: number;
     routeBefore: string;
+    fromFooter?: string;
+
   };
 }>;
 
@@ -49,7 +51,9 @@ const Footer = () => {
               ? () =>
                   navigation.navigate("EventInfoScreen", {
                     userId: Number(user?.userId),
-                    routeBefore: "statusboard",
+                    routeBefore: "StatusDashboard",
+                    fromFooter: "1",
+
                   })
               : icon.onPress
           }

@@ -1,4 +1,5 @@
 type EventInfo = {
+  id: number;
   startTime: string;
   endTime: string;
   name: string;

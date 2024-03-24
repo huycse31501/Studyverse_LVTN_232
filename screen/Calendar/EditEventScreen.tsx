@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -22,6 +22,11 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import BlackBorderTextInputField from "../../component/shared/BlackBorderInputField";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import regexVault from "../../utils/regex";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { formatTime } from "../../utils/timeFormat";
+import Constants from "expo-constants";
+import MemberTagList from "../../component/EventRelated/tagFamilyMember";
 
 type EditEventRouteProp = RouteProp<RootStackParamList, "EditEventScreen">;
 
@@ -42,20 +47,27 @@ const notiOptions: Option[] = [
   { label: "Trước 1 giờ", value: "60" },
 ];
 
-const mockData = {
-  defaultName: "defaultName",
-  isLoop: false,
-};
 const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
-  const insets = useSafeAreaInsets();
-  const getCurrentDateFormatted = () => {
-    const date = new Date();
-    return [
-      date.getDate().toString().padStart(2, "0"),
-      (date.getMonth() + 1).toString().padStart(2, "0"),
-      date.getFullYear(),
-    ].join("/");
-  };
+  const { eventInfo, userId, routeBefore, fromFooter } = route?.params;
+  const user = useSelector((state: RootState) => state.user.user);
+  const familyList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+  const totalList = user ? [...familyList, user] : familyList;
+  const memberToRender = totalList.filter(
+    (user) => user.userId === String(userId)
+  )[0];
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEventLoopEnabled, setIsEventLoopEnabled] = useState(
+    eventInfo.isLoop
+  );
+  const [isNotiEnabled, setIsNotiEnabled] = useState(
+    eventInfo.remindTime !== 0
+  );
+  const [selectedNotiValue, setSelectedNotiValue] = useState(eventInfo.note);
+  const [deleteMode, setDeleteMode] = useState(false);
 
   const validateValidDate = (checkDate: string) => {
     const [day, month, year] = checkDate.split("/");
@@ -70,36 +82,42 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
     return true;
   };
 
-  const [selectedNotiValue, setSelectedNotiValue] = useState("");
-  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
-
   const [inputs, setInputs] = useState({
     eventName: {
-      value: "defaultName",
+      value: eventInfo.name,
       required: true,
     },
     eventDate: {
-      value: getCurrentDateFormatted(),
+      value: eventInfo.startDate,
       required: true,
     },
     eventStartTime: {
-      value: "",
+      value: eventInfo.startTime,
       required: true,
     },
     eventEndTime: {
-      value: "",
+      value: eventInfo.endTime,
       required: true,
     },
+    isLoop: {
+      value: String(eventInfo.isLoop),
+      required: false,
+    },
+
     isNoti: {
-      value: undefined,
-      required: true,
+      value: eventInfo.remindTime !== 0,
+      required: false,
     },
     notiBefore: {
-      value: "",
+      value: eventInfo.remindTime,
       required: isNotiEnabled,
     },
     noteText: {
-      value: "defaultName",
+      value: eventInfo.note,
+      required: false,
+    },
+    tags: {
+      value: String(eventInfo.tagsToEdit),
       required: false,
     },
   });
@@ -113,16 +131,28 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
   });
 
   const handleStartTimeChange = (startTime: string) => {
-    inputChangedHandler("eventStartTime", startTime);
+    inputChangedHandler("eventStartTime", formatTime(startTime));
   };
 
   const handleEndTimeChange = (endTime: string) => {
-    inputChangedHandler("eventEndTime", endTime);
+    inputChangedHandler("eventEndTime", formatTime(endTime));
   };
 
   const setSelectedNotiValueAndInput = (value: string) => {
     setSelectedNotiValue(value);
     inputChangedHandler("notiBefore", value);
+  };
+
+  const handleSelectedMembersChange = (selectedMemberIds: number[]) => {
+    const selectedMembersString = `[${selectedMemberIds.join(",")}]`;
+
+    setInputs((currentInputs) => ({
+      ...currentInputs,
+      tags: {
+        ...currentInputs.tags,
+        value: selectedMembersString,
+      },
+    }));
   };
 
   useEffect(() => {
@@ -136,31 +166,74 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
       isStartDateValid: validateValidDate(inputs.eventDate.value),
     };
     setInputValidation(updatedValidation);
-  }, [inputs]);
+  }, [
+    inputs.eventName.value,
+    inputs.noteText.value,
+    inputs.eventDate.value,
+    isEventLoopEnabled,
+  ]);
+  const inputChangedHandler = useCallback(
+    (inputIdentifier: keyof typeof inputs, enteredValue: string) => {
+      setInputs((curInputs) => {
+        const currentInput = curInputs[inputIdentifier];
+        if (currentInput) {
+          return {
+            ...curInputs,
+            [inputIdentifier]: {
+              ...currentInput,
+              value: enteredValue,
+            },
+          };
+        }
+        return curInputs;
+      });
+    },
+    []
+  );
 
-  function inputChangedHandler(
-    inputIdentifier: keyof typeof inputs,
-    enteredValue: string
-  ) {
-    setInputs((curInputs) => {
-      const currentInput = curInputs[inputIdentifier];
+  const resetInputs = () => {
+    setInputs({
+      eventName: {
+        value: eventInfo.name,
+        required: true,
+      },
+      eventDate: {
+        value: eventInfo.startDate,
+        required: true,
+      },
+      eventStartTime: {
+        value: eventInfo.startTime,
+        required: true,
+      },
+      eventEndTime: {
+        value: eventInfo.endTime,
+        required: true,
+      },
+      isLoop: {
+        value: String(eventInfo.isLoop),
+        required: false,
+      },
 
-      if (currentInput) {
-        return {
-          ...curInputs,
-          [inputIdentifier]: {
-            ...currentInput,
-            value: enteredValue,
-          },
-        };
-      }
-
-      return curInputs;
+      isNoti: {
+        value: eventInfo.remindTime !== 0,
+        required: false,
+      },
+      notiBefore: {
+        value: eventInfo.remindTime,
+        required: isNotiEnabled,
+      },
+      noteText: {
+        value: eventInfo.note,
+        required: false,
+      },
+      tags: {
+        value: String(eventInfo.tagsToEdit),
+        required: false,
+      },
     });
-  }
+  };
 
   async function submitHandler() {
-    console.log(inputs);
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -172,56 +245,102 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
     }
 
     if (!allFieldsFilled) {
-      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin chỉnh sửa sự kiện");
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin tạo sự kiện");
     } else if (!allFieldsValid) {
       if (inputValidation.isEventNameValid === false) {
         Alert.alert("Thông báo", "Tên sự kiện không hợp lệ");
       } else if (inputValidation.isNoteTextValid === false) {
         Alert.alert("Thông báo", "Ghi chú sự kiện không hợp lệ");
       } else if (inputValidation.isStartDateValid === false) {
-        Alert.alert("Bạn không thể chỉnh sửa sự kiện về quá khứ");
+        Alert.alert("Bạn không thể tạo sự kiện trong quá khứ");
       }
     } else {
-      setInputs({
-        eventName: {
-          value: "",
-          required: true,
-        },
-        eventDate: {
-          value: "",
-          required: true,
-        },
-        eventStartTime: {
-          value: "",
-          required: true,
-        },
-        eventEndTime: {
-          value: "",
-          required: true,
-        },
-        isNoti: {
-          value: undefined,
-          required: true,
-        },
-        notiBefore: {
-          value: "",
-          required: isNotiEnabled,
-        },
-        noteText: {
-          value: "",
-          required: false,
-        },
-      });
-      setInputValidation({
-        isEventNameValid: true,
-        isNoteTextValid: true,
-        isStartDateValid: true,
-      });
+      let requestCreateEventURL = `http://${host}:${port}/event/${eventInfo.id}`;
+
+      try {
+        const response = await fetch(requestCreateEventURL, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: inputs.eventName.value,
+            date: inputs.eventDate.value,
+            timeStart: inputs.eventStartTime.value,
+            timeEnd: inputs.eventEndTime.value,
+            isRemind: inputs.isNoti.value,
+            remindTime: inputs.notiBefore.value,
+            note: inputs.noteText.value,
+            userId: userId,
+            tagUsers: inputs.tags.value,
+            isLoop: deleteMode,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.msg == "1") {
+          setIsLoading(false);
+          resetInputs();
+          if (routeBefore === "StatusDashboard" && fromFooter !== "1") {
+            navigation.navigate("StatusDashboard");
+          } else {
+            navigation.navigate("EventInfoScreen", {
+              userId: userId,
+              routeBefore: routeBefore,
+              newEventCreated: true,
+            });
+          }
+        } else {
+          setIsLoading(false);
+          Alert.alert("Thất bại", "Chỉnh sửa sự kiện thất bại");
+        }
+      } catch (e) {
+        setIsLoading(false);
+        Alert.alert(`Chỉnh sửa sự kiện thất bại`);
+      }
     }
   }
 
+  async function submitCancelHandler() {
+    let requestCreateEventURL = `http://${host}:${port}/event/${eventInfo.id}`;
+
+    try {
+      const response = await fetch(requestCreateEventURL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          deleteLoop: deleteMode,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.msg == "1") {
+        setIsLoading(false);
+        resetInputs();
+        if (routeBefore === "StatusDashboard" && fromFooter !== "1") {
+          navigation.navigate("StatusDashboard");
+        } else {
+          navigation.navigate("EventInfoScreen", {
+            userId: userId,
+            routeBefore: routeBefore,
+            newEventCreated: true,
+          });
+        }
+      } else {
+        setIsLoading(false);
+        Alert.alert("Thất bại", "Xóa sự kiện thất bại");
+      }
+    } catch (e) {
+      setIsLoading(false);
+      Alert.alert(`Xóa sự kiện thất bại`);
+    }
+  }
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "position" : "height"}
@@ -240,7 +359,18 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
             <View style={styles.backButtonContainer}>
               <TouchableOpacity
                 style={styles.backButton}
-                // onPress={() => navigation.navigate("Setting")}
+                onPress={() => {
+                  resetInputs();
+                  if (routeBefore === "StatusDashboard" && fromFooter !== "1") {
+                    navigation.navigate("StatusDashboard");
+                  } else {
+                    navigation.navigate("EventInfoScreen", {
+                      userId: userId,
+                      routeBefore: routeBefore,
+                      newEventCreated: true,
+                    });
+                  }
+                }}
               >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
@@ -258,7 +388,8 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
               }}
             />
           </View>
-          {mockData.isLoop ? (
+
+          {eventInfo?.isLoop ? (
             <>
               <View style={styles.eventLoopInfoContainer}>
                 <Text style={styles.eventLoopInfoText}>
@@ -291,7 +422,10 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
               offColor="#e0dddd"
               size="large"
               onToggle={() => {
-                inputChangedHandler("isNoti", String(!isNotiEnabled));
+                inputChangedHandler(
+                  "isNoti",
+                  !isNotiEnabled ? "true" : "false"
+                );
                 setIsNotiEnabled(!isNotiEnabled);
               }}
               circleColor={"#FFFFFF"}
@@ -335,8 +469,15 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
               ))}
             </View>
           )}
+          <Text style={styles.noteText}>Những người liên quan đến sự kiện</Text>
+          <View style={styles.memberChoiceContainer}>
+            <MemberTagList
+              excludeId={userId}
+              onSelectedMembersChange={handleSelectedMembersChange}
+              defaultValue={eventInfo.tagsToEdit}
+            />
+          </View>
           <Text style={styles.noteText}>Note</Text>
-
           <View style={styles.textNoticeContainer}>
             <TextInput
               value={inputs.noteText.value}
@@ -344,9 +485,32 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
               style={styles.noticeInput}
             />
           </View>
+          {eventInfo?.isLoop && (
+            <>
+              <View style={styles.applyToAllContainer}>
+                <ToggleSwitch
+                  isOn={deleteMode}
+                  onColor="#4CD964"
+                  offColor="#e0dddd"
+                  size="large"
+                  onToggle={() => {
+                    setDeleteMode(!deleteMode);
+                  }}
+                  circleColor={"#FFFFFF"}
+                />
+                <Text style={styles.eventLoopText}>Thay đổi toàn bộ</Text>
+              </View>
+              <View style={styles.eventLoopInfoApplyContainer}>
+                <Text style={styles.eventLoopInfoText}>
+                  Áp dụng lựa chọn trên có thể thay đổi thông tin toàn bộ những
+                  sự kiện lặp trong lịch
+                </Text>
+              </View>
+            </>
+          )}
           <View
             style={{
-              marginTop: isNotiEnabled == false && mockData.isLoop ? 150 : 50,
+              marginTop: 30,
               marginBottom: 30,
               flexDirection: "row",
               marginHorizontal: 30,
@@ -373,7 +537,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
               extraTextStyle={{
                 color: "#2c2929",
               }}
-              onPress={submitHandler}
+              onPress={submitCancelHandler}
             />
           </View>
         </KeyboardAwareScrollView>
@@ -470,7 +634,6 @@ const styles = StyleSheet.create({
   eventNotiContainer: {
     flexDirection: "row",
     paddingLeft: 30,
-    marginTop: 15,
   },
   textNoticeContainer: {
     backgroundColor: "#e0e6f0",
@@ -495,8 +658,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   eventLoopInfoContainer: {
-    marginVertical: 20,
-    marginHorizontal: 24,
+    paddingLeft: 20,
+    marginTop: 10,
+    marginBottom: 25,
   },
   eventLoopInfoText: {
     alignSelf: "center",
@@ -507,6 +671,18 @@ const styles = StyleSheet.create({
   loopChoiceContainer: {
     marginTop: 30,
     marginLeft: 30,
+  },
+  memberChoiceContainer: {
+    paddingLeft: 25,
+  },
+  applyToAllContainer: {
+    flexDirection: "row",
+    paddingLeft: 30,
+    marginTop: 35,
+  },
+  eventLoopInfoApplyContainer: {
+    paddingLeft: 20,
+    marginTop: 25,
   },
 });
 

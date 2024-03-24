@@ -128,7 +128,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       required: true,
     },
     isLoop: {
-      value: false,
+      value: "false",
       required: false,
     },
     loopInterval: {
@@ -262,7 +262,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         required: true,
       },
       isLoop: {
-        value: false,
+        value: "false",
         required: false,
       },
       loopInterval: {
@@ -320,6 +320,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       }
     } else {
       let requestCreateEventURL = `http://${host}:${port}/event/createEvent`;
+
       try {
         const response = await fetch(requestCreateEventURL, {
           method: "POST",
@@ -331,7 +332,8 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             day: inputs.eventDate.value,
             timeStart: inputs.eventStartTime.value,
             timeEnd: inputs.eventEndTime.value,
-            loopMode: inputs.isLoop.value ? inputs.loopInterval.value : 0,
+            loopMode:
+              inputs.isLoop.value === "true" ? inputs.loopInterval.value : "0",
             endDate: inputs.endLoopDate.value,
             isRemind: inputs.isNoti.value,
             remindTime: inputs.notiBefore.value,
@@ -342,7 +344,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         });
 
         const data = await response.json();
-
         if (data.msg == "1") {
           setIsLoading(false);
           resetInputs();
@@ -384,12 +385,8 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
                 style={styles.backButton}
                 onPress={() => {
                   resetInputs();
-                  navigation.navigate("EventInfoScreen", {
-                    userId: Number(userId),
-                    routeBefore: "createEvent",
-                  })
-                }
-                }
+                  navigation.navigate("StatusDashboard");
+                }}
               >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
@@ -490,7 +487,10 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               offColor="#e0dddd"
               size="large"
               onToggle={() => {
-                inputChangedHandler("isNoti", String(!isNotiEnabled));
+                inputChangedHandler(
+                  "isNoti",
+                  !isNotiEnabled ? "true" : "false"
+                );
                 setIsNotiEnabled(!isNotiEnabled);
               }}
               circleColor={"#FFFFFF"}

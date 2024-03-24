@@ -1,27 +1,48 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import EventInfo from "../type/EventInfo";
 import { avatarList } from "../../utils/listOfAvatar";
 import { sortEventsByStartTime } from "../../utils/sortEventByTime";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import { RootStackParamList } from "../navigator/appNavigator";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 type EventTimelineProps = {
   data: EventInfo[];
+  routeBefore?: string;
+  userId?: number;
   height?: number;
+  fromFooter?: string;
 };
 
-const EventTimeline = ({ data, height }: EventTimelineProps) => {
+type EventTimeLineNavigationProp = StackNavigationProp<{
+  EditEventScreen: {
+    userId: number;
+    eventInfo: any;
+    routeBefore: string;
+    fromFooter?: string;
+  };
+}>;
+
+const EventTimeline = ({
+  data,
+  height,
+  userId,
+  routeBefore,
+  fromFooter
+}: EventTimelineProps) => {
+  const navigation = useNavigation<EventTimeLineNavigationProp>();
   const [currentTime, setCurrentTime] = useState("");
-
   const sortedEvents = useMemo(() => sortEventsByStartTime(data), [data]);
-  const user = useSelector((state: RootState) => state.user.user);
-  const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMembers
-  );
-  const totalList = user ? [...familyList, user] : familyList;
-
-  // console.log(totalList)
   useEffect(() => {
     const updateCurrentTime = () => {
       const newCurrentTime = new Date().toLocaleTimeString("en-GB", {
@@ -32,8 +53,8 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
       });
       setCurrentTime(newCurrentTime);
     };
-    updateCurrentTime(); // Update immediately on mount
-    const interval = setInterval(updateCurrentTime, 1000); // Update every second
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 1000);
     return () => clearInterval(interval);
   }, []);
   const getTimeUntilNextEvent = (eventTime: string): string | null => {
@@ -44,7 +65,6 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
     const eventDate = new Date(eventDateTimeString);
 
     const diff = eventDate.getTime() - now.getTime();
-
     if (diff < 0) {
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -77,7 +97,7 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
 
     return timeString ? `Sau ${timeString}` : "";
   };
-
+  
   return (
     <View style={[styles.container, height ? { height: height } : {}]}>
       <ScrollView
@@ -86,7 +106,23 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
         nestedScrollEnabled={true}
       >
         {sortedEvents.map((event, index) => (
-          <View key={index} style={styles.eventBlock}>
+          <TouchableOpacity
+            key={index}
+            style={styles.eventBlock}
+            onPress={() => {
+              if (
+                typeof userId !== "undefined" &&
+                typeof routeBefore !== "undefined"
+              ) {
+                navigation.navigate("EditEventScreen", {
+                  userId: userId,
+                  routeBefore: routeBefore,
+                  eventInfo: event,
+                  fromFooter: fromFooter,
+                });
+              }
+            }}
+          >
             <View style={styles.timeContainer}>
               <Text style={styles.timeStart}>{event.startTime}</Text>
               <Text style={styles.timeEnd}>{event.endTime}</Text>
@@ -108,7 +144,7 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
                   .map((tag, tagIndex) => (
                     <Image
                       key={tagIndex}
-                      source={{ uri: avatarList[Number(tag)] }}
+                      source={{ uri: avatarList[Number(tag) - 1] }}
                       style={styles.image}
                     />
                   ))}
@@ -116,7 +152,7 @@ const EventTimeline = ({ data, height }: EventTimelineProps) => {
                 <Text style={styles.moreImages}>+{event.tags.length - 3}</Text>
               )}
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
@@ -171,7 +207,6 @@ const styles = StyleSheet.create({
   },
   countdownContainer: {
     marginTop: 5,
-    backgroundColor: "#FF375F",
     borderRadius: 10,
     padding: 5,
   },

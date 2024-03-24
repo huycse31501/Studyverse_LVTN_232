@@ -52,7 +52,6 @@ const StatusDashboard = () => {
 
   const [intervalId, setIntervalId] = useState(null);
   const [listOfEvent, setListOfEvent] = useState([]);
-
   const requestEventList = async () => {
     let requestCreateEventURL = `http://${host}:${port}/event/${user?.userId}`;
     try {
@@ -81,7 +80,6 @@ const StatusDashboard = () => {
             .map((event: any) => {
               const startDateObj = new Date(event.timeStart);
               const endDateObj = new Date(event.timeEnd);
-
               const startDate = startDateObj.toLocaleDateString("en-GB");
               const endDate = endDateObj.toLocaleDateString("en-GB");
               const startTime = startDateObj.toTimeString().substring(0, 5);
@@ -94,6 +92,11 @@ const StatusDashboard = () => {
                 endTime,
                 name: event.name,
                 tags: mapUserIdsToAvatarIds(familyList, event.tagUsers),
+                id: event.id,
+                remindTime: event.remindTime,
+                note: event.note,
+                isLoop: event.loop,
+                tagsToEdit: event.tagUsers,
               };
             })
             .filter((event: any) => {
@@ -101,13 +104,7 @@ const StatusDashboard = () => {
                 event.startDate === selectedDateString &&
                 event.endDate === selectedDateString
               );
-            })
-            .map((event: any) => ({
-              startTime: event.startTime,
-              endTime: event.endTime,
-              name: event.name,
-              tags: event.tags,
-            }));
+            });
           setListOfEvent(filteredAndFormattedEvents);
         } catch (e) {
           console.error("Error fetching events:", e);
@@ -190,7 +187,12 @@ const StatusDashboard = () => {
           <View style={styles.eventContainer}>
             <Text style={styles.eventHeader}>Sự kiện hôm nay</Text>
             {listOfEvent.length !== 0 ? (
-              <EventTimeline data={listOfEvent} height={200} />
+              <EventTimeline
+                userId={Number(user?.userId)}
+                routeBefore="StatusDashboard"
+                data={listOfEvent}
+                height={200}
+              />
             ) : (
               <View style={styles.eventPlaceHolder}>
                 <Text style={styles.eventNotFound}>

@@ -18,11 +18,13 @@ import { getTimeDifference } from "../../utils/takeTimeDif";
 type MemberTagListProps = {
   excludeId: number;
   onSelectedMembersChange: (selectedMembers: number[]) => void;
+  defaultValue?: number[];
 };
 
 const MemberTagList: React.FC<MemberTagListProps> = ({
   onSelectedMembersChange,
   excludeId,
+  defaultValue,
 }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
@@ -32,8 +34,9 @@ const MemberTagList: React.FC<MemberTagListProps> = ({
   const memberStatusData = totalList.filter(
     (userInTotalList) => userInTotalList.userId !== String(excludeId)
   );
-
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<number[]>(
+    defaultValue ? defaultValue : []
+  );
 
   const handleSelectMember = (memberId: number) => {
     let updatedSelectedMembers;

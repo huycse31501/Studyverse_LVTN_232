@@ -17,7 +17,7 @@ import FamilyAcceptScreen from "../../screen/Dashboard/FamilyAccept";
 import UserInformationScreen from "../../screen/Dashboard/UserInformation";
 import { EventProps } from "../shared/RemindEvent";
 import EventInfo from "../type/EventInfo";
-import EventInfoScreen from "../../screen/Calendar/CalendarDashboard";
+import EventInfoScreen, { Event } from "../../screen/Calendar/CalendarDashboard";
 import EventRemindScreen from "../../screen/Calendar/EventRemindScreen";
 import CreateEventScreen from "../../screen/Calendar/CreateEventScreen";
 import EditEventScreen from "../../screen/Calendar/EditEventScreen";
@@ -40,6 +40,8 @@ export type RootStackParamList = {
     userId: number;
     routeBefore: string;
     newEventCreated?: boolean;
+    fromFooter?: string;
+
   };
   EventRemindScreen: {
     userId: number;
@@ -50,6 +52,9 @@ export type RootStackParamList = {
   };
   EditEventScreen: {
     userId: number;
+    eventInfo: any;
+    routeBefore: string;
+    fromFooter?: string;
   };
 };
 
