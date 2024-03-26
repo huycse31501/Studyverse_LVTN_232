@@ -1,5 +1,5 @@
 import { Reducer } from "redux";
-import { UserActionTypes, SET_USER, User, LOGOUT } from "../types/actionTypes";
+import { UserActionTypes, SET_USER, User, LOGOUT, SET_USER_STATUS } from "../types/actionTypes";
 
 export interface UserState {
   user: User | null;
@@ -18,6 +18,14 @@ export const userReducer: Reducer<UserState, UserActionTypes> = (
       return {
         ...state,
         user: action.payload,
+      };
+    case SET_USER_STATUS:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          userStatus: action.payload,
+        },
       };
     case LOGOUT:
       return initialState;

@@ -154,7 +154,7 @@ const SignUp = () => {
       try {
         let host = Constants?.expoConfig?.extra?.host;
         let port = Constants?.expoConfig?.extra?.port;
-        const requestSignUpURL = `http://${host}:${port}/user/signup`;
+        const requestSignUpURL = `https://${host}/user/signup`;
         const response = await fetch(requestSignUpURL, {
           method: "POST",
           headers: {

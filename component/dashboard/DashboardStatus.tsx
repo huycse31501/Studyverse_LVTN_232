@@ -1,10 +1,20 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { RootState } from "../../redux/store";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Alert,
+  Platform,
+  TextInput,
+} from "react-native";
+import { AppDispatch, RootState } from "../../redux/store";
+import { useSelector, useDispatch } from "react-redux";
 import { avatarList } from "../../utils/listOfAvatar";
+import { setUser } from "../../redux/actions/userActions";
+import Constants from "expo-constants";
 
-const AvatarIcon = require("../../assets/images/dashboard/avatar.png");
 const MessageIcon = require("../../assets/images/dashboard/bubble-chat-big.png");
 const MenuIcon = require("../../assets/images/dashboard/setting.png");
 
@@ -15,58 +25,140 @@ type UserStatusProps = {
   onChatPress?: () => void;
 };
 
-const UserStatus = ({
-  userName,
-  status,
-  onMenuPress,
-  onChatPress,
-}: UserStatusProps) => {
-  const user = useSelector((state: RootState) => state.user.user);
+let host = Constants?.expoConfig?.extra?.host;
+let port = Constants?.expoConfig?.extra?.port;
 
-  const getStatusColor = () => {
-    switch (status) {
-      case "on":
-        return "#5AD539";
-      case "off":
-        return "gray";
-      case "busy":
-        return "#FF5050";
-      default:
-        return "gray";
-    }
-  };
+const UserStatus = React.memo(
+  ({ userName, status, onMenuPress, onChatPress }: UserStatusProps) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const user = useSelector((state: RootState) => state.user.user);
+    const [editStatus, setEditStatus] = useState(false);
+    const [statusText, setStatusText] = useState<string>(
+      user?.userStatus || "Trạng thái hoạt động"
+    );
 
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => console.log("Avatar pressed")}>
-        <Image
-          source={{
-            uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
-          }}
-          style={styles.avatarIcon}
-        />
-      </TouchableOpacity>
-      <View style={styles.textContainer}>
-        <View style={styles.statusContainer}>
-          <Text style={styles.userName}>{userName}</Text>
-          <View
-            style={[
-              styles.statusIndicator,
-              { backgroundColor: getStatusColor() },
-            ]}
+    const getStatusColor = () => {
+      switch (status) {
+        case "on":
+          return "#5AD539";
+        case "off":
+          return "gray";
+        case "busy":
+          return "#FF5050";
+        default:
+          return "gray";
+      }
+    };
+
+    const handleStatusChange = async () => {
+      try {
+        let requestChangeStatusUrl = `https://${host}/user/updateStatus`;
+        const ChangeStatusResponse = await fetch(requestChangeStatusUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: user?.email,
+            status: statusText.trim().length > 0 ? statusText : null,
+          }),
+        });
+        const changeResponse = await ChangeStatusResponse.json();
+        if (changeResponse.msg === "1") {
+          dispatch(
+            setUser({
+              ...user,
+              userStatus: statusText,
+            })
+          );
+          setEditStatus(false);
+        } else {
+          Alert.alert("Thay đổi trạng thái thất bại");
+        }
+      } catch (e) {
+        console.log(e);
+        Alert.alert("Lỗi xảy ra trong quá trình Thay đổi trạng thái thất bại");
+      }
+    };
+    const handleStatusPress = () => {
+      if (Platform.OS === "ios") {
+        Alert.prompt(
+          "Thay đổi trạng thái",
+          "Cập nhật trạng thái mới:",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "OK",
+              onPress: (inputStatus) => {
+                let newStatus =
+                  inputStatus && inputStatus.trim().length > 0
+                    ? inputStatus
+                    : "Trạng thái hoạt động";
+                dispatch(
+                  setUser({
+                    ...user,
+                    userStatus: inputStatus,
+                  })
+                );
+                setStatusText(newStatus);
+              },
+            },
+          ],
+          "plain-text",
+          statusText
+        );
+      } else {
+        setEditStatus(true);
+      }
+    };
+
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => console.log("Avatar pressed")}>
+          <Image
+            source={{
+              uri: avatarList[Number(user?.avatarId) - 1] ?? avatarList[0],
+            }}
+            style={styles.avatarIcon}
           />
+        </TouchableOpacity>
+        <View style={styles.textContainer}>
+          <View style={styles.statusContainer}>
+            <Text style={styles.userName}>{userName}</Text>
+            <View
+              style={[
+                styles.statusIndicator,
+                { backgroundColor: getStatusColor() },
+              ]}
+            />
+          </View>
+          {editStatus ? (
+            <TextInput
+              value={statusText}
+              onChangeText={setStatusText}
+              onEndEditing={handleStatusChange}
+              autoFocus={true}
+              style={styles.status}
+            />
+          ) : (
+            <TouchableOpacity onPress={handleStatusPress}>
+              <Text style={styles.status}>{statusText}</Text>
+            </TouchableOpacity>
+          )}
         </View>
-        <Text style={styles.status}>{"Trạng thái hoạt động"}</Text>
+        <TouchableOpacity onPress={onChatPress}>
+          <Image source={MessageIcon} style={styles.messageIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onMenuPress}>
+          <Image source={MenuIcon} style={styles.menuIcon} />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={onChatPress}>
-        <Image source={MessageIcon} style={styles.messageIcon} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={onMenuPress}>
-        <Image source={MenuIcon} style={styles.menuIcon} />
-      </TouchableOpacity>
-    </View>
-  );
-};
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

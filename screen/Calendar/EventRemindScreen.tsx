@@ -59,7 +59,7 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
   const [listOfEvent, setListOfEvent] = useState([]);
 
   const requestEventList = async () => {
-    let requestCreateEventURL = `http://${host}:${port}/event/${userId}`;
+    let requestCreateEventURL = `https://${host}/event/${userId}`;
     try {
       const response = await fetch(requestCreateEventURL, {
         method: "GET",
@@ -139,7 +139,7 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
   };
 
   const handleCancelButton = async () => {
-    let requestUpdateEventStateURL = `http://${host}:${port}/event/${curEventChange?.eventId}/updateStatus`;
+    let requestUpdateEventStateURL = `https://${host}/event/${curEventChange?.eventId}/updateStatus`;
     try {
       const response = await fetch(requestUpdateEventStateURL, {
         method: "PUT",

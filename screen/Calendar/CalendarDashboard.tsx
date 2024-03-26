@@ -101,7 +101,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
 
   useEffect(() => {
     const requestEventList = async () => {
-      let requestCreateEventURL = `http://${host}:${port}/event/${userId}`;
+      let requestCreateEventURL = `https://${host}/event/${userId}`;
       try {
         const response = await fetch(requestCreateEventURL, {
           method: "GET",

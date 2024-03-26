@@ -1,6 +1,6 @@
 import { RouteProp, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -33,6 +33,7 @@ const FamilyAcceptScreen = () => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
 
+
   const dispatch = useDispatch<AppDispatch>();
   const waitList = useSelector((state: RootState) => state.waitList.waitList);
   const familyMemberList = useSelector(
@@ -50,18 +51,6 @@ const FamilyAcceptScreen = () => {
         }))
       : [];
 
-  //[
-  //   {
-  //     accountID: "0082161929",
-  //     fullName: "Nguyễn Minh Trúc",
-  //     avatarUri: require("../../assets/images/dashboard/avatar-NMT.png"),
-  //   },
-  //   {
-  //     accountID: "0082039123",
-  //     fullName: "Nguyễn Minh Tuấn",
-  //     avatarUri: require("../../assets/images/dashboard/avatar-NMTuan.png"),
-  //   },
-  // ];
   const insets = useSafeAreaInsets();
 
   const navigation = useNavigation<FamilyInfoNavigationProp>();
@@ -137,7 +126,7 @@ const FamilyAcceptScreen = () => {
                               item.userId === String(member.accountID)
                           )[0];
                           try {
-                            let declineMemberUrl = `http://${host}:${port}/family/approveLinkFamily`;
+                            let declineMemberUrl = `https://${host}/family/approveLinkFamily`;
 
                             const declinceMember = await fetch(
                               declineMemberUrl,
@@ -187,7 +176,7 @@ const FamilyAcceptScreen = () => {
                               item.userId === String(member.accountID)
                           )[0];
                           try {
-                            let acceptMemberUrl = `http://${host}:${port}/family/approveLinkFamily`;
+                            let acceptMemberUrl = `https://${host}/family/approveLinkFamily`;
 
                             const acceptMember = await fetch(acceptMemberUrl, {
                               method: "POST",

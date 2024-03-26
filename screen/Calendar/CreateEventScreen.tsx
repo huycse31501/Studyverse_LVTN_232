@@ -244,6 +244,11 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   );
 
   const resetInputs = () => {
+    setIsEventLoopEnabled(false);
+    setIsNotiEnabled(false);
+    setSelectedLoopValue("");
+    setSelectedNotiValue("");
+
     setInputs({
       eventName: {
         value: "",
@@ -319,7 +324,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
         );
       }
     } else {
-      let requestCreateEventURL = `http://${host}:${port}/event/createEvent`;
+      let requestCreateEventURL = `https://${host}/event/createEvent`;
 
       try {
         const response = await fetch(requestCreateEventURL, {

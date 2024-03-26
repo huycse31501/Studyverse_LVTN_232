@@ -1,6 +1,5 @@
-import { RouteProp, useNavigation } from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
 import {
   StyleSheet,
   View,
@@ -10,15 +9,20 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Platform,
+  Alert,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import FamilyInfoSwitcher from "../../component/dashboard/familyInfoSwitcher";
-import { User } from "./Details";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { avatarList } from "../../utils/listOfAvatar";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setFamilyMember } from "../../redux/actions/familyAction";
+import { setWaitList } from "../../redux/actions/waitListAction";
+import Constants from "expo-constants";
 
 type FamilyInfoNavigationProp = RouteProp<
   RootStackParamList,
@@ -29,11 +33,23 @@ interface FamilyInfoScreenProps {
   route: FamilyInfoNavigationProp;
   navigation: StackNavigationProp<RootStackParamList, "FamilyInfoScreen">;
 }
+
+let host = Constants?.expoConfig?.extra?.host;
+
+
 const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
+  const [headerState, setHeaderState] = useState<"List" | "WaitList">("List");
+
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
   const user = useSelector((state: RootState) => state.user.user);
+  const waitList = useSelector((state: RootState) => state.waitList.waitList);
+  const familyMemberList = useSelector(
+    (state: RootState) => state.familyMember.familyMembers
+  );
+
+  const dispatch = useDispatch<AppDispatch>();
 
   const listOfMember =
     Array.isArray(familyList) && familyList.length !== 0
@@ -41,6 +57,15 @@ const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
           fullName: `${item.firstName} ${item.lastName}`,
           nickName: `${item.nickName}`,
           birthday: `${item.dateOfBirth}`,
+          avatarUri: avatarList[Number(item?.avatarId) - 1] ?? avatarList[0],
+        }))
+      : [];
+
+  const waitListInput =
+    Array.isArray(waitList) && waitList.length !== 0
+      ? waitList.map((item) => ({
+          accountID: item.userId,
+          fullName: `${item.firstName} ${item.lastName}`,
           avatarUri: avatarList[Number(item?.avatarId) - 1] ?? avatarList[0],
         }))
       : [];
@@ -94,35 +119,186 @@ const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
           </View>
           <View style={styles.switcherContainer}>
             <FamilyInfoSwitcher
-              type={"List"}
-              onWaitListPress={() => navigation.navigate("FamilyAcceptScreen")}
+              type={headerState}
+              onWaitListPress={() => setHeaderState("WaitList")}
+              onListPress={() => {
+                setHeaderState("List");
+              }}
             />
           </View>
-          <View style={styles.familyList}>
-            {listOfMember.map((member, index) => (
-              <View key={index} style={styles.familyMember}>
-                <View style={styles.userInformationContainer}>
-                  <View style={styles.card}>
-                    <Image
-                      source={{ uri: member.avatarUri }}
-                      style={styles.avatarCard}
-                    />
-                    <View style={styles.textContainer}>
-                      <Text style={styles.textInfo}>
-                        Họ và tên: {member.fullName}
-                      </Text>
-                      <Text style={styles.textInfo}>
-                        Biệt danh: {member.nickName}
-                      </Text>
-                      <Text style={styles.textInfo}>
-                        Ngày sinh: {member.birthday}
-                      </Text>
+          {headerState === "List" ? (
+            <>
+              <View style={styles.familyList}>
+                {listOfMember.map((member, index) => (
+                  <View key={index} style={styles.familyMember}>
+                    <View style={styles.userInformationContainer}>
+                      <View style={styles.card}>
+                        <Image
+                          source={{ uri: member.avatarUri }}
+                          style={styles.avatarCard}
+                        />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.textInfo}>
+                            Họ và tên: {member.fullName}
+                          </Text>
+                          <Text style={styles.textInfo}>
+                            Biệt danh: {member.nickName}
+                          </Text>
+                          <Text style={styles.textInfo}>
+                            Ngày sinh: {member.birthday}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
                   </View>
-                </View>
+                ))}
               </View>
-            ))}
-          </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.waitListContainer}>
+                {waitListInput.map((member, index) => (
+                  <View key={index} style={styles.newMember}>
+                    <View style={styles.userInformationContainer}>
+                      <View style={styles.card}>
+                        <Image
+                          source={{ uri: member.avatarUri }}
+                          style={styles.avatarCard}
+                        />
+                        <View style={styles.textContainer}>
+                          <Text style={styles.textInfo}>
+                            Mã tài khoản: {member.accountID}
+                          </Text>
+                          <Text style={styles.textInfo}>
+                            Họ và tên: {member.fullName}
+                          </Text>
+                        </View>
+                        <View style={styles.decisionIconContainer}>
+                          <TouchableOpacity
+                            onPress={async () => {
+                              const userToAcceptInfo = waitList?.filter(
+                                (item: any) =>
+                                  item.userId === String(member.accountID)
+                              )[0];
+                              try {
+                                let declineMemberUrl = `https://${host}/family/approveLinkFamily`;
+
+                                const declinceMember = await fetch(
+                                  declineMemberUrl,
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                      familyId: user?.familyId,
+                                      email: userToAcceptInfo?.email,
+                                      code: 0,
+                                    }),
+                                  }
+                                );
+                                const declinceMemberResponse =
+                                  await declinceMember.json();
+
+                                if (
+                                  declinceMemberResponse &&
+                                  declinceMemberResponse?.msg == "1" &&
+                                  Array.isArray(waitList)
+                                ) {
+                                  const updatedWaitList = waitList.filter(
+                                    (item: any) =>
+                                      item.userId !== member.accountID
+                                  );
+                                  dispatch(setWaitList(updatedWaitList));
+                                } else {
+                                  Alert.alert("Hủy liên kết thất bại");
+                                }
+                              } catch (e) {
+                                Alert.alert(
+                                  "Lỗi xảy ra trong quá trình hủy liên kết"
+                                );
+                              }
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/images/shared/declineIcon.png")}
+                              style={styles.decisionIcon}
+                            ></Image>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={async () => {
+                              const userToAcceptInfo = waitList?.filter(
+                                (item: any) =>
+                                  item.userId === String(member.accountID)
+                              )[0];
+                              try {
+                                let acceptMemberUrl = `https://${host}/family/approveLinkFamily`;
+
+                                const acceptMember = await fetch(
+                                  acceptMemberUrl,
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                      familyId: user?.familyId,
+                                      email: userToAcceptInfo?.email,
+                                      code: 1,
+                                    }),
+                                  }
+                                );
+                                const acceptMemberResponse =
+                                  await acceptMember.json();
+
+                                if (
+                                  acceptMemberResponse &&
+                                  acceptMemberResponse?.msg == "1" &&
+                                  Array.isArray(familyMemberList) &&
+                                  Array.isArray(waitList)
+                                ) {
+                                  if (
+                                    userToAcceptInfo &&
+                                    typeof userToAcceptInfo === "object"
+                                  ) {
+                                    const updatedFamilyMemberList = [
+                                      ...familyMemberList,
+                                      userToAcceptInfo,
+                                    ];
+
+                                    dispatch(
+                                      setFamilyMember(updatedFamilyMemberList)
+                                    );
+                                  }
+
+                                  const updatedWaitList = waitList.filter(
+                                    (item: any) =>
+                                      item.userId !== member.accountID
+                                  );
+                                  dispatch(setWaitList(updatedWaitList));
+                                } else {
+                                  Alert.alert("Liên kết thất bại");
+                                }
+                              } catch (e) {
+                                Alert.alert(
+                                  "Lỗi xảy ra trong quá trình liên kết"
+                                );
+                              }
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/images/shared/acceptIcon.png")}
+                              style={styles.decisionIcon}
+                            ></Image>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -198,6 +374,19 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontWeight: "500",
     paddingVertical: 3,
+  },
+  waitListContainer: {},
+  newMember: {},
+  decisionIconContainer: {
+    flexDirection: "row",
+    position: "absolute",
+    right: 10,
+    top: 30,
+  },
+  decisionIcon: {
+    width: 30,
+    height: 30,
+    paddingHorizontal: "6.5%",
   },
 });
 

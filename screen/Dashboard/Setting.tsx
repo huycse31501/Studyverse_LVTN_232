@@ -63,7 +63,7 @@ const Setting = () => {
 
   const handleUnlinkPress = async () => {
     try {
-      let requestUnlinkURL = `http://${host}:${port}/family/unlinkFamily`;
+      let requestUnlinkURL = `https://${host}/family/unlinkFamily`;
 
       const unlinkFamilyResponse = await fetch(requestUnlinkURL, {
         method: "POST",
@@ -96,7 +96,7 @@ const Setting = () => {
 
   const handleCreateFamily = async () => {
     try {
-      let requestCreateFamily = `http://${host}:${port}/family/createFamily`;
+      let requestCreateFamily = `https://${host}/family/createFamily`;
 
       const createFamilyResponse = await fetch(requestCreateFamily, {
         method: "POST",
@@ -123,7 +123,7 @@ const Setting = () => {
   const handleConfirmLink = async () => {
     if (regexVault.emailValidate.test(familyLinkInfo)) {
       try {
-        let requestLinkFamily = `http://${host}:${port}/family/linkFamily`;
+        let requestLinkFamily = `https://${host}/family/linkFamily`;
 
         const linkFamily = await fetch(requestLinkFamily, {
           method: "POST",
@@ -204,7 +204,7 @@ const Setting = () => {
       image: require("../../assets/images/shared/logout.png"),
       onPress: async () => {
         try {
-          let requestlogoutUserUrl = `http://${host}:${port}/user/logout`;
+          let requestlogoutUserUrl = `https://${host}/user/logout`;
           const logoutUserResponse = await fetch(requestlogoutUserUrl, {
             method: "POST",
             headers: {

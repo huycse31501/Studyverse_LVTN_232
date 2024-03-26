@@ -66,11 +66,11 @@ const UserInformationScreen = () => {
 
   const [confirmCancelModalVisible, setConfirmCancelModalVisible] =
     useState(false);
-
+  console.log(user);
   const handleCancelButton = async () => {
     setConfirmCancelModalVisible(false);
     try {
-      let requestCancelFamilyUrl = `http://${host}:${port}/family/outFamily`;
+      let requestCancelFamilyUrl = `https://${host}/family/outFamily`;
       const cancelFamilyResponse = await fetch(requestCancelFamilyUrl, {
         method: "POST",
         headers: {
@@ -104,7 +104,7 @@ const UserInformationScreen = () => {
       case "số điện thoại":
         if (regexVault.phoneNumberValidate.test(infoToChange)) {
           try {
-            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            let changeInfoUrl = `https://${host}/user/updateInfo`;
             const cancelFamilyResponse = await fetch(changeInfoUrl, {
               method: "POST",
               headers: {
@@ -139,7 +139,7 @@ const UserInformationScreen = () => {
       case "họ":
         if (regexVault.firstNameValidate.test(infoToChange)) {
           try {
-            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            let changeInfoUrl = `https://${host}/user/updateInfo`;
             const cancelFamilyResponse = await fetch(changeInfoUrl, {
               method: "POST",
               headers: {
@@ -174,7 +174,7 @@ const UserInformationScreen = () => {
       case "tên":
         if (regexVault.lastNameValidate.test(infoToChange)) {
           try {
-            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            let changeInfoUrl = `https://${host}/user/updateInfo`;
             const cancelFamilyResponse = await fetch(changeInfoUrl, {
               method: "POST",
               headers: {
@@ -209,7 +209,7 @@ const UserInformationScreen = () => {
       case "biệt danh":
         if (regexVault.firstNameValidate.test(infoToChange)) {
           try {
-            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            let changeInfoUrl = `https://${host}/user/updateInfo`;
             const cancelFamilyResponse = await fetch(changeInfoUrl, {
               method: "POST",
               headers: {
@@ -244,7 +244,7 @@ const UserInformationScreen = () => {
       case "ngày sinh":
         if (regexVault.DOBValidate.test(infoToChange)) {
           try {
-            let changeInfoUrl = `http://${host}:${port}/user/updateInfo`;
+            let changeInfoUrl = `https://${host}/user/updateInfo`;
             const cancelFamilyResponse = await fetch(changeInfoUrl, {
               method: "POST",
               headers: {

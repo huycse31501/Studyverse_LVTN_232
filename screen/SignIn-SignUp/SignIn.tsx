@@ -85,7 +85,7 @@ const SignIn = () => {
     const fetchData = async () => {
       if (user && Number(user.familyId) !== 0) {
         try {
-          let requestFamilyListURL = `http://${host}:${port}/family/getFamilyMembers/${user.familyId}`;
+          let requestFamilyListURL = `https://${host}/family/getFamilyMembers/${user.familyId}`;
           const familyListResponse = await fetch(requestFamilyListURL, {
             method: "GET",
             headers: {
@@ -132,7 +132,7 @@ const SignIn = () => {
     const fetchData = async () => {
       if (user) {
         try {
-          let requestWaitList = `http://${host}:${port}/family/getPendingUsers`;
+          let requestWaitList = `https://${host}/family/getPendingUsers`;
           const familyWaitListResponse = await fetch(requestWaitList, {
             method: "POST",
             headers: {
@@ -205,7 +205,7 @@ const SignIn = () => {
         password: { value: "", required: true },
       });
 
-      let requestUserURL = `http://${host}:${port}/user/login`;
+      let requestUserURL = `https://${host}/user/login`;
       try {
         const response = await fetch(requestUserURL, {
           method: "POST",
@@ -219,6 +219,7 @@ const SignIn = () => {
         });
 
         const data = await response.json();
+
         if (data.msg == "1") {
           const userInformation = data.data;
           const userPayload: User = {

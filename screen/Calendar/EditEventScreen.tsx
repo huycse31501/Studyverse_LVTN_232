@@ -255,7 +255,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
         Alert.alert("Bạn không thể tạo sự kiện trong quá khứ");
       }
     } else {
-      let requestCreateEventURL = `http://${host}:${port}/event/${eventInfo.id}`;
+      let requestCreateEventURL = `https://${host}/event/${eventInfo.id}`;
 
       try {
         const response = await fetch(requestCreateEventURL, {
@@ -302,7 +302,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
   }
 
   async function submitCancelHandler() {
-    let requestCreateEventURL = `http://${host}:${port}/event/${eventInfo.id}`;
+    let requestCreateEventURL = `https://${host}/event/${eventInfo.id}`;
 
     try {
       const response = await fetch(requestCreateEventURL, {

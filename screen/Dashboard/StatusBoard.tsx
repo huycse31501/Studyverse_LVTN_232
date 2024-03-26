@@ -1,12 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
-  Image,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  ScrollView,
   Text,
   TouchableOpacity,
 } from "react-native";
@@ -21,7 +19,6 @@ import { User } from "./Details";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import Constants from "expo-constants";
-import { Event, GroupedEvent } from "../Calendar/CalendarDashboard";
 import { useDispatch } from "react-redux";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { mapUserIdsToAvatarIds } from "../../utils/mapUserIdToAvatarId";
@@ -37,9 +34,10 @@ type StatusBoardNavigationProp = StackNavigationProp<{
   };
 }>;
 
+let host = Constants?.expoConfig?.extra?.host;
+let port = Constants?.expoConfig?.extra?.port;
+
 const StatusDashboard = () => {
-  let host = Constants?.expoConfig?.extra?.host;
-  let port = Constants?.expoConfig?.extra?.port;
 
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
@@ -52,7 +50,7 @@ const StatusDashboard = () => {
 
   const [listOfEvent, setListOfEvent] = useState([]);
   const requestEventList = async () => {
-    let requestUserEventURL = `http://${host}:${port}/event/${user?.userId}`;
+    let requestUserEventURL = `https://${host}/event/${user?.userId}`;
     try {
       const response = await fetch(requestUserEventURL, {
         method: "GET",
@@ -113,7 +111,7 @@ const StatusDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let requestFamilyListURL = `http://${host}:${port}/family/getFamilyMembers/${user?.familyId}`;
+        let requestFamilyListURL = `https://${host}/family/getFamilyMembers/${user?.familyId}`;
         const familyListResponse = await fetch(requestFamilyListURL, {
           method: "GET",
           headers: {

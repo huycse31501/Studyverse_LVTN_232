@@ -57,7 +57,7 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
     useState(false);
   const handleCancelButton = async () => {
     try {
-      let kickMemberUrl = `http://${host}:${port}/family/kickMember`;
+      let kickMemberUrl = `https://${host}/family/kickMember`;
 
       const kickMember = await fetch(kickMemberUrl, {
         method: "POST",

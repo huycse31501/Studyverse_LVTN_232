@@ -51,7 +51,7 @@ const NotificationManager = () => {
   }
 
   async function fetchAndScheduleEvents(userId: string) {
-    let requestUserEventURL = `http://${host}:${port}/event/${userId}`;
+    let requestUserEventURL = `https://${host}/event/${userId}`;
     try {
       const response = await fetch(requestUserEventURL, {
         method: "GET",

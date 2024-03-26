@@ -25,7 +25,7 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "host": "192.168.1.5",
+      "host": "studyverse-latest.onrender.com",
       "port": "8080"
     }
   }
