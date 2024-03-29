@@ -169,8 +169,6 @@ const SignIn = () => {
           }
         } catch (e) {
           setIsLoading(false);
-
-          Alert.alert("Failed to fetch family wait list:");
           setRequestState(false);
         }
       }

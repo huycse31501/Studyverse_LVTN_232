@@ -11,6 +11,7 @@ type Props = {
   remind?: boolean;
   listOfEventCount?: DateCountMap[];
   onDateSelect?: (date: Date) => void;
+  onExam?: boolean;
 };
 
 const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
@@ -19,6 +20,7 @@ const WeekDatePicker: React.FC<Props> = ({
   remind,
   onDateSelect,
   listOfEventCount,
+  onExam,
 }) => {
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -113,7 +115,7 @@ const WeekDatePicker: React.FC<Props> = ({
       </View>
       <View style={styles.eventDateContainer}>
         <Text style={styles.eventDateText}>
-          {remind ? "Nhắc nhở" : "Sự kiện"}
+          {remind ? "Nhắc nhở" : onExam ? "Bài kiểm tra" : "Sự kiện"}
         </Text>
         <Text style={styles.eventDateTime}>
           {date.getMonth() + 1}/{date.getFullYear()}

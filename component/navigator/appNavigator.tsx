@@ -21,6 +21,7 @@ import EventInfoScreen, { Event } from "../../screen/Calendar/CalendarDashboard"
 import EventRemindScreen from "../../screen/Calendar/EventRemindScreen";
 import CreateEventScreen from "../../screen/Calendar/CreateEventScreen";
 import EditEventScreen from "../../screen/Calendar/EditEventScreen";
+import ExamInfoScreen from "../../screen/Exam/ExamDashboard";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -56,6 +57,12 @@ export type RootStackParamList = {
     routeBefore: string;
     fromFooter?: string;
   };
+  ExamInfoScreen: {
+    userId: number;
+    routeBefore: string;
+    newExamCreated?: boolean;
+    fromFooter?: string;
+  }
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -92,6 +99,8 @@ const AppNavigator = () => {
         <Stack.Screen name="EventRemindScreen" component={EventRemindScreen} />
         <Stack.Screen name="CreateEventScreen" component={CreateEventScreen} />
         <Stack.Screen name="EditEventScreen" component={EditEventScreen} />
+        <Stack.Screen name="ExamInfoScreen" component={ExamInfoScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
