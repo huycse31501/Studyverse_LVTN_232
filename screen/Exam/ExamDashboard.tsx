@@ -125,6 +125,9 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               onExamItemPress={(item) => {
                 console.log("Selected Exam:", item);
                 setConfirmDoTestModal(true);
+                navigation.navigate("ExamHistoryScreen", {
+                  userId: userId,
+                })
               }}
             />
           </View>
