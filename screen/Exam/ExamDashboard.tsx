@@ -125,9 +125,15 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               onExamItemPress={(item) => {
                 console.log("Selected Exam:", item);
                 setConfirmDoTestModal(true);
-                navigation.navigate("ExamHistoryScreen", {
+                // navigation.navigate("ExamHistoryScreen", {
+                //   userId: userId,
+                // })
+                navigation.navigate("ExamResultScreen", {
+                  totalQuestions: 40,
+                  correctAnswers: 10,
+                  timeTaken: "07:30",
                   userId: userId,
-                })
+                });
               }}
             />
           </View>

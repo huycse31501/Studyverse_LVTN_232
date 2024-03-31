@@ -17,12 +17,15 @@ import FamilyAcceptScreen from "../../screen/Dashboard/FamilyAccept";
 import UserInformationScreen from "../../screen/Dashboard/UserInformation";
 import { EventProps } from "../shared/RemindEvent";
 import EventInfo from "../type/EventInfo";
-import EventInfoScreen, { Event } from "../../screen/Calendar/CalendarDashboard";
+import EventInfoScreen, {
+  Event,
+} from "../../screen/Calendar/CalendarDashboard";
 import EventRemindScreen from "../../screen/Calendar/EventRemindScreen";
 import CreateEventScreen from "../../screen/Calendar/CreateEventScreen";
 import EditEventScreen from "../../screen/Calendar/EditEventScreen";
 import ExamInfoScreen from "../../screen/Exam/ExamDashboard";
 import ExamHistoryScreen from "../../screen/Exam/ExamHistory";
+import ExamResultScreen from "../../screen/Exam/ExamResultScreen";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -43,7 +46,6 @@ export type RootStackParamList = {
     routeBefore: string;
     newEventCreated?: boolean;
     fromFooter?: string;
-
   };
   EventRemindScreen: {
     userId: number;
@@ -63,14 +65,19 @@ export type RootStackParamList = {
     routeBefore: string;
     newExamCreated?: boolean;
     fromFooter?: string;
-  }
+  };
   ExamHistoryScreen: {
     userId: number;
     routeBefore?: string;
     newExamCreated?: boolean;
     fromFooter?: string;
-  }
-
+  };
+  ExamResultScreen: {
+    totalQuestions: number;
+    correctAnswers: number;
+    timeTaken: string;
+    userId?: number;
+  };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -109,6 +116,7 @@ const AppNavigator = () => {
         <Stack.Screen name="EditEventScreen" component={EditEventScreen} />
         <Stack.Screen name="ExamInfoScreen" component={ExamInfoScreen} />
         <Stack.Screen name="ExamHistoryScreen" component={ExamHistoryScreen} />
+        <Stack.Screen name="ExamResultScreen" component={ExamResultScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
