@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Tag from "../shared/Tags";
 
 export type ExamStatus = "completed" | "grading" | "failed" | "pending";
 
@@ -49,14 +50,30 @@ const ExamList: React.FC<ExamListProps> = ({
   const getBackGroundColor = (status: ExamStatus) => {
     switch (status) {
       case "completed":
-        return "#8ac57b";
+        return "#ccedb8";
       case "failed":
         return "#f87d7d";
       case "grading":
-        return "#ddf2e0";
+        return "#c9e8f4";
       default:
         return "#ffffff";
     }
+  };
+
+  const renderTags = (tags: string[]) => {
+    const tagsToShow = tags.length > 2 ? tags.slice(0, 2) : tags;
+    const additionalTagsCount = tags.length > 2 ? `+${tags.length - 2}` : null;
+
+    return (
+      <View style={styles.tagContainer}>
+        {tagsToShow.map((tag, index) => (
+          <Tag key={index} name={tag} />
+        ))}
+        {additionalTagsCount && (
+          <Text style={styles.additionalTagsText}>{additionalTagsCount}</Text>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -77,13 +94,16 @@ const ExamList: React.FC<ExamListProps> = ({
                 source={require("../../assets/images/shared/eventTimeCircle.png")}
                 style={styles.timeCircleIcon}
               />
-              <Text style={styles.time}>
-                {item.timeStart ?? "Chưa bắt đầu"}
-              </Text>
+              <Text style={styles.time}>{item.timeStart ?? "-----"}</Text>
+              <View style={styles.tagContainer}>{renderTags(item.tags)}</View>
             </View>
           </View>
           <View style={styles.gradingContainer}>
-            <Ionicons name={getIconName(item.status)} size={24} />
+            <Ionicons
+              name={getIconName(item.status)}
+              style={{ color: "#0e0e11" }}
+              size={24}
+            />
             <Text style={styles.gradingText}>{item.result ?? "-----"}</Text>
           </View>
         </TouchableOpacity>
@@ -143,12 +163,28 @@ const styles = StyleSheet.create({
   },
   gradingContainer: {
     flexDirection: "row",
+    marginBottom: 30,
   },
   gradingText: {
     fontSize: 14.5,
     fontWeight: "500",
     marginLeft: 10,
     marginRight: 5,
+  },
+  tagContainer: {
+    flexDirection: "row",
+    marginHorizontal: 5,
+    position: "absolute",
+    left: 35,
+    bottom: -5,
+  },
+  additionalTagsText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#000000",
+    position: "absolute",
+    right: -25,
+    bottom: 5,
   },
 });
 

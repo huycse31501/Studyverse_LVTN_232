@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Platform,
+  Modal,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import WeekDatePicker from "../../component/shared/DateSlide";
@@ -30,6 +31,7 @@ import { RootStackParamList } from "../../component/navigator/appNavigator";
 import MemberOption from "../../component/examRelated/examMemberSlide";
 import ExamList from "../../component/examRelated/examList";
 import { examList } from "../../mockData/ExamData";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 type ExamInfoRouteProp = RouteProp<RootStackParamList, "ExamInfoScreen">;
 
@@ -53,6 +55,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   )[0];
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [confirmDoTestModal, setConfirmDoTestModal] = useState(false);
 
   const onBackPress = useCallback(() => {
     if (memberToRender.userId === user?.userId) {
@@ -69,6 +72,10 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
   }, []);
+
+  const handleDoTestButton = async () => {
+    setConfirmDoTestModal(false);
+  };
 
   const insets = useSafeAreaInsets();
 
@@ -113,7 +120,13 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
             />
           </View>
           <View style={styles.examContainer}>
-            <ExamList Exams={examList} />
+            <ExamList
+              Exams={examList}
+              onExamItemPress={(item) => {
+                console.log("Selected Exam:", item);
+                setConfirmDoTestModal(true);
+              }}
+            />
           </View>
           {user && user.role === "parent" && (
             <ApplyButton
