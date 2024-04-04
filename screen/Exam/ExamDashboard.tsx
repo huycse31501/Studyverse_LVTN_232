@@ -32,6 +32,7 @@ import MemberOption from "../../component/examRelated/examMemberSlide";
 import ExamList from "../../component/examRelated/examList";
 import { examList } from "../../mockData/ExamData";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { mockQuestions } from "./DoExam";
 
 type ExamInfoRouteProp = RouteProp<RootStackParamList, "ExamInfoScreen">;
 
@@ -128,13 +129,12 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
                 // navigation.navigate("ExamHistoryScreen", {
                 //   userId: userId,
                 // })
-                navigation.navigate("ExamResultScreen", {
-                  totalQuestions: 40,
-                  correctAnswers: 10,
-                  timeTaken: "07:30",
-                  userId: userId,
-                });
-              }}
+                navigation.navigate("DoExamScreen", {
+                  questions: mockQuestions,
+                  time: '00:20:30',
+                })
+              }
+              }
             />
           </View>
           {user && user.role === "parent" && (
