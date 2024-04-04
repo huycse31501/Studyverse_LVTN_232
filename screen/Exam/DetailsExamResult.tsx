@@ -17,6 +17,7 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Constants from "expo-constants";
 import ApplyButton from "../../component/shared/ApplyButton";
+import WideButton from "../../component/shared/WideButton";
 
 export type Question = {
   id: number;
@@ -42,117 +43,40 @@ export const mockQuestions: Question[] = [
   },
 ];
 
-export const mockQuestionsResult: Question[] = [
-  {
-    id: 1,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-    userAnswer: "London",
-    correctAnswer: "Paris",
-  },
-  {
-    id: 2,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-    userAnswer: "Paris",
-    correctAnswer: "Paris",
-  },
-  {
-    id: 3,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    userAnswer: "Me",
-    correctAnswer: "true",
-  },
-  {
-    id: 4,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    userAnswer: "Me",
-    correctAnswer: "false",
-  },
-  {
-    id: 5,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    userAnswer: "Me",
+type DetailExamResultRouteProp = RouteProp<
+  RootStackParamList,
+  "DetailExamResultScreen"
+>;
 
-    isParentView: true,
-  },
-];
-
-type DoExamRouteProp = RouteProp<RootStackParamList, "DoExamScreen">;
-
-interface DoExamScreenProps {
-  route: DoExamRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "DoExamScreen">;
+interface DetailExamResultScreenProps {
+  route: DetailExamResultRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "DetailExamResultScreen">;
 }
 
-const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
+const DetailExamResultScreen = ({
+  route,
+  navigation,
+}: DetailExamResultScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-  const { userId, questions, time } = route.params;
-
-  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const { userId, questions, timeFinish } = route.params;
+  const [gradedQuestions, setGradedQuestions] = useState<Question[]>(questions);
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState("");
 
-  const getSecondsFromTime = (time: string) => {
-    const [hours, minutes, seconds] = time.split(":").map(Number);
-    return hours * 3600 + minutes * 60 + seconds;
+  const handleGradeOption = (questionId: number, isCorrect: boolean) => {
+    const updatedQuestions = gradedQuestions.map((q) => {
+      if (q.id === questionId) {
+        const correctAnswerValue = isCorrect ? "true" : "false";
+        const newCorrectAnswer =
+          q.correctAnswer === correctAnswerValue ? "" : correctAnswerValue;
+        return { ...q, correctAnswer: newCorrectAnswer };
+      }
+      return q;
+    });
+    setGradedQuestions(updatedQuestions);
   };
 
-  useEffect(() => {
-    let totalTime = getSecondsFromTime(time);
-    setTimeLeft(time);
-
-    const timer = setInterval(() => {
-      totalTime -= 1;
-      const hours = Math.floor(totalTime / 3600);
-      const mins = Math.floor((totalTime % 3600) / 60);
-      const secs = totalTime % 60;
-      const formattedTime = `${hours.toString().padStart(2, "0")}:${mins
-        .toString()
-        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-      setTimeLeft(formattedTime);
-
-      if (totalTime <= 0) {
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [time]);
-
-  useEffect(() => {
-    const progress = Object.keys(answers).length / questions.length;
-  }, [answers]);
-  const handleSelectOption = (questionId: number, option: string) => {
-    let newAnswers = { ...answers };
-
-    if (
-      questions.find((question) => question.id === questionId)?.type ===
-        "text" &&
-      option.trim() === ""
-    ) {
-      const { [questionId]: deletedAnswer, ...rest } = newAnswers;
-      newAnswers = rest;
-    } else {
-      if (newAnswers[questionId] === option) {
-        delete newAnswers[questionId];
-      } else {
-        newAnswers = {
-          ...newAnswers,
-          [questionId]: option,
-        };
-      }
-    }
-
-    setAnswers(newAnswers);
-  };
   const goToNextQuestion = () => {
     const nextIndex = currentIndex + 1;
     if (nextIndex < questions.length) {
@@ -170,6 +94,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
   };
 
   const renderItem = ({ item, index }: { item: Question; index: number }) => {
+    const userAnswer = item.userAnswer;
+    const correctAnswer = item.correctAnswer;
+    const isAnswered = userAnswer !== undefined;
     const progressText = `${index + 1}/${questions.length}`;
 
     switch (item.type) {
@@ -186,32 +113,42 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
                 source={require("../../assets/images/shared/clockIcon.png")}
                 style={styles.timeIcon}
               />
-              <Text style={styles.timeCounter}>{timeLeft}</Text>
-              <TouchableOpacity
-                key={index}
-                style={styles.submitButton}
-                onPress={() => {}}
-              >
-                <Text style={styles.submitText}>Nộp bài</Text>
-              </TouchableOpacity>
+              <Text style={styles.timeCounter}>{timeFinish}</Text>
+              {item.isParentView && (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.submitButton}
+                  onPress={() => {}}
+                >
+                  <Text style={styles.submitText}>Hoàn thành</Text>
+                </TouchableOpacity>
+              )}
             </View>
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{item.question}</Text>
             </View>
             <View style={styles.optionsContainer}>
               {item.options!.map((option, index) => {
-                const isSelected = answers[item.id] === option;
+                const isUserAnswer = userAnswer === option;
+                const isCorrectAnswer = correctAnswer === option;
+                let backgroundColor = "#FFFFFF";
+                if (isAnswered) {
+                  if (isUserAnswer && isUserAnswer !== isCorrectAnswer) {
+                    backgroundColor = "#FDE4E4";
+                  } else if (isCorrectAnswer) {
+                    backgroundColor = "#DDF0E6";
+                  }
+                }
                 return (
-                  <TouchableOpacity
+                  <View
                     key={index}
                     style={[
                       styles.optionWrapper,
-                      isSelected && styles.selectedOption,
+                      { backgroundColor: backgroundColor },
                     ]}
-                    onPress={() => handleSelectOption(item.id, option)}
                   >
                     <Text style={styles.optionText}>{option}</Text>
-                  </TouchableOpacity>
+                  </View>
                 );
               })}
             </View>
@@ -230,14 +167,16 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
                 source={require("../../assets/images/shared/clockIcon.png")}
                 style={styles.timeIcon}
               />
-              <Text style={styles.timeCounter}>{timeLeft}</Text>
-              <TouchableOpacity
-                key={index}
-                style={styles.submitButton}
-                onPress={() => {}}
-              >
-                <Text style={styles.submitText}>Nộp bài</Text>
-              </TouchableOpacity>
+              <Text style={styles.timeCounter}>{timeFinish}</Text>
+              {item.isParentView && (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.submitButton}
+                  onPress={() => {}}
+                >
+                  <Text style={styles.submitText}>Hoàn thành</Text>
+                </TouchableOpacity>
+              )}
             </View>
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{item.question}</Text>
@@ -245,18 +184,58 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
             <Text style={styles.answerTitleTextStyle}>Trả lời</Text>
 
             <View style={styles.textNoticeContainer}>
-              <TextInput
-                value={answers[item.id] || ""}
-                onChangeText={(text) => handleSelectOption(item.id, text)}
-                style={styles.noticeInput}
-              />
+              <Text style={styles.noticeInput}>{userAnswer || " "}</Text>
             </View>
+            {correctAnswer && !item.isParentView && (
+              <View
+                style={[
+                  styles.notificationContainer,
+                  correctAnswer === "false" && { backgroundColor: "#FDE4E4" },
+                ]}
+              >
+                <Text style={styles.notificationText}>
+                  {`Câu trả lời ${
+                    correctAnswer === "false" ? "không " : ""
+                  }chính xác`}
+                </Text>
+              </View>
+            )}
+            {item.isParentView && (
+              <View style={styles.gradingContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.gradingOptionWrapper,
+                    item.correctAnswer === "true" && {
+                      backgroundColor: "#DDF0E6",
+                    },
+                  ]}
+                  onPress={() => handleGradeOption(item.id, true)}
+                >
+                  <Text style={styles.optionText}>Đúng</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.gradingOptionWrapper,
+                    item.correctAnswer === "false" && {
+                      backgroundColor: "#FDE4E4",
+                    },
+                  ]}
+                  onPress={() => handleGradeOption(item.id, false)}
+                >
+                  <Text style={styles.optionText}>Sai</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         );
     }
   };
 
-  const progress = Object.keys(answers).length / questions.length;
+  const answeredQuestionsCount = questions.filter(
+    (q) => q.userAnswer !== undefined
+  ).length;
+  const progress = answeredQuestionsCount / questions.length;
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -272,7 +251,7 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
 
       <View style={styles.listContainer}>
         <FlatList
-          data={questions}
+          data={gradedQuestions}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           horizontal
@@ -381,7 +360,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     marginTop: 100,
-    marginLeft: 5,
+    // marginLeft: 5,
   },
   questionContainer: {
     width: Dimensions.get("window").width,
@@ -435,7 +414,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 30,
     paddingBottom: 20,
-    marginTop: 60,
+    marginTop: 20,
   },
   navButton: {
     paddingVertical: 8,
@@ -465,7 +444,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   submitButton: {
-    marginLeft: 120,
+    marginLeft: 100,
     paddingVertical: 8,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -477,6 +456,42 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontSize: 17,
   },
+  notificationContainer: {
+    backgroundColor: "#ccffcc",
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#DDF0E6",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 330,
+    marginTop: 10,
+    alignSelf: "center",
+  },
+  notificationText: {
+    color: "#3e3d4a",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  gradingContainer: {
+    flexDirection: "row",
+  },
+  gradingOptionWrapper: {
+    backgroundColor: "#FFFFFF",
+    padding: 10,
+    marginTop: 10,
+    marginHorizontal: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    width: Dimensions.get("window").width / 2 - 45,
+    borderRadius: 15,
+    elevation: 3,
+    marginLeft: 17.5,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+  },
 });
 
-export default DoExamScreen;
+export default DetailExamResultScreen;
