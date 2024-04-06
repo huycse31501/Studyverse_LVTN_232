@@ -26,6 +26,7 @@ export type Question = {
   userAnswer?: string;
   correctAnswer?: string;
   isParentView?: boolean;
+  label?: string[];
 };
 
 export const mockQuestions: Question[] = [

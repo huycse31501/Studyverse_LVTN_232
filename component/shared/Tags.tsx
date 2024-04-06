@@ -6,21 +6,39 @@ type TagProps = {
   name: string;
 };
 
+export const listOfTags = [
+  "Toán",
+  "Lý",
+  "Hóa học",
+  "Lịch sử",
+  "Anh văn",
+  "Ngữ văn",
+  "Sinh học",
+  "Địa ly",
+  "GDCD",
+  "Hằng ngày",
+  "Kiểm tra",
+];
 const getColors = (name: string) => {
   let backgroundColor, circleColor;
   switch (name) {
     case "Toán":
+    case "Lý":
+    case "Hóa học":
       backgroundColor = "#f7f0d3";
       circleColor = "#F59E0B";
       break;
     case "Anh văn":
     case "Lịch sử":
     case "Ngữ văn":
+    case "Sinh học":
+    case "Địa lý":
+    case "GDCD":
       backgroundColor = "#FEF2F2";
       circleColor = "#DC2626";
       break;
-    case "Daily":
-    case "Exam":
+    case "Hằng ngày":
+    case "Kiểm tra":
       backgroundColor = "#F0FFF5";
       circleColor = "#1A7529";
       break;
@@ -50,7 +68,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 15,
     marginHorizontal: 7,
-    width: 80,
   },
   circle: {
     width: 10,

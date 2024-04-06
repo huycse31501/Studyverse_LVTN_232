@@ -129,9 +129,8 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
                 // navigation.navigate("ExamHistoryScreen", {
                 //   userId: userId,
                 // })
-                navigation.navigate("DetailExamResultScreen", {
-                  questions: mockQuestionsResult,
-                  timeFinish: "00:20:30",
+                navigation.navigate("CreateExamScreen", {
+                  userId: userId,
                 });
               }}
             />

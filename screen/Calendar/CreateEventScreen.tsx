@@ -542,7 +542,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
           <Text style={styles.noteText}>Những người liên quan đến sự kiện</Text>
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
-              excludeId={userId}
+              excludeId={[userId]}
               onSelectedMembersChange={handleSelectedMembersChange}
             />
           </View>

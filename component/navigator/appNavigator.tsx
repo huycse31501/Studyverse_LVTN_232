@@ -28,6 +28,9 @@ import ExamHistoryScreen from "../../screen/Exam/ExamHistory";
 import ExamResultScreen from "../../screen/Exam/ExamResultScreen";
 import DoExamScreen, { Question } from "../../screen/Exam/DoExam";
 import DetailExamResultScreen from "../../screen/Exam/DetailsExamResult";
+import CreateExamScreen from "../../screen/Exam/CreateExamScreen";
+import CreateQuestionListScreen from "../../screen/Exam/CreateQuestionList";
+import CreateNewQuestionScreen from "../../screen/Exam/CreateNewQuestion";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -84,12 +87,27 @@ export type RootStackParamList = {
     questions: Question[];
     time: string;
     userId?: number;
-  }
+  };
   DetailExamResultScreen: {
     questions: Question[];
     timeFinish: string;
     userId?: number;
-  }
+  };
+  CreateExamScreen: {
+    userId: number;
+    previousPayload?: any;
+    currentQuestionList?: any;
+  };
+  CreateQuestionListScreen: {
+    userId: number;
+    previousPayload?: any;
+    currentQuestionList?: any;
+  };
+  CreateNewQuestionScreen: {
+    userId: number;
+    previousPayload?: any;
+    currentQuestionList?: any;
+  };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -130,9 +148,19 @@ const AppNavigator = () => {
         <Stack.Screen name="ExamHistoryScreen" component={ExamHistoryScreen} />
         <Stack.Screen name="ExamResultScreen" component={ExamResultScreen} />
         <Stack.Screen name="DoExamScreen" component={DoExamScreen} />
-        <Stack.Screen name="DetailExamResultScreen" component={DetailExamResultScreen} />
-
-
+        <Stack.Screen
+          name="DetailExamResultScreen"
+          component={DetailExamResultScreen}
+        />
+        <Stack.Screen name="CreateExamScreen" component={CreateExamScreen} />
+        <Stack.Screen
+          name="CreateQuestionListScreen"
+          component={CreateQuestionListScreen}
+        />
+        <Stack.Screen
+          name="CreateNewQuestionScreen"
+          component={CreateNewQuestionScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

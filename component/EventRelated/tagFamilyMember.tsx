@@ -16,7 +16,7 @@ import { avatarList } from "../../utils/listOfAvatar";
 import { getTimeDifference } from "../../utils/takeTimeDif";
 
 type MemberTagListProps = {
-  excludeId: number;
+  excludeId: number[];
   onSelectedMembersChange: (selectedMembers: number[]) => void;
   defaultValue?: number[];
 };
@@ -32,7 +32,10 @@ const MemberTagList: React.FC<MemberTagListProps> = ({
   );
   const totalList = user ? [...familyList, user] : familyList;
   const memberStatusData = totalList.filter(
-    (userInTotalList) => userInTotalList.userId !== String(excludeId)
+    (userInTotalList) => {
+      const userIdNumber = Number(userInTotalList.userId);
+      return !isNaN(userIdNumber) && !excludeId.includes(userIdNumber);
+    }
   );
   const [selectedMembers, setSelectedMembers] = useState<number[]>(
     defaultValue ? defaultValue : []
