@@ -16,27 +16,30 @@ import { avatarList } from "../../utils/listOfAvatar";
 import { getTimeDifference } from "../../utils/takeTimeDif";
 
 type MemberTagListProps = {
-  excludeId: number[];
   onSelectedMembersChange: (selectedMembers: number[]) => void;
   defaultValue?: number[];
+  isEvent?: boolean;
 };
 
 const MemberTagList: React.FC<MemberTagListProps> = ({
   onSelectedMembersChange,
-  excludeId,
   defaultValue,
+  isEvent,
 }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
   const totalList = user ? [...familyList, user] : familyList;
-  const memberStatusData = totalList.filter(
-    (userInTotalList) => {
-      const userIdNumber = Number(userInTotalList.userId);
-      return !isNaN(userIdNumber) && !excludeId.includes(userIdNumber);
-    }
-  );
+  const excludeList = totalList
+    .filter((member) => member.role === "parent")
+    .map((member) => Number(member.userId));
+
+  const excludeId = isEvent ? [user?.userId] : [...excludeList, user?.userId];
+  const memberStatusData = totalList.filter((userInTotalList) => {
+    const userIdNumber = Number(userInTotalList.userId);
+    return !isNaN(userIdNumber) && !excludeId.includes(userIdNumber);
+  });
   const [selectedMembers, setSelectedMembers] = useState<number[]>(
     defaultValue ? defaultValue : []
   );

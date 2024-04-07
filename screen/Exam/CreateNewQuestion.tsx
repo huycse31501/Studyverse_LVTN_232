@@ -23,22 +23,7 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import BlackBorderTextInputField from "../../component/shared/BlackBorderInputField";
 import { listOfTags } from "../../component/shared/Tags";
 import TagToSelect from "../../component/shared/TagsToSelect";
-
-export const mockQuestionsList: Question[] = [
-  {
-    id: 1,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-    label: ["Anh văn"],
-  },
-  {
-    id: 2,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    label: ["Ngữ văn"],
-  },
-];
+import { number } from "prop-types";
 
 type CreateNewQuestionRouteProp = RouteProp<
   RootStackParamList,
@@ -64,6 +49,7 @@ const CreateNewQuestionScreen = ({
 
   const [questionOptions, setQuestionOptions] = useState(["", "", "", ""]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [correctAnswer, setCorrectAnswer] = useState<number>();
   const toggleTagSelection = (tagName: string) => {
     setSelectedTags((currentSelectedTags) => {
       if (currentSelectedTags.includes(tagName)) {
@@ -73,16 +59,8 @@ const CreateNewQuestionScreen = ({
       }
     });
   };
-  const user = useSelector((state: RootState) => state.user.user);
-  const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMembers
-  );
-  const totalList = user ? [...familyList, user] : familyList;
-  const excludeList = totalList
-    .filter((member) => member.role === "parent")
-    .map((member) => Number(member.userId));
-  const [inputs, setInputs] = useState(mockQuestionsList);
 
+  const [inputs, setInputs] = useState([]);
   const handleBackButton = () => {
     navigation.navigate("CreateQuestionListScreen", {
       userId: Number(userId),
@@ -214,6 +192,18 @@ const CreateNewQuestionScreen = ({
                   }}
                 />
               </View>
+              <View style={{}}>
+                <Text style={styles.inputTitleText}>Lựa chọn đúng</Text>
+                <BlackBorderTextInputField
+                  placeHolder="Điền vị trí lựa chọn (1,2,3,4)"
+                  isValid
+                  required
+                  value={correctAnswer ? String(correctAnswer) : ""}
+                  textInputConfig={{
+                    onChangeText: (value) => setCorrectAnswer(Number(value)),
+                  }}
+                />
+              </View>
             </>
           )}
           <Text style={styles.noteText}>Nhãn bài kiểm tra</Text>
@@ -237,20 +227,23 @@ const CreateNewQuestionScreen = ({
               label="Tạo câu hỏi"
               onPress={() => {
                 const newQuestion: Question = {
-                  id: currentQuestionList.length + 1,
-                  type: questionType === "multiple-choice" ? "multiple-choice" : "text",
+                  id: currentQuestionList ? currentQuestionList.length + 1 : 0,
+                  type:
+                    questionType === "multiple-choice"
+                      ? "multiple-choice"
+                      : "text",
                   question: questionTitle,
                   label: selectedTags,
                 };
-              
-                if (questionType === 'multiple-choice') {
+
+                if (questionType === "multiple-choice") {
                   newQuestion.options = questionOptions;
+                  newQuestion.answerId = correctAnswer;
                 }
-              
                 navigation.navigate("CreateQuestionListScreen", {
                   userId: userId,
                   previousPayload: previousPayload,
-                  currentQuestionList: [...currentQuestionList, newQuestion],
+                  currentQuestionList: currentQuestionList ? [...currentQuestionList, newQuestion] : [newQuestion],
                 });
               }}
             />

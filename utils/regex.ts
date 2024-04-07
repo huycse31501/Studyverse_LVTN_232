@@ -9,6 +9,8 @@ const regexVault = {
   passwordValidate: /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,20}$/,
   preventxssValidate: /^[A-Za-z0-9À-ÖØ-öø-ỹ_\s]{2,40}$/,
   examTime: /^([01]?[0-9]|2[0-3]):([0-5]?[0-9]):([0-5]?[0-9])$/,
+  passPoint: /^(10|[1-9])$/,
+  correctChoice: /^[1-4]$/,
 };
 
 export default regexVault;

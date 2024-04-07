@@ -7,6 +7,7 @@ import {
   Platform,
   SafeAreaView,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import { RouteProp } from "@react-navigation/native";
@@ -44,16 +45,8 @@ const validateValidDate = (checkDate: string) => {
 };
 
 const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
-  const { userId } = route.params;
+  const { userId, previousPayload, currentQuestionList } = route.params;
 
-  const user = useSelector((state: RootState) => state.user.user);
-  const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMembers
-  );
-  const totalList = user ? [...familyList, user] : familyList;
-  const excludeList = totalList
-    .filter((member) => member.role === "parent")
-    .map((member) => Number(member.userId));
   const [inputs, setInputs] = useState({
     examName: {
       value: "",
@@ -63,10 +56,7 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
       value: "",
       required: false,
     },
-    subject: {
-      value: "",
-      required: true,
-    },
+
     examTime: {
       value: "",
       required: true,
@@ -75,30 +65,35 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
       value: "",
       required: true,
     },
+    passPoint: {
+      value: "",
+      required: true,
+    },
     tagsUser: {
       value: "[]",
       required: true,
     },
     tagsSubject: {
-      value: [],
+      value: [] as string[],
       required: true,
     },
   });
 
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
   const toggleTagSelection = (tagName: string) => {
-    
-    setSelectedTags((currentSelectedTags) => {
-      if (currentSelectedTags.includes(tagName)) {
-        return currentSelectedTags.filter((tag) => tag !== tagName);
-      } else {
-        return [...currentSelectedTags, tagName];
-      }
+    setInputs((currentInputs) => {
+      const updatedTags = currentInputs.tagsSubject.value.includes(tagName)
+        ? currentInputs.tagsSubject.value.filter((tag) => tag !== tagName)
+        : [...currentInputs.tagsSubject.value, tagName];
+
+      return {
+        ...currentInputs,
+        tagsSubject: {
+          ...currentInputs.tagsSubject,
+          value: updatedTags,
+        },
+      };
     });
   };
-
-  
   const handleSelectedMembersChange = (selectedMemberIds: number[]) => {
     const selectedMembersString = `[${selectedMemberIds.join(",")}]`;
 
@@ -111,17 +106,12 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
     }));
   };
 
-
   const [inputValidation, setInputValidation] = useState({
     isExamNameValid: regexVault.preventxssValidate.test(inputs.examName.value),
-    isDescriptionValid: regexVault.preventxssValidate.test(
-      inputs.description.value
-    ),
     isExamDateValid: validateValidDate(inputs.examDate.value),
     isExamTimeValid: regexVault.examTime.test(inputs.examTime.value),
+    isPassPointValid: regexVault.passPoint.test(inputs.passPoint.value),
   });
-
-
 
   useEffect(() => {
     const updatedValidation = {
@@ -131,15 +121,21 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
       isDescriptionValid:
         inputs.description.value.length === 0 ||
         regexVault.preventxssValidate.test(inputs.description.value),
-      isExamDateValid: validateValidDate(inputs.examDate.value),
+      isPassPointValid:
+        inputs.passPoint.value.length === 0 ||
+        regexVault.passPoint.test(inputs.passPoint.value),
+
+      isExamDateValid:
+        validateValidDate(inputs.examDate.value) &&
+        regexVault.DOBValidate.test(inputs.examDate.value),
       isExamTimeValid: regexVault.examTime.test(inputs.examTime.value),
     };
     setInputValidation(updatedValidation);
   }, [
-    inputs.description.value,
     inputs.examName.value,
     inputs.examDate.value,
     inputs.examTime.value,
+    inputs.passPoint.value,
   ]);
 
   const inputChangedHandler = useCallback(
@@ -158,7 +154,7 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
         return curInputs;
       });
     },
-    []
+    [inputs]
   );
 
   const resetInputs = () => {
@@ -171,15 +167,15 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
         value: "",
         required: false,
       },
-      subject: {
-        value: "",
-        required: true,
-      },
       examTime: {
         value: "",
         required: true,
       },
       examDate: {
+        value: "",
+        required: true,
+      },
+      passPoint: {
         value: "",
         required: true,
       },
@@ -194,7 +190,41 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
     });
   };
 
-  const insets = useSafeAreaInsets(); 
+  const continueHandle = () => {
+    let allFieldsFilled = true;
+    let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
+
+    for (const [key, value] of Object.entries(inputs)) {
+      if (value.required && !value.value) {
+        allFieldsFilled = false;
+
+        break;
+      }
+    }
+    if (!allFieldsFilled) {
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
+    } else if (!allFieldsValid) {
+      if (inputValidation.isExamNameValid === false) {
+        Alert.alert("Thông báo", "Tên bài kiểm tra không hợp lệ");
+      } else if (inputValidation.isExamDateValid === false) {
+        Alert.alert("Bạn không thể tạo bài kiểm tra trong quá khứ");
+      } else if (inputValidation.isPassPointValid === false) {
+        Alert.alert(
+          "Thông báo",
+          "Số điểm cần để đạt bài kiểm tra phải nằm trong khoảng từ 1 đến 10"
+        );
+      } else if (inputValidation.isExamTimeValid === false) {
+        Alert.alert("Thông báo", "Thời gian làm bài cần ở dạng HH:MM:SS");
+      }
+    } else {
+      navigation.navigate("CreateQuestionListScreen", {
+        userId: userId,
+        previousPayload: inputs,
+        currentQuestionList: currentQuestionList
+      });
+    }
+  };
+  const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
@@ -215,6 +245,7 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => {
+                resetInputs();
                 navigation.navigate("ExamInfoScreen", {
                   userId: Number(userId),
                   routeBefore: "StatusDashboard",
@@ -251,18 +282,23 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               }}
             />
           </View>
+
           <View>
-            <Text style={styles.inputTitleText}>Tên môn học</Text>
+            <Text style={styles.inputTitleText}>
+              Số điểm cần để vượt qua bài kiểm tra
+            </Text>
             <BlackBorderTextInputField
-              placeHolder="Môn học"
+              placeHolder="Điền số từ 1 tới 10"
               isValid
               required
-              value={inputs.subject.value}
+              value={inputs.passPoint.value}
               textInputConfig={{
-                onChangeText: inputChangedHandler.bind(this, "subject"),
+                onChangeText: inputChangedHandler.bind(this, "passPoint"),
+                keyboardType: "number-pad",
               }}
             />
           </View>
+
           <View>
             <Text style={styles.inputTitleText}>Thời gian làm bài</Text>
             <BlackBorderTextInputField
@@ -275,7 +311,9 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               }}
             />
           </View>
-          <Text style={styles.inputTitleText}>Hạn làm bài</Text>
+          <Text style={[styles.inputTitleText, {
+            marginBottom: 5,
+          }]}>Hạn làm bài</Text>
           <View style={styles.examDateContainer}>
             <DateInputField
               required
@@ -287,10 +325,10 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               }}
             />
           </View>
+
           <Text style={styles.noteText}>Thành viên cần làm bài</Text>
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
-              excludeId={[...excludeList, userId]}
               onSelectedMembersChange={handleSelectedMembersChange}
             />
           </View>
@@ -300,16 +338,13 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               <TagToSelect
                 key={index}
                 name={tag}
-                isSelected={selectedTags.includes(tag)}
+                isSelected={inputs.tagsSubject.value.includes(tag)}
                 onPress={() => toggleTagSelection(tag)}
               />
             ))}
           </View>
           <View style={styles.nextButtonContainer}>
-            <ApplyButton label="Tiếp tục" onPress={() => navigation.navigate("CreateQuestionListScreen", {
-              userId: userId,
-              previousPayload: inputs
-            })} />
+            <ApplyButton label="Tiếp tục" onPress={continueHandle} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
@@ -381,6 +416,6 @@ const styles = StyleSheet.create({
   nextButtonContainer: {
     marginTop: 30,
     marginBottom: 50,
-  }
+  },
 });
 export default CreateExamScreen;

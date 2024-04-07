@@ -16,14 +16,12 @@ import { avatarList } from "../../utils/listOfAvatar";
 import { getTimeDifference } from "../../utils/takeTimeDif";
 
 type MemberOptionProps = {
-  excludeId: number;
   onSelectedMembersChange: (selectedMembers: number | null) => void;
   defaultValue?: number[];
 };
 
 const MemberOption: React.FC<MemberOptionProps> = ({
   onSelectedMembersChange,
-  excludeId,
   defaultValue,
 }) => {
   const user = useSelector((state: RootState) => state.user.user);
@@ -31,15 +29,21 @@ const MemberOption: React.FC<MemberOptionProps> = ({
     (state: RootState) => state.familyMember.familyMembers
   );
   const totalList = user ? [...familyList, user] : familyList;
-  const memberStatusData = totalList.filter(
-    (userInTotalList) => userInTotalList.userId !== String(excludeId) //&&       userInTotalList.role !== "parent"
+  const excludeList = totalList
+    .filter((member) => member.role === "parent")
+    .map((member) => Number(member.userId));
+
+  const excludeId = [...excludeList, user?.userId];
+  const memberStatusData = totalList.filter((userInTotalList) => {
+    const userIdNumber = Number(userInTotalList.userId);
+    return !isNaN(userIdNumber) && !excludeId.includes(userIdNumber);
+  });
+  const [selectedMember, setSelectedMember] = useState<number | null>(
+    defaultValue?.[0] ??
+      (memberStatusData.length > 0 ? Number(memberStatusData[0].userId) : null)
   );
 
-  const [selectedMember, setSelectedMember] = useState<number | null>(
-    defaultValue
-      ? defaultValue[0]
-      : (memberStatusData[0] && Number(memberStatusData[0].userId)) || null
-  );
+  
 
   useEffect(() => {
     if (selectedMember === null && memberStatusData.length > 0) {
@@ -47,8 +51,7 @@ const MemberOption: React.FC<MemberOptionProps> = ({
       setSelectedMember(defaultSelectedMember);
       onSelectedMembersChange(defaultSelectedMember);
     }
-  }, [memberStatusData, onSelectedMembersChange, selectedMember]);
-
+  }, [memberStatusData, onSelectedMembersChange]);
   const handleSelectMember = (memberId: number) => {
     setSelectedMember(memberId);
     onSelectedMembersChange(memberId);

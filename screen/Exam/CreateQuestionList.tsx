@@ -8,37 +8,24 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Image,
-  Touchable,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import regexVault from "../../utils/regex";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import BlackBorderTextInputField from "../../component/shared/BlackBorderInputField";
-import DateInputField from "../../component/signin-signup/DateInputField";
-import MemberTagList from "../../component/EventRelated/tagFamilyMember";
+
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { Question } from "./DoExam";
 import ApplyButton from "../../component/shared/ApplyButton";
-
-export const mockQuestionsList: Question[] = [
-  {
-    id: 1,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-    label: ["Anh văn"],
-  },
-  {
-    id: 2,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    label: ["Ngữ văn"],
-  },
-];
+import Constants from "expo-constants";
+import { convertTimeToSeconds } from "../../utils/convertTimeToSecond";
+import { minQuestionsToPass } from "../../utils/minQuestionToPass";
+import { convertSubjectToId, convertSubjectsToIds } from "../../component/shared/constants/convertSubjectToId";
+import parseStringToDate from "../../utils/parseStringToDate";
 
 type CreateQuestionListRouteProp = RouteProp<
   RootStackParamList,
@@ -53,23 +40,126 @@ interface CreateQuestionListScreenProps {
   >;
 }
 
+let host = Constants?.expoConfig?.extra?.host;
+let port = Constants?.expoConfig?.extra?.port;
+
 const CreateQuestionListScreen = ({
   route,
   navigation,
 }: CreateQuestionListScreenProps) => {
   const { userId, previousPayload, currentQuestionList } = route.params;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const user = useSelector((state: RootState) => state.user.user);
-  const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMembers
-  );
-  const totalList = user ? [...familyList, user] : familyList;
-  const excludeList = totalList
-    .filter((member) => member.role === "parent")
-    .map((member) => Number(member.userId));
-  const [inputs, setInputs] = useState(
-    currentQuestionList ?? mockQuestionsList
-  );
+  const handleSubmitCreateQuestion = async () => {
+    if (!currentQuestionList) {
+      Alert.alert("Bài kiểm tra cần tối thiểu 1 câu hỏi");
+    } else {
+      let requestCreateTestURL = `https://${host}/test/createTest`;
+
+      try {
+        const response = await fetch(requestCreateTestURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: previousPayload?.examName?.value,
+            description: previousPayload?.description?.value,
+            time: convertTimeToSeconds(previousPayload?.examTime?.value),
+            questionCountToPass: minQuestionsToPass(
+              previousPayload?.passPoint?.value,
+              currentQuestionList.length
+            ),
+            parentId: userId,
+            tags: convertSubjectsToIds(previousPayload?.tagsSubject?.value),
+            startDate: new Date(),
+            endDate: parseStringToDate(previousPayload?.examDate?.value),
+            image: "",
+            childrenIds: previousPayload?.tagsUser?.value,
+            questions: currentQuestionList.map((question: any) => {
+              return {
+                name: question?.question,
+                type: question?.type === "multiple-choice" ? 1 : 2,
+                tags: convertSubjectsToIds(question?.label),
+                description: "",
+                suggest: "",
+                image: "",
+                choices:
+                  question?.type === "multiple-choice"
+                    ? question?.options.map((choice: any) => {
+                        return {
+                          content: choice,
+                          image: "",
+                        };
+                      })
+                    : [],
+                answerId:
+                  question?.type === "multiple-choice"
+                    ? question?.answerId
+                    : -1,
+              };
+            }),
+          }),
+        });
+        console.log(
+          JSON.stringify({
+            name: previousPayload?.examName?.value,
+            description: previousPayload?.description?.value,
+            time: convertTimeToSeconds(previousPayload?.examTime?.value),
+            questionCountToPass: minQuestionsToPass(
+              previousPayload?.passPoint?.value,
+              currentQuestionList.length
+            ),
+            parentId: userId,
+            tags: convertSubjectsToIds(previousPayload?.tagsSubject?.value),
+            startDate: new Date(),
+            endDate: parseStringToDate(previousPayload?.examDate?.value),
+            image: "",
+            childrenIds: previousPayload?.tagsUser?.value,
+            questions: currentQuestionList.map((question: any) => {
+              return {
+                name: question?.question,
+                type: question?.type === "multiple-choice" ? 1 : 2,
+                tags: convertSubjectsToIds(question?.label),
+                description: "",
+                suggest: "",
+                image: "",
+                choices:
+                  question?.type === "multiple-choice"
+                    ? question?.options.map((choice: any) => {
+                        return {
+                          content: choice,
+                          image: "",
+                        };
+                      })
+                    : [],
+                answerId:
+                  question?.type === "multiple-choice"
+                    ? question?.answerId
+                    : -1,
+              };
+            }),
+          })
+        );
+        const data = await response.json();
+        console.log(data);
+        if (data.msg == "1") {
+          setIsLoading(false);
+          navigation.navigate("ExamInfoScreen", {
+            userId: Number(userId),
+            routeBefore: "CreateExamScreen",
+            newExamCreated: true,
+          });
+        } else {
+          setIsLoading(false);
+          Alert.alert("Thất bại", "Tạo bài kiểm tra thất bại");
+        }
+      } catch (e) {
+        setIsLoading(false);
+        Alert.alert(`Tạo bài kiểm tra thất bại`);
+      }
+    }
+  };
 
   const insets = useSafeAreaInsets();
   return (
@@ -94,6 +184,8 @@ const CreateQuestionListScreen = ({
               onPress={() => {
                 navigation.navigate("CreateExamScreen", {
                   userId: Number(userId),
+                  previousPayload: previousPayload,
+                  currentQuestionList: currentQuestionList,
                 });
               }}
             >
@@ -107,7 +199,7 @@ const CreateQuestionListScreen = ({
               onPress={() =>
                 navigation.navigate("CreateNewQuestionScreen", {
                   userId: userId,
-                  currentQuestionList: inputs,
+                  currentQuestionList: currentQuestionList,
                   previousPayload: previousPayload,
                 })
               }
@@ -119,23 +211,29 @@ const CreateQuestionListScreen = ({
             </TouchableOpacity>
           </View>
           <View style={styles.questionListContainer}>
-            {inputs.map((question: any, index: any) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.questionContainer}
-                onPress={() => {}}
-              >
-                <Text style={styles.questionTitleText}>
-                  {question.question}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {currentQuestionList &&
+              currentQuestionList.map((question: any, index: any) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.questionContainer}
+                  onPress={() => {}}
+                >
+                  <Text style={styles.questionTitleText}>
+                    {question.question.slice(0, 55)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
       <View style={styles.nextButtonContainer}>
-        <ApplyButton label="Xác nhận" onPress={() => {}} />
+        <ApplyButton label="Xác nhận" onPress={handleSubmitCreateQuestion} />
       </View>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -235,6 +333,16 @@ const styles = StyleSheet.create({
   questionTitleText: {
     fontSize: 16,
     fontWeight: "500",
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 export default CreateQuestionListScreen;

@@ -48,6 +48,8 @@ const BlackBorderTextInputField = ({
         onBlur={handleBlur}
         autoCorrect={false}
         value={value}
+
+
         {...textInputConfig}
       />
       {showError && (

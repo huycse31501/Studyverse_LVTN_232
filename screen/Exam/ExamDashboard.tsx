@@ -33,6 +33,7 @@ import ExamList from "../../component/examRelated/examList";
 import { examList } from "../../mockData/ExamData";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { mockQuestions, mockQuestionsResult } from "./DoExam";
+import { isEqual } from "lodash";
 
 type ExamInfoRouteProp = RouteProp<RootStackParamList, "ExamInfoScreen">;
 
@@ -54,10 +55,41 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   const memberToRender = totalList.filter(
     (user) => user.userId === String(userId)
   )[0];
+  const excludeList = totalList
+    .filter((member) => member.role === "parent")
+    .map((member) => Number(member.userId));
 
+  const excludeId = [...excludeList, user?.userId];
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [confirmDoTestModal, setConfirmDoTestModal] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(
+    Number(excludeId[0])
+  );
 
+  const handleSelectedMemberChange = useCallback((memberId: number | null) => {
+    setSelectedMemberId(memberId);
+  }, []);
+
+  const [examData, setExamData] = useState();
+  useEffect(() => {
+    const requestExamList = async () => {
+      let requestExamURL = `https://${host}/test/${user?.familyId}`;
+      try {
+        const response = await fetch(requestExamURL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        if (!isEqual(data, examData)) {
+          setExamData(data);
+        }
+      } catch (e) {
+        console.error("Error fetching events:", e);
+      }
+    };
+    requestExamList();
+  }, [host, userId, route.params?.newExamCreated]);
   const onBackPress = useCallback(() => {
     if (memberToRender.userId === user?.userId) {
       navigation.navigate("StatusDashboard");
@@ -69,17 +101,12 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
       });
     }
   }, [navigation, memberToRender.userId, user?.userId, userId]);
-
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
   }, []);
 
-  const handleDoTestButton = async () => {
-    setConfirmDoTestModal(false);
-  };
-
   const insets = useSafeAreaInsets();
-
+  // console.log(examData);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
@@ -116,8 +143,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <View style={styles.memberChoiceContainer}>
             <MemberOption
-              excludeId={userId}
-              onSelectedMembersChange={() => {}}
+              onSelectedMembersChange={handleSelectedMemberChange}
             />
           </View>
           <View style={styles.examContainer}>
@@ -125,13 +151,9 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               Exams={examList}
               onExamItemPress={(item) => {
                 console.log("Selected Exam:", item);
-                setConfirmDoTestModal(true);
                 // navigation.navigate("ExamHistoryScreen", {
                 //   userId: userId,
                 // })
-                navigation.navigate("CreateExamScreen", {
-                  userId: userId,
-                });
               }}
             />
           </View>
@@ -139,7 +161,11 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
             <ApplyButton
               label="Tạo bài kiểm tra"
               extraStyle={{ width: "50%", marginTop: 50, marginBottom: 30 }}
-              onPress={() => {}}
+              onPress={() => {
+                navigation.navigate("CreateExamScreen", {
+                  userId: userId,
+                });
+              }}
             />
           )}
         </KeyboardAwareScrollView>
