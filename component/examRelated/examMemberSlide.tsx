@@ -33,7 +33,7 @@ const MemberOption: React.FC<MemberOptionProps> = ({
     .filter((member) => member.role === "parent")
     .map((member) => Number(member.userId));
 
-  const excludeId = [...excludeList, user?.userId];
+  const excludeId = [...excludeList, Number(user?.userId)];
   const memberStatusData = totalList.filter((userInTotalList) => {
     const userIdNumber = Number(userInTotalList.userId);
     return !isNaN(userIdNumber) && !excludeId.includes(userIdNumber);

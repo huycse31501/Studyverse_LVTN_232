@@ -24,7 +24,10 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import Constants from "expo-constants";
 import { convertTimeToSeconds } from "../../utils/convertTimeToSecond";
 import { minQuestionsToPass } from "../../utils/minQuestionToPass";
-import { convertSubjectToId, convertSubjectsToIds } from "../../component/shared/constants/convertSubjectToId";
+import {
+  convertSubjectToId,
+  convertSubjectsToIds,
+} from "../../component/shared/constants/convertSubjectToId";
 import parseStringToDate from "../../utils/parseStringToDate";
 
 type CreateQuestionListRouteProp = RouteProp<
@@ -101,48 +104,7 @@ const CreateQuestionListScreen = ({
             }),
           }),
         });
-        console.log(
-          JSON.stringify({
-            name: previousPayload?.examName?.value,
-            description: previousPayload?.description?.value,
-            time: convertTimeToSeconds(previousPayload?.examTime?.value),
-            questionCountToPass: minQuestionsToPass(
-              previousPayload?.passPoint?.value,
-              currentQuestionList.length
-            ),
-            parentId: userId,
-            tags: convertSubjectsToIds(previousPayload?.tagsSubject?.value),
-            startDate: new Date(),
-            endDate: parseStringToDate(previousPayload?.examDate?.value),
-            image: "",
-            childrenIds: previousPayload?.tagsUser?.value,
-            questions: currentQuestionList.map((question: any) => {
-              return {
-                name: question?.question,
-                type: question?.type === "multiple-choice" ? 1 : 2,
-                tags: convertSubjectsToIds(question?.label),
-                description: "",
-                suggest: "",
-                image: "",
-                choices:
-                  question?.type === "multiple-choice"
-                    ? question?.options.map((choice: any) => {
-                        return {
-                          content: choice,
-                          image: "",
-                        };
-                      })
-                    : [],
-                answerId:
-                  question?.type === "multiple-choice"
-                    ? question?.answerId
-                    : -1,
-              };
-            }),
-          })
-        );
         const data = await response.json();
-        console.log(data);
         if (data.msg == "1") {
           setIsLoading(false);
           navigation.navigate("ExamInfoScreen", {

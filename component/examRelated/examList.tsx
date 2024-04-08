@@ -21,18 +21,26 @@ export interface ExamProps {
   timeStart: string | undefined;
   tags: string[];
   result: string | undefined;
+  endDate?: string;
 }
 
 export interface ExamListProps {
   Exams: ExamProps[];
   height?: number;
   onExamItemPress?: (item: ExamProps) => void;
+  pickedDate?: Date;
 }
+
+const isSameDay = (date1:Date, date2:Date) => {
+  return date1.toISOString().slice(0, 10) === date2.toISOString().slice(0, 10);
+};
+
 
 const ExamList: React.FC<ExamListProps> = ({
   Exams,
   height,
   onExamItemPress,
+  pickedDate,
 }) => {
   const getIconName = (status: ExamStatus) => {
     switch (status) {
@@ -46,7 +54,6 @@ const ExamList: React.FC<ExamListProps> = ({
         return "remove-circle-outline";
     }
   };
-
   const getBackGroundColor = (status: ExamStatus) => {
     switch (status) {
       case "completed":
@@ -83,6 +90,7 @@ const ExamList: React.FC<ExamListProps> = ({
           style={[
             styles.container,
             { backgroundColor: getBackGroundColor(item.status) },
+            
           ]}
           key={index}
           onPress={() => onExamItemPress?.(item)}

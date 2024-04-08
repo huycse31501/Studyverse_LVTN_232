@@ -29,17 +29,30 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import MemberOption from "../../component/examRelated/examMemberSlide";
-import ExamList from "../../component/examRelated/examList";
+import ExamList, { ExamProps } from "../../component/examRelated/examList";
 import { examList } from "../../mockData/ExamData";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { mockQuestions, mockQuestionsResult } from "./DoExam";
 import { isEqual } from "lodash";
+import { formatDateObj } from "../../utils/formatDateObjToString";
+import { convertIdsToSubjects } from "../../component/shared/constants/convertSubjectToId";
+import { formatDateInUserInformation } from "../../utils/formatDateStrtoDateStr";
+import { DateCountMap } from "../Calendar/CalendarDashboard";
+import { formatDate } from "../../utils/formatDate";
 
 type ExamInfoRouteProp = RouteProp<RootStackParamList, "ExamInfoScreen">;
 
 interface ExamInfoScreenProps {
   route: ExamInfoRouteProp;
   navigation: StackNavigationProp<RootStackParamList, "ExamInfoScreen">;
+}
+
+interface ExamData {
+  endDate: string;
+}
+
+interface CountByDate {
+  [key: string]: number;
 }
 
 const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
@@ -58,18 +71,46 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   const excludeList = totalList
     .filter((member) => member.role === "parent")
     .map((member) => Number(member.userId));
-
-  const excludeId = [...excludeList, user?.userId];
+  const memberStatusData = totalList.filter((userInTotalList) => {
+    const userIdNumber = Number(userInTotalList.userId);
+    return !isNaN(userIdNumber) && !excludeList.includes(userIdNumber);
+  });
+  const excludeId = [...excludeList, Number(user?.userId)];
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(
-    Number(excludeId[0])
+  const [selectedMemberId, setSelectedMemberId] = useState(
+    user?.role === "parent" ? Number(memberStatusData[0].userId) : user?.userId
   );
+  const [examData, setExamData] = useState();
+  const [filteredExams, setFilteredExams] = useState([]);
+  const [examToInput, setExamToInput] = useState<ExamProps[]>([]);
+  const [countExam, setCountExam] = useState([]);
+
+  useEffect(() => {
+    if (!Array.isArray(examToInput)) return;
+
+    const examCount = Object.values(
+      examToInput
+        .map((exam: any) => ({
+          date: formatDate(exam.endDate.split("T")[0]),
+        }))
+        .reduce((acc: DateCountMap, currentValue: any) => {
+          const { date } = currentValue;
+          if (acc[date]) {
+            acc[date].countEvent += 1;
+          } else {
+            acc[date] = { date, countEvent: 1 };
+          }
+          return acc;
+        }, {} as DateCountMap)
+    );
+
+    setCountExam(examCount as any);
+  }, [examData, selectedMemberId]);
 
   const handleSelectedMemberChange = useCallback((memberId: number | null) => {
-    setSelectedMemberId(memberId);
+    setSelectedMemberId(memberId as any);
   }, []);
 
-  const [examData, setExamData] = useState();
   useEffect(() => {
     const requestExamList = async () => {
       let requestExamURL = `https://${host}/test/${user?.familyId}`;
@@ -105,8 +146,72 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
     setSelectedDate(date);
   }, []);
 
+  const filterExamsForSelectedMember = useCallback(() => {
+    if (!examData || selectedMemberId == null) return [];
+
+    const examsForSelectedMember = (examData as any)[selectedMemberId];
+    if (!examsForSelectedMember) return [];
+
+    const filtered = examsForSelectedMember.filter((exam: any) => {
+      const startDate = new Date(exam.startDate);
+      const endDate = new Date(exam.endDate);
+      const selectedDateStart = new Date(selectedDate.setHours(0, 0, 0, 0));
+      const selectedDateEnd = new Date(selectedDate.setHours(23, 59, 59, 999));
+
+      return selectedDateStart <= endDate && selectedDateEnd >= startDate;
+    });
+
+    return filtered;
+  }, [examData, selectedMemberId, selectedDate]);
+
+  useEffect(() => {
+    const exams = filterExamsForSelectedMember();
+    setFilteredExams(exams);
+  }, [filterExamsForSelectedMember]);
+
+  const filterExamsForExamInput = useCallback(() => {
+    if (!examData || selectedMemberId == null) return [];
+
+    const examsForSelectedMember = (examData as any)[selectedMemberId];
+    if (!examsForSelectedMember) return [];
+
+    const filtered = examsForSelectedMember
+      .filter((exam: any) => {
+        const startDate = new Date(exam.startDate);
+        const endDate = new Date(exam.endDate);
+        const selectedDateStart = new Date(selectedDate.setHours(0, 0, 0, 0));
+        const selectedDateEnd = new Date(
+          selectedDate.setHours(23, 59, 59, 999)
+        );
+
+        return selectedDateStart <= endDate && selectedDateEnd >= startDate;
+      })
+      .map((exam: any) => {
+        return {
+          name: exam.name,
+          dateStart: formatDateInUserInformation(exam.startDate),
+          timeStart: undefined,
+          tags: convertIdsToSubjects(exam.tags),
+          status: "pending",
+          result: undefined,
+          endDate: exam.endDate,
+        };
+      });
+
+    return filtered;
+  }, [examData, selectedMemberId, selectedDate]);
+
+  useEffect(() => {
+    const examsInput = filterExamsForExamInput();
+    setExamToInput(examsInput);
+  }, [filterExamsForExamInput]);
+
+  useEffect(() => {
+    setFilteredExams(filterExamsForSelectedMember());
+  }, [filterExamsForSelectedMember]);
+  // console.log(examToInput);
+  // console.log(countExam)
   const insets = useSafeAreaInsets();
-  // console.log(examData);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
@@ -139,16 +244,19 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
             />
           </View>
           <View style={styles.weekDatePickerContainer}>
-            <WeekDatePicker onExam onDateSelect={handleDateSelect} />
+            <WeekDatePicker onExam listOfEventCount={countExam} onDateSelect={handleDateSelect} />
           </View>
           <View style={styles.memberChoiceContainer}>
-            <MemberOption
-              onSelectedMembersChange={handleSelectedMemberChange}
-            />
+            {user?.role === "parent" && (
+              <MemberOption
+                onSelectedMembersChange={handleSelectedMemberChange}
+              />
+            )}
           </View>
           <View style={styles.examContainer}>
             <ExamList
-              Exams={examList}
+              Exams={examToInput}
+              pickedDate={selectedDate}
               onExamItemPress={(item) => {
                 console.log("Selected Exam:", item);
                 // navigation.navigate("ExamHistoryScreen", {
@@ -160,7 +268,14 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           {user && user.role === "parent" && (
             <ApplyButton
               label="Tạo bài kiểm tra"
-              extraStyle={{ width: "50%", marginTop: 50, marginBottom: 30 }}
+              extraStyle={{
+                width: "50%",
+                marginTop:
+                  examToInput.length <= 3 || filteredExams.length <= 3
+                    ? 300
+                    : 50,
+                marginBottom: 30,
+              }}
               onPress={() => {
                 navigation.navigate("CreateExamScreen", {
                   userId: userId,

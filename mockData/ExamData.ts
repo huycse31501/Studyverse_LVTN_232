@@ -19,7 +19,7 @@ export const examList: ExamProps[] = [
   },
   {
     name: "Ôn tập Ngữ văn",
-    dateStart: "29/03/20244",
+    dateStart: "29/03/2024",
     timeStart: "08:44",
     tags: ["Ngữ văn", "Kiểm tra", "Kiểm tra"],
     status: "grading",
