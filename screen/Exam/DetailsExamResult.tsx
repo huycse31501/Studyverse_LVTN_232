@@ -61,7 +61,7 @@ const DetailExamResultScreen = ({
     attempIndex,
     childrenId,
     payloadToDoExam,
-    result,
+    result
   } = route.params;
 
   const user = useSelector((state: RootState) => state.user.user);
@@ -87,10 +87,11 @@ const DetailExamResultScreen = ({
             ? correctAnswer === userAnswer
               ? "correct"
               : "incorrect"
-            : examInfo?.submissions[attempIndex]?.answers[question.id]?.isPass == 1
+            : examInfo?.submissions[attempIndex]?.answers[question.id]
+                ?.isPass == 1
             ? "correct"
-            : examInfo?.submissions[attempIndex]?.answers[question.id]?.isPass ==
-              -1
+            : examInfo?.submissions[attempIndex]?.answers[question.id]
+                ?.isPass == -1
             ? "incorrect"
             : "grading",
       };
@@ -100,7 +101,7 @@ const DetailExamResultScreen = ({
     transformQuestions(examInfo)
   );
   const [gradingResults, setGradingResults] = useState<GradingResult[]>([]);
-  console.log(examInfo.submissions[attempIndex])
+  console.log(examInfo.submissions[attempIndex]);
   const handleGradeOption = (questionId: any, isCorrect: any) => {
     setGradingResults((prevResults: any) => {
       const index = prevResults.findIndex(

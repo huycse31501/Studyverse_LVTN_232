@@ -58,7 +58,16 @@ interface DoExamScreenProps {
 const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-  const { userId, questions, time, examId, childrenId, examInfo } = route.params;
+  const {
+    userId,
+    questions,
+    time,
+    examId,
+    childrenId,
+    examInfo,
+    payloadToNavigateBackToExamResultScreen,
+    routeBefore,
+  } = route.params;
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState("");
@@ -353,6 +362,10 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
+            if (routeBefore === "ExamResultScreen") {
+
+              return;
+            }
             navigation.navigate("ExamHistoryScreen", {
               examInfo: examInfo,
               userId: Number(userId),

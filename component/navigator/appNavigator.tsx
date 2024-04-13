@@ -110,8 +110,6 @@ export type RootStackParamList = {
     payloadToDoExam?: any;
     childrenId?: any;
     result?: any;
-    routeBefore?: any;
-    payloadToNavigateBackToExamResultScreen?: any
   };
   CreateExamScreen: {
     userId: number;

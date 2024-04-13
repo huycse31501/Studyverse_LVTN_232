@@ -122,13 +122,7 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
           }}
         />
       </View>
-      <View style={styles.buttonGroup}>
-        <WideButton
-          backgroundColor="#DCEED2"
-          title="Xem chi tiết bài làm"
-          onPress={() => {}}
-        />
-      </View>
+
       <View style={styles.buttonGroup}>
         <WideButton
           backgroundColor="#41ABF7"
@@ -216,6 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     alignSelf: "center",
+    marginBottom: 80,
   },
   buttonGroup: {
     marginTop: 30,
@@ -228,7 +223,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingVertical: 5,
     marginTop: 100,
-    marginBottom: 225,
-  }
+    marginBottom: 300,
+  },
 });
 export default ExamResultScreen;
