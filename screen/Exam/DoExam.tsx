@@ -353,8 +353,16 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
-            navigation.navigate("ExamInfoScreen", {
+            navigation.navigate("ExamHistoryScreen", {
+              examInfo: examInfo,
               userId: Number(userId),
+              payLoadToDoExam: {
+                userId: userId,
+                questions: questions,
+                time: time,
+                examId: examInfo.testId,
+                childrenId: childrenId,
+              },
             });
           }}
         >

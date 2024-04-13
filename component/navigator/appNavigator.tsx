@@ -98,6 +98,8 @@ export type RootStackParamList = {
     childrenId?: any;
     payLoadToDoExam?: any;
     examInfo?: any;
+    routeBefore?: any;
+    payloadToNavigateBackToExamResultScreen?: any
   };
   DetailExamResultScreen: {
     timeFinish: string;
@@ -108,6 +110,8 @@ export type RootStackParamList = {
     payloadToDoExam?: any;
     childrenId?: any;
     result?: any;
+    routeBefore?: any;
+    payloadToNavigateBackToExamResultScreen?: any
   };
   CreateExamScreen: {
     userId: number;
