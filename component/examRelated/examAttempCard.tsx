@@ -8,19 +8,28 @@ export type ExamAttempt = {
   correctAnswers: number;
   totalQuestions: number;
   timeTaken: string;
+  attempIndex?: any;
 };
 
 type ExamAttemptCardProps = {
   attempt: ExamAttempt;
+  onPressCard?: () => void;
 };
 
-const ExamAttemptCard: React.FC<ExamAttemptCardProps> = ({ attempt }) => {
+const ExamAttemptCard: React.FC<ExamAttemptCardProps> = ({
+  attempt,
+  onPressCard,
+}) => {
   const { title, result, correctAnswers, totalQuestions, timeTaken } = attempt;
 
-  const cardStyle = result === "Đạt" ? styles.passCard : styles.failCard;
-
+  const cardStyle =
+    result === "pass"
+      ? styles.passCard
+      : result === "grading"
+      ? styles.gradingCard
+      : styles.failCard;
   return (
-    <TouchableOpacity style={[styles.card, cardStyle]}>
+    <TouchableOpacity style={[styles.card, cardStyle]} onPress={onPressCard}>
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
       </View>
@@ -29,10 +38,18 @@ const ExamAttemptCard: React.FC<ExamAttemptCardProps> = ({ attempt }) => {
         <Text
           style={[
             styles.result,
-            result === "Đạt" ? styles.passResult : styles.failResult,
+            result === "pass"
+              ? styles.passResult
+              : result === "grading"
+              ? styles.gradingResult
+              : styles.failResult,
           ]}
         >
-          {result}
+          {result === "pass"
+            ? "Đạt"
+            : result === "grading"
+            ? "Đang chấm"
+            : "Chưa đạt"}
         </Text>
       </View>
       <View style={styles.detailRow}>
@@ -80,6 +97,9 @@ const styles = StyleSheet.create({
   failResult: {
     color: "#dd5353",
   },
+  gradingResult: {
+    color: "#1b2c33",
+  },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -103,6 +123,10 @@ const styles = StyleSheet.create({
   failCard: {
     backgroundColor: "#FDE8E8",
     borderColor: "#FBCDCD",
+  },
+  gradingCard: {
+    backgroundColor: "#c9e8f4",
+    borderColor: "#ffffff",
   },
 });
 

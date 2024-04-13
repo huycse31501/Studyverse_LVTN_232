@@ -52,7 +52,13 @@ const CreateQuestionListScreen = ({
 }: CreateQuestionListScreenProps) => {
   const { userId, previousPayload, currentQuestionList } = route.params;
   const [isLoading, setIsLoading] = useState(false);
+  const [questionList, setQuestionList] = useState(currentQuestionList)
 
+  useEffect(() => {
+    if (currentQuestionList) {
+      setQuestionList(currentQuestionList);
+    }
+  }, [currentQuestionList]);
   const handleSubmitCreateQuestion = async () => {
     if (!currentQuestionList) {
       Alert.alert("Bài kiểm tra cần tối thiểu 1 câu hỏi");
@@ -67,11 +73,11 @@ const CreateQuestionListScreen = ({
           },
           body: JSON.stringify({
             name: previousPayload?.examName?.value,
-            description: previousPayload?.description?.value,
+            description: "",
             time: convertTimeToSeconds(previousPayload?.examTime?.value),
             questionCountToPass: minQuestionsToPass(
               previousPayload?.passPoint?.value,
-              currentQuestionList.length
+              questionList.length
             ),
             parentId: userId,
             tags: convertSubjectsToIds(previousPayload?.tagsSubject?.value),
@@ -79,7 +85,7 @@ const CreateQuestionListScreen = ({
             endDate: parseStringToDate(previousPayload?.examDate?.value),
             image: "",
             childrenIds: previousPayload?.tagsUser?.value,
-            questions: currentQuestionList.map((question: any) => {
+            questions: questionList.map((question: any) => {
               return {
                 name: question?.question,
                 type: question?.type === "multiple-choice" ? 1 : 2,
@@ -122,6 +128,10 @@ const CreateQuestionListScreen = ({
       }
     }
   };
+  const handleRemoveQuestion = (indexToRemove: number): void => {
+    const updatedQuestions: Question[] = questionList.filter((_: any, index: number) => index !== indexToRemove);
+    setQuestionList(updatedQuestions);
+  };
 
   const insets = useSafeAreaInsets();
   return (
@@ -147,7 +157,7 @@ const CreateQuestionListScreen = ({
                 navigation.navigate("CreateExamScreen", {
                   userId: Number(userId),
                   previousPayload: previousPayload,
-                  currentQuestionList: currentQuestionList,
+                  currentQuestionList: questionList,
                 });
               }}
             >
@@ -161,7 +171,7 @@ const CreateQuestionListScreen = ({
               onPress={() =>
                 navigation.navigate("CreateNewQuestionScreen", {
                   userId: userId,
-                  currentQuestionList: currentQuestionList,
+                  currentQuestionList: questionList,
                   previousPayload: previousPayload,
                 })
               }
@@ -173,8 +183,8 @@ const CreateQuestionListScreen = ({
             </TouchableOpacity>
           </View>
           <View style={styles.questionListContainer}>
-            {currentQuestionList &&
-              currentQuestionList.map((question: any, index: any) => (
+            {questionList &&
+              questionList.map((question: any, index: any) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.questionContainer}
@@ -183,6 +193,9 @@ const CreateQuestionListScreen = ({
                   <Text style={styles.questionTitleText}>
                     {question.question.slice(0, 55)}
                   </Text>
+                  <TouchableOpacity onPress={() => handleRemoveQuestion(index)}>
+                    <Image style={styles.removeQuestion} source={require("../../assets/images/shared/declineIcon.png")}/>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))}
           </View>
@@ -291,6 +304,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     width: "85%",
     marginLeft: 25,
+    justifyContent: "space-between",
   },
   questionTitleText: {
     fontSize: 16,
@@ -305,6 +319,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  removeQuestion: {
+    width: 25,
+    height: 25,
   },
 });
 export default CreateQuestionListScreen;

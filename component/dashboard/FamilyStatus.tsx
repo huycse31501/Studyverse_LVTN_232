@@ -37,7 +37,6 @@ const StatusCard: React.FC = ({}) => {
     (state: RootState) => state.familyMember.familyMembers
   );
   const navigation = useNavigation<StatusCardNavigationProp>();
-
   return (
     <View style={styles.cardContainer}>
       {Object.values(memberStatusData).map((memberStatus, index) => (

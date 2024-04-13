@@ -226,7 +226,7 @@ const CreateNewQuestionScreen = ({
             <ApplyButton
               label="Tạo câu hỏi"
               onPress={() => {
-                const newQuestion: Question = {
+                const newQuestion: any = {
                   id: currentQuestionList ? currentQuestionList.length + 1 : 0,
                   type:
                     questionType === "multiple-choice"

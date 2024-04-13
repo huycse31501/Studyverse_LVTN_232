@@ -220,7 +220,7 @@ const Setting = () => {
             dispatch(setWaitList([] as any));
             dispatch(setFamilyMember([] as any));
           } else {
-            Alert.alert("Đăng xuất thất bại");
+            // Alert.alert("Đăng xuất thất bại");
           }
         } catch (e) {
           console.log(e);

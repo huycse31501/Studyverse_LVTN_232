@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   Touchable,
+  Alert,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import ProgressBar from "../../component/shared/ProgressBar";
@@ -18,6 +19,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import Constants from "expo-constants";
 import ApplyButton from "../../component/shared/ApplyButton";
 import WideButton from "../../component/shared/WideButton";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 export type Question = {
   id: number;
@@ -26,22 +29,13 @@ export type Question = {
   options?: string[];
   userAnswer?: string;
   correctAnswer?: string;
-  isParentView?: boolean;
+  isCorrect?: any;
 };
 
-export const mockQuestions: Question[] = [
-  {
-    id: 1,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-  },
-  {
-    id: 2,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-  },
-];
+interface GradingResult {
+  id: number;
+  isPass: boolean;
+}
 
 type DetailExamResultRouteProp = RouteProp<
   RootStackParamList,
@@ -59,23 +53,70 @@ const DetailExamResultScreen = ({
 }: DetailExamResultScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-  const { userId, questions, timeFinish } = route.params;
-  const [gradedQuestions, setGradedQuestions] = useState<Question[]>(questions);
+  const {
+    userId,
+    timeFinish,
+    attemp,
+    examInfo,
+    attempIndex,
+    childrenId,
+    payloadToDoExam,
+    result,
+  } = route.params;
+
+  const user = useSelector((state: RootState) => state.user.user);
+  const isParentView = user?.role === "parent";
+  const transformQuestions = (examInfo: any): Question[] => {
+    return examInfo.questions.map((question: any) => {
+      const type = question.type === 1 ? "multiple-choice" : "text";
+      const options = question.choices.map((choice: any) => choice.content);
+      const userAnswer =
+        question.type === 1
+          ? examInfo.submissions[attempIndex].answers[question.id]?.content
+          : examInfo.submissions[attempIndex].answers[question.id]?.answer;
+      const correctAnswer = question?.correctChoice?.content ?? undefined;
+      return {
+        id: question.id,
+        type: type,
+        question: question.name,
+        options: type === "multiple-choice" ? options : undefined,
+        userAnswer: userAnswer,
+        correctAnswer: correctAnswer,
+        isCorrect:
+          question.type === 1
+            ? correctAnswer === userAnswer
+              ? "correct"
+              : "incorrect"
+            : examInfo?.submissions[attempIndex]?.answers[question.id]?.isPass == 1
+            ? "correct"
+            : examInfo?.submissions[attempIndex]?.answers[question.id]?.isPass ==
+              -1
+            ? "incorrect"
+            : "grading",
+      };
+    });
+  };
+  const [questions, setQuestions] = useState(() =>
+    transformQuestions(examInfo)
+  );
+  const [gradingResults, setGradingResults] = useState<GradingResult[]>([]);
+  console.log(examInfo.submissions[attempIndex])
+  const handleGradeOption = (questionId: any, isCorrect: any) => {
+    setGradingResults((prevResults: any) => {
+      const index = prevResults.findIndex(
+        (result: any) => result.id === questionId
+      );
+      if (index > -1) {
+        return prevResults.map((result: any, i: any) =>
+          i === index ? { ...result, isPass: isCorrect } : result
+        );
+      } else {
+        return [...prevResults, { id: questionId, isPass: isCorrect }];
+      }
+    });
+  };
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleGradeOption = (questionId: number, isCorrect: boolean) => {
-    const updatedQuestions = gradedQuestions.map((q) => {
-      if (q.id === questionId) {
-        const correctAnswerValue = isCorrect ? "true" : "false";
-        const newCorrectAnswer =
-          q.correctAnswer === correctAnswerValue ? "" : correctAnswerValue;
-        return { ...q, correctAnswer: newCorrectAnswer };
-      }
-      return q;
-    });
-    setGradedQuestions(updatedQuestions);
-  };
 
   const goToNextQuestion = () => {
     const nextIndex = currentIndex + 1;
@@ -92,12 +133,47 @@ const DetailExamResultScreen = ({
       setCurrentIndex(prevIndex);
     }
   };
-
+  const handleGradeTest = async () => {
+    if (gradingResults.length !== 0) {
+      let requestGradeTestURL = `https://${host}/submission/scoring`;
+      try {
+        const response = await fetch(requestGradeTestURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: examInfo.submissions[attempIndex].id,
+            questions: gradingResults,
+          }),
+        });
+        const data = await response.json();
+        if (data.msg == "1") {
+          navigation.navigate("ExamInfoScreen", {
+            userId: Number(userId),
+            routeBefore: "CreateExamScreen",
+            newExamCreated: true,
+          });
+        } else {
+          Alert.alert("Thất bại", "Chấm bài kiểm tra thất bại");
+        }
+      } catch (e) {
+        Alert.alert(`Chấm bài kiểm tra thất bại`);
+      }
+    }
+  };
   const renderItem = ({ item, index }: { item: Question; index: number }) => {
     const userAnswer = item.userAnswer;
     const correctAnswer = item.correctAnswer;
+    const isCorrect = item.isCorrect;
     const isAnswered = userAnswer !== undefined;
     const progressText = `${index + 1}/${questions.length}`;
+    const gradingResultForItem = gradingResults.find(
+      (result) => result.id === item.id
+    );
+    const isItemPassed = gradingResultForItem
+      ? gradingResultForItem.isPass
+      : undefined;
 
     switch (item.type) {
       case "multiple-choice":
@@ -114,11 +190,11 @@ const DetailExamResultScreen = ({
                 style={styles.timeIcon}
               />
               <Text style={styles.timeCounter}>{timeFinish}</Text>
-              {item.isParentView && (
+              {isParentView && result === "grading" && (
                 <TouchableOpacity
                   key={index}
                   style={styles.submitButton}
-                  onPress={() => {}}
+                  onPress={handleGradeTest}
                 >
                   <Text style={styles.submitText}>Hoàn thành</Text>
                 </TouchableOpacity>
@@ -152,6 +228,20 @@ const DetailExamResultScreen = ({
                 );
               })}
             </View>
+            {isCorrect !== "grading" && (
+              <View
+                style={[
+                  styles.notificationContainer,
+                  isCorrect === "incorrect" && { backgroundColor: "#FDE4E4" },
+                ]}
+              >
+                <Text style={styles.notificationText}>
+                  {`Câu trả lời ${
+                    isCorrect === "incorrect" ? "không " : ""
+                  }chính xác`}
+                </Text>
+              </View>
+            )}
           </View>
         );
       case "text":
@@ -168,11 +258,11 @@ const DetailExamResultScreen = ({
                 style={styles.timeIcon}
               />
               <Text style={styles.timeCounter}>{timeFinish}</Text>
-              {item.isParentView && (
+              {isParentView && result === "grading" && (
                 <TouchableOpacity
                   key={index}
                   style={styles.submitButton}
-                  onPress={() => {}}
+                  onPress={handleGradeTest}
                 >
                   <Text style={styles.submitText}>Hoàn thành</Text>
                 </TouchableOpacity>
@@ -186,28 +276,26 @@ const DetailExamResultScreen = ({
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{userAnswer || " "}</Text>
             </View>
-            {correctAnswer && !item.isParentView && (
+            {isCorrect !== "grading" && (
               <View
                 style={[
                   styles.notificationContainer,
-                  correctAnswer === "false" && { backgroundColor: "#FDE4E4" },
+                  isCorrect === "incorrect" && { backgroundColor: "#FDE4E4" },
                 ]}
               >
                 <Text style={styles.notificationText}>
                   {`Câu trả lời ${
-                    correctAnswer === "false" ? "không " : ""
+                    isCorrect === "incorrect" ? "không " : ""
                   }chính xác`}
                 </Text>
               </View>
             )}
-            {item.isParentView && (
+            {isCorrect === "grading" && isParentView && (
               <View style={styles.gradingContainer}>
                 <TouchableOpacity
                   style={[
                     styles.gradingOptionWrapper,
-                    item.correctAnswer === "true" && {
-                      backgroundColor: "#DDF0E6",
-                    },
+                    isItemPassed === true && { backgroundColor: "#DDF0E6" },
                   ]}
                   onPress={() => handleGradeOption(item.id, true)}
                 >
@@ -216,9 +304,7 @@ const DetailExamResultScreen = ({
                 <TouchableOpacity
                   style={[
                     styles.gradingOptionWrapper,
-                    item.correctAnswer === "false" && {
-                      backgroundColor: "#FDE4E4",
-                    },
+                    isItemPassed === false && { backgroundColor: "#FDE4E4" },
                   ]}
                   onPress={() => handleGradeOption(item.id, false)}
                 >
@@ -242,7 +328,12 @@ const DetailExamResultScreen = ({
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
-            console.log("pressed");
+            navigation.navigate("ExamHistoryScreen", {
+              examInfo: examInfo,
+              childrenId: childrenId,
+              userId: Number(userId),
+              payLoadToDoExam: payloadToDoExam,
+            });
           }}
         >
           <Text style={styles.backButtonText}>Back</Text>
@@ -251,7 +342,7 @@ const DetailExamResultScreen = ({
 
       <View style={styles.listContainer}>
         <FlatList
-          data={gradedQuestions}
+          data={questions}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           horizontal

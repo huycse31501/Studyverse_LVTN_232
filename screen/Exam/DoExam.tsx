@@ -9,20 +9,27 @@ import {
   TouchableOpacity,
   Image,
   Touchable,
+  Alert,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import ProgressBar from "../../component/shared/ProgressBar";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Constants from "expo-constants";
 import ApplyButton from "../../component/shared/ApplyButton";
+import { formatTimeToHHMMSS } from "../../utils/formatTimeFromSecondToHHMMSS";
+import { convertTimeToSeconds } from "../../utils/convertTimeToSecond";
 
+export type Option = {
+  content: string;
+  id: string;
+};
 export type Question = {
   id: number;
   type: "multiple-choice" | "text";
   question: string;
-  options?: string[];
+  options?: Option[];
   userAnswer?: string;
   correctAnswer?: string;
   isParentView?: boolean;
@@ -30,60 +37,16 @@ export type Question = {
   answerId?: number;
 };
 
-export const mockQuestions: Question[] = [
-  {
-    id: 1,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-  },
-  {
-    id: 2,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-  },
-];
+export type Choice = {
+  id: number;
+  choiceId?: number | null;
+  answer?: string | null;
+};
 
-export const mockQuestionsResult: Question[] = [
-  {
-    id: 1,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-    userAnswer: "London",
-    correctAnswer: "Paris",
-  },
-  {
-    id: 2,
-    type: "multiple-choice",
-    question: "What is the capital of France?",
-    options: ["New York", "London", "Paris", "Tokyo"],
-    userAnswer: "Paris",
-    correctAnswer: "Paris",
-  },
-  {
-    id: 3,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    userAnswer: "Me",
-    correctAnswer: "true",
-  },
-  {
-    id: 4,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    userAnswer: "Me",
-    correctAnswer: "false",
-  },
-  {
-    id: 5,
-    type: "text",
-    question: 'Who wrote "Romeo and Juliet"?',
-    userAnswer: "Me",
-
-    isParentView: true,
-  },
-];
+const getSecondsFromTime = (time: string) => {
+  const [hours, minutes, seconds] = time.split(":").map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
+};
 
 type DoExamRouteProp = RouteProp<RootStackParamList, "DoExamScreen">;
 
@@ -95,17 +58,48 @@ interface DoExamScreenProps {
 const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-  const { userId, questions, time } = route.params;
-
-  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const { userId, questions, time, examId, childrenId, examInfo } = route.params;
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState("");
+  // console.log(userId)
+  // console.log(questions, time)
+  const totalExamTimeInSeconds = useRef(getSecondsFromTime(time));
+  const [timeLeftInSeconds, setTimeLeftInSeconds] = useState(
+    totalExamTimeInSeconds.current
+  );
+  const [currentChoice, setCurrentChoice] = useState<Choice[]>(
+    questions.map((question) => {
+      return {
+        id: question.id,
+        choiceId: question.type === "multiple-choice" ? -1 : null,
+        answer: null,
+      };
+    })
+  );
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeftInSeconds((prevTimeLeftInSeconds) => {
+        const updatedTimeLeftInSeconds = prevTimeLeftInSeconds - 1;
+        if (updatedTimeLeftInSeconds <= 0) {
+          clearInterval(timer);
+        }
+        return updatedTimeLeftInSeconds;
+      });
+    }, 1000);
 
-  const getSecondsFromTime = (time: string) => {
-    const [hours, minutes, seconds] = time.split(":").map(Number);
-    return hours * 3600 + minutes * 60 + seconds;
-  };
+    return () => clearInterval(timer);
+  }, []);
+
+  const elapsedTime = totalExamTimeInSeconds.current - timeLeftInSeconds;
+  const elapsedHours = Math.floor(elapsedTime / 3600);
+  const elapsedMinutes = Math.floor((elapsedTime % 3600) / 60);
+  const elapsedSeconds = elapsedTime % 60;
+  const formattedElapsedTime = `${elapsedHours
+    .toString()
+    .padStart(2, "0")}:${elapsedMinutes
+    .toString()
+    .padStart(2, "0")}:${elapsedSeconds.toString().padStart(2, "0")}`;
 
   useEffect(() => {
     let totalTime = getSecondsFromTime(time);
@@ -123,38 +117,70 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
 
       if (totalTime <= 0) {
         clearInterval(timer);
+        handleSubmitTest();
       }
     }, 1000);
 
     return () => clearInterval(timer);
   }, [time]);
 
-  useEffect(() => {
-    const progress = Object.keys(answers).length / questions.length;
-  }, [answers]);
-  const handleSelectOption = (questionId: number, option: string) => {
-    let newAnswers = { ...answers };
+  useFocusEffect(
+    React.useCallback(() => {
+      setCurrentChoice(
+        questions.map((question) => ({
+          id: question.id,
+          choiceId: question.type === "multiple-choice" ? -1 : null,
+          answer: null,
+        }))
+      );
+    }, [questions])
+  );
 
-    if (
-      questions.find((question) => question.id === questionId)?.type ===
-        "text" &&
-      option.trim() === ""
-    ) {
-      const { [questionId]: deletedAnswer, ...rest } = newAnswers;
-      newAnswers = rest;
-    } else {
-      if (newAnswers[questionId] === option) {
-        delete newAnswers[questionId];
-      } else {
-        newAnswers = {
-          ...newAnswers,
-          [questionId]: option,
+  const handleSelectOption = (
+    questionId: number,
+    optionContent: string,
+    optionId?: string
+  ) => {
+    let newCurrentChoice = [...currentChoice];
+
+    const question = questions.find((q) => q.id === questionId);
+    if (!question) return;
+
+    const choiceIndex = newCurrentChoice.findIndex(
+      (choice) => choice.id === questionId
+    );
+
+    if (choiceIndex !== -1) {
+      if (question.type === "text") {
+        newCurrentChoice[choiceIndex] = {
+          ...newCurrentChoice[choiceIndex],
+          answer: optionContent.trim() === "" ? null : optionContent,
+        };
+      } else if (question.type === "multiple-choice") {
+        const selectedOptionId = question.options?.find(
+          (option) => option.content === optionContent
+        )?.id;
+
+        newCurrentChoice[choiceIndex] = {
+          ...newCurrentChoice[choiceIndex],
+          choiceId:
+            newCurrentChoice[choiceIndex].choiceId === Number(selectedOptionId)
+              ? -1
+              : Number(selectedOptionId),
         };
       }
     }
 
-    setAnswers(newAnswers);
+    setCurrentChoice(newCurrentChoice);
   };
+  const handleTextChange = (questionId: number, text: string) => {
+    setCurrentChoice((currentChoice) =>
+      currentChoice.map((choice) =>
+        choice.id === questionId ? { ...choice, answer: text } : choice
+      )
+    );
+  };
+
   const goToNextQuestion = () => {
     const nextIndex = currentIndex + 1;
     if (nextIndex < questions.length) {
@@ -171,9 +197,53 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
     }
   };
 
+  const handleSubmitTest = async () => {
+    let requestSubmitTestURL = `https://${host}/test/submit`;
+
+    try {
+      const response = await fetch(requestSubmitTestURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          startDate: new Date(),
+          endDate: new Date(),
+          testId: examId,
+          childrenId: childrenId,
+          time: convertTimeToSeconds(formattedElapsedTime),
+          questions: currentChoice,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.msg == "1") {
+        navigation.navigate("ExamResultScreen", {
+          userId: Number(userId),
+          timeTaken: formattedElapsedTime,
+          currentChoice: currentChoice,
+          questions: questions,
+          time: time,
+          examId: examId,
+          childrenId: childrenId,
+          examInfo: examInfo,
+        });
+        // navigation.navigate("ExamInfoScreen", {
+        //   userId: Number(userId),
+        // });
+      } else {
+        Alert.alert("Thất bại", "Nộp bài thất bại");
+      }
+    } catch (e) {
+      Alert.alert(`Nộp bài thất bại - API Failed`);
+    }
+  };
+  // console.log(currentChoice)
   const renderItem = ({ item, index }: { item: Question; index: number }) => {
     const progressText = `${index + 1}/${questions.length}`;
-
+    const questionChoice = currentChoice.find(
+      (choice) => choice.id === item.id
+    );
     switch (item.type) {
       case "multiple-choice":
         return (
@@ -192,7 +262,7 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
               <TouchableOpacity
                 key={index}
                 style={styles.submitButton}
-                onPress={() => {}}
+                onPress={handleSubmitTest}
               >
                 <Text style={styles.submitText}>Nộp bài</Text>
               </TouchableOpacity>
@@ -202,17 +272,19 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
             </View>
             <View style={styles.optionsContainer}>
               {item.options!.map((option, index) => {
-                const isSelected = answers[item.id] === option;
                 return (
                   <TouchableOpacity
-                    key={index}
+                    key={option.id}
                     style={[
                       styles.optionWrapper,
-                      isSelected && styles.selectedOption,
+                      questionChoice?.choiceId === Number(option.id) &&
+                        styles.selectedOption,
                     ]}
-                    onPress={() => handleSelectOption(item.id, option)}
+                    onPress={() =>
+                      handleSelectOption(item.id, option.content, option.id)
+                    }
                   >
-                    <Text style={styles.optionText}>{option}</Text>
+                    <Text style={styles.optionText}>{option.content}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -236,7 +308,7 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
               <TouchableOpacity
                 key={index}
                 style={styles.submitButton}
-                onPress={() => {}}
+                onPress={handleSubmitTest}
               >
                 <Text style={styles.submitText}>Nộp bài</Text>
               </TouchableOpacity>
@@ -248,9 +320,12 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
 
             <View style={styles.textNoticeContainer}>
               <TextInput
-                value={answers[item.id] || ""}
-                onChangeText={(text) => handleSelectOption(item.id, text)}
+                value={questionChoice?.answer || ""}
+                onChangeText={(text) => handleTextChange(item.id, text)}
                 style={styles.noticeInput}
+                placeholder="Điền câu trả lời tại đây"
+                multiline={true}
+                keyboardType="ascii-capable"
               />
             </View>
           </View>
@@ -258,14 +333,29 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
     }
   };
 
-  const progress = Object.keys(answers).length / questions.length;
+  const progress =
+    currentChoice.reduce((acc, choice) => {
+      const answer = choice.answer ?? "";
+      if (
+        (choice.choiceId !== undefined &&
+          choice.choiceId !== -1 &&
+          choice.choiceId !== null) ||
+        answer.trim() !== ""
+      ) {
+        return acc + 1;
+      } else {
+        return acc;
+      }
+    }, 0) / questions.length;
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => {
-            console.log("pressed");
+            navigation.navigate("ExamInfoScreen", {
+              userId: Number(userId),
+            });
           }}
         >
           <Text style={styles.backButtonText}>Back</Text>
@@ -281,6 +371,7 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           ref={flatListRef}
+          keyboardShouldPersistTaps="handled"
         />
       </View>
       <View style={styles.navigationContainer}>
@@ -366,13 +457,15 @@ const styles = StyleSheet.create({
   },
   textNoticeContainer: {
     backgroundColor: "#e0e6f0",
-    padding: 10,
     borderRadius: 10,
+    padding: 15,
     width: 330,
     height: 150,
     marginTop: 30,
     alignSelf: "center",
     marginBottom: 20,
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
   },
   noticeInput: {
     fontSize: 18,
@@ -380,6 +473,9 @@ const styles = StyleSheet.create({
     color: "#413636",
     marginTop: 10,
     alignSelf: "center",
+    width: "100%",
+    height: "100%",
+    textAlignVertical: "top",
   },
   listContainer: {
     marginTop: 100,

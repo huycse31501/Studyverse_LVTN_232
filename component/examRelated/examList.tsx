@@ -22,6 +22,11 @@ export interface ExamProps {
   tags: string[];
   result: string | undefined;
   endDate?: string;
+  questions?: any;
+  testId?: any;
+  time?: any;
+  submmissions?: any;
+  questionCountToPass?: any;
 }
 
 export interface ExamListProps {
@@ -31,10 +36,9 @@ export interface ExamListProps {
   pickedDate?: Date;
 }
 
-const isSameDay = (date1:Date, date2:Date) => {
+const isSameDay = (date1: Date, date2: Date) => {
   return date1.toISOString().slice(0, 10) === date2.toISOString().slice(0, 10);
 };
-
 
 const ExamList: React.FC<ExamListProps> = ({
   Exams,
@@ -90,7 +94,6 @@ const ExamList: React.FC<ExamListProps> = ({
           style={[
             styles.container,
             { backgroundColor: getBackGroundColor(item.status) },
-            
           ]}
           key={index}
           onPress={() => onExamItemPress?.(item)}
@@ -183,7 +186,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 5,
     position: "absolute",
-    left: 35,
+    left: 45,
     bottom: -5,
   },
   additionalTagsText: {

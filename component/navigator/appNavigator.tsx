@@ -67,7 +67,7 @@ export type RootStackParamList = {
   };
   ExamInfoScreen: {
     userId: number;
-    routeBefore: string;
+    routeBefore?: string;
     newExamCreated?: boolean;
     fromFooter?: string;
   };
@@ -76,22 +76,38 @@ export type RootStackParamList = {
     routeBefore?: string;
     newExamCreated?: boolean;
     fromFooter?: string;
+    payLoadToDoExam?: any;
+    examInfo?: any;
+    childrenId?: any;
   };
   ExamResultScreen: {
-    totalQuestions: number;
-    correctAnswers: number;
     timeTaken: string;
     userId?: number;
+    examInfo?: any;
+    childrenId?: any;
+    questions?: any;
+    time?: any;
+    examId?: any;
+    currentChoice?: any;
   };
   DoExamScreen: {
     questions: Question[];
     time: string;
     userId?: number;
+    examId?: string;
+    childrenId?: any;
+    payLoadToDoExam?: any;
+    examInfo?: any;
   };
   DetailExamResultScreen: {
-    questions: Question[];
     timeFinish: string;
     userId?: number;
+    examInfo?: any;
+    attemp?: any;
+    attempIndex?: any;
+    payloadToDoExam?: any;
+    childrenId?: any;
+    result?: any;
   };
   CreateExamScreen: {
     userId: number;

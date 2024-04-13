@@ -118,9 +118,6 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
       isExamNameValid:
         inputs.examName.value.length === 0 ||
         regexVault.preventxssValidate.test(inputs.examName.value),
-      isDescriptionValid:
-        inputs.description.value.length === 0 ||
-        regexVault.preventxssValidate.test(inputs.description.value),
       isPassPointValid:
         inputs.passPoint.value.length === 0 ||
         regexVault.passPoint.test(inputs.passPoint.value),
@@ -266,19 +263,6 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               value={inputs.examName.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(this, "examName"),
-              }}
-            />
-          </View>
-          <View>
-            <Text style={styles.inputTitleText}>
-              Mô tả ngắn về bài kiểm tra
-            </Text>
-            <BlackBorderTextInputField
-              placeHolder="Mô tả"
-              isValid
-              value={inputs.description.value}
-              textInputConfig={{
-                onChangeText: inputChangedHandler.bind(this, "description"),
               }}
             />
           </View>

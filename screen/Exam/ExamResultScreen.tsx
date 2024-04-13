@@ -12,10 +12,12 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Svg, Circle, Path } from "react-native-svg";
 import CircularProgress from "../../component/examRelated/circleResult";
 import WideButton from "../../component/shared/WideButton";
-
-const isPass = (correctAnswers: number, totalQuestions: number) => {
-  return correctAnswers >= totalQuestions / 2;
-};
+import {
+  CountCorrectAnswer,
+  CountCorrectAnswerForDashboard,
+  getExamStatusForHistory,
+  getExamStatusForHistoryForDashboard,
+} from "../../utils/examStatus";
 
 type ExamResultRouteProp = RouteProp<RootStackParamList, "ExamResultScreen">;
 
@@ -25,12 +27,30 @@ interface ExamResultScreenProps {
 }
 
 const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
-  const { userId, correctAnswers, totalQuestions, timeTaken } = route.params;
-  const pass = isPass(correctAnswers, totalQuestions);
+  const {
+    userId,
+    timeTaken,
+    currentChoice,
+    questions,
+    time,
+    examId,
+    childrenId,
+    examInfo,
+  } = route.params;
+
+  const pass = getExamStatusForHistoryForDashboard(
+    currentChoice,
+    examInfo.questions,
+    examInfo.questionCountToPass
+  );
+  const correctAnswers = CountCorrectAnswerForDashboard(
+    currentChoice,
+    examInfo.questions
+  );
+  const totalQuestions = questions.length;
   const percentage = (correctAnswers / totalQuestions) * 100;
-  const color = pass ? "#9cef76" : "#f3716b";
-  const textColor = pass ? "white" : "black";
-  const dynamicStyles = getDynamicStyles(pass);
+  const color =
+    pass === "pass" ? "#9cef76" : pass === "fail" ? "#f3716b" : "#c9e8f4";
 
   return (
     <View style={styles.container}>
@@ -57,35 +77,49 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
         </TouchableOpacity>
       </View>
       <Text style={styles.resultText}>Hoàn thành</Text>
-      <View style={styles.circleResultContainer}>
-        <CircularProgress
-          size={200}
-          strokeWidth={32.5}
-          percentage={percentage}
-          backgroundColor="#e6e6e6"
-          progressColor={color}
-        />
-      </View>
-      <Text style={styles.testResult}>
-        {percentage >= 50 ? "Đạt" : "Chưa đạt"}
-      </Text>
-      <View style={styles.detailsContainer}>
-        <View style={styles.scoreContainer}>
-          <Text
-            style={styles.resultDetailText}
-          >{`${correctAnswers}/${totalQuestions}`}</Text>
-          <Text style={styles.resultDetailTextName}>Kết quả</Text>
-        </View>
-        <View style={styles.scoreContainer}>
-          <Text style={styles.resultDetailText}>{`${timeTaken}`}</Text>
-          <Text style={styles.resultDetailTextName}>Thời gian</Text>
-        </View>
-      </View>
+      {pass !== "grading" ? (
+        <>
+          <View style={styles.circleResultContainer}>
+            <CircularProgress
+              size={200}
+              strokeWidth={32.5}
+              percentage={percentage}
+              backgroundColor="#e6e6e6"
+              progressColor={color}
+            />
+          </View>
+          <Text style={styles.testResult}>
+            {pass === "pass" ? "Đạt" : "Chưa đạt"}
+          </Text>
+          <View style={styles.detailsContainer}>
+            <View style={styles.scoreContainer}>
+              <Text
+                style={styles.resultDetailText}
+              >{`${correctAnswers}/${totalQuestions}`}</Text>
+              <Text style={styles.resultDetailTextName}>Kết quả</Text>
+            </View>
+            <View style={styles.scoreContainer}>
+              <Text style={styles.resultDetailText}>{`${timeTaken}`}</Text>
+              <Text style={styles.resultDetailTextName}>Thời gian</Text>
+            </View>
+          </View>
+        </>
+      ) : (
+        <>
+          <Text style={styles.nextTimeText}>Bài kiểm tra sẽ được chấm sau</Text>
+        </>
+      )}
       <View style={styles.buttonGroup}>
         <WideButton
           backgroundColor="#FEDB86"
           title="Màn hình chính"
-          onPress={() => {}}
+          onPress={() => {
+            navigation.navigate("ExamInfoScreen", {
+              userId: Number(userId),
+              routeBefore: "StatusDashboard",
+              fromFooter: "1",
+            });
+          }}
         />
       </View>
       <View style={styles.buttonGroup}>
@@ -106,16 +140,6 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
     </View>
   );
 };
-
-const getDynamicStyles = (pass: boolean) =>
-  StyleSheet.create({
-    backgroundColor: {
-      backgroundColor: pass ? "#9cef76" : "#f3716b",
-    },
-    textColor: {
-      color: pass ? "white" : "black",
-    },
-  });
 
 const styles = StyleSheet.create({
   container: {
@@ -197,5 +221,14 @@ const styles = StyleSheet.create({
     marginTop: 30,
     paddingHorizontal: 50,
   },
+  nextTimeText: {
+    color: "#383A44",
+    fontSize: 20,
+    fontWeight: "800",
+    alignSelf: "center",
+    paddingVertical: 5,
+    marginTop: 100,
+    marginBottom: 225,
+  }
 });
 export default ExamResultScreen;

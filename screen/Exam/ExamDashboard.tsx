@@ -32,13 +32,14 @@ import MemberOption from "../../component/examRelated/examMemberSlide";
 import ExamList, { ExamProps } from "../../component/examRelated/examList";
 import { examList } from "../../mockData/ExamData";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
-import { mockQuestions, mockQuestionsResult } from "./DoExam";
 import { isEqual } from "lodash";
 import { formatDateObj } from "../../utils/formatDateObjToString";
 import { convertIdsToSubjects } from "../../component/shared/constants/convertSubjectToId";
 import { formatDateInUserInformation } from "../../utils/formatDateStrtoDateStr";
 import { DateCountMap } from "../Calendar/CalendarDashboard";
 import { formatDate } from "../../utils/formatDate";
+import { formatTimeToHHMMSS } from "../../utils/formatTimeFromSecondToHHMMSS";
+import { calculateCorrectAnswers, getExamStatus } from "../../utils/examStatus";
 
 type ExamInfoRouteProp = RouteProp<RootStackParamList, "ExamInfoScreen">;
 
@@ -75,7 +76,6 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
     const userIdNumber = Number(userInTotalList.userId);
     return !isNaN(userIdNumber) && !excludeList.includes(userIdNumber);
   });
-  const excludeId = [...excludeList, Number(user?.userId)];
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedMemberId, setSelectedMemberId] = useState(
     user?.role === "parent" ? Number(memberStatusData[0].userId) : user?.userId
@@ -84,7 +84,6 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   const [filteredExams, setFilteredExams] = useState([]);
   const [examToInput, setExamToInput] = useState<ExamProps[]>([]);
   const [countExam, setCountExam] = useState([]);
-
   useEffect(() => {
     if (!Array.isArray(examToInput)) return;
 
@@ -112,25 +111,29 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   }, []);
 
   useEffect(() => {
-    const requestExamList = async () => {
-      let requestExamURL = `https://${host}/test/${user?.familyId}`;
-      try {
-        const response = await fetch(requestExamURL, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        if (!isEqual(data, examData)) {
-          setExamData(data);
+    const intervalId = setInterval(() => {
+      const requestExamList = async () => {
+        let requestExamURL = `https://${host}/test/${user?.familyId}`;
+        try {
+          const response = await fetch(requestExamURL, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const data = await response.json();
+          if (!isEqual(data, examData)) {
+            setExamData(data);
+          }
+        } catch (e) {
+          console.error("Error fetching events:", e);
         }
-      } catch (e) {
-        console.error("Error fetching events:", e);
-      }
-    };
-    requestExamList();
-  }, [host, userId, route.params?.newExamCreated]);
+      };
+      requestExamList();
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [host, userId, examData, route.params?.newExamCreated]);
   const onBackPress = useCallback(() => {
     if (memberToRender.userId === user?.userId) {
       navigation.navigate("StatusDashboard");
@@ -190,16 +193,37 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
         return {
           name: exam.name,
           dateStart: formatDateInUserInformation(exam.startDate),
-          timeStart: undefined,
+          timeStart:
+            exam?.submissions?.length === 0
+              ? undefined
+              : formatTimeToHHMMSS(
+                  exam.submissions[exam.submissions.length - 1]?.time
+                ),
           tags: convertIdsToSubjects(exam.tags),
-          status: "pending",
-          result: undefined,
+          status: getExamStatus(
+            exam.submissions,
+            exam.questions,
+            exam.questionCountToPass
+          ),
+          result: calculateCorrectAnswers(exam.submissions, exam.questions),
           endDate: exam.endDate,
+          questions: exam.questions,
+          testId: exam.id,
+          time: exam.time,
+          submissions: exam.submissions,
+          questionCountToPass: exam.questionCountToPass,
         };
       });
 
     return filtered;
-  }, [examData, selectedMemberId, selectedDate]);
+  }, [
+    examData,
+    selectedMemberId,
+    selectedDate,
+    host,
+    userId,
+    route.params?.newExamCreated,
+  ]);
 
   useEffect(() => {
     const examsInput = filterExamsForExamInput();
@@ -210,6 +234,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
     setFilteredExams(filterExamsForSelectedMember());
   }, [filterExamsForSelectedMember]);
   // console.log(examToInput);
+
   // console.log(countExam)
   const insets = useSafeAreaInsets();
   return (
@@ -244,7 +269,11 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
             />
           </View>
           <View style={styles.weekDatePickerContainer}>
-            <WeekDatePicker onExam listOfEventCount={countExam} onDateSelect={handleDateSelect} />
+            <WeekDatePicker
+              onExam
+              listOfEventCount={countExam}
+              onDateSelect={handleDateSelect}
+            />
           </View>
           <View style={styles.memberChoiceContainer}>
             {user?.role === "parent" && (
@@ -258,10 +287,32 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               Exams={examToInput}
               pickedDate={selectedDate}
               onExamItemPress={(item) => {
-                console.log("Selected Exam:", item);
-                // navigation.navigate("ExamHistoryScreen", {
-                //   userId: userId,
-                // })
+                navigation.navigate("ExamHistoryScreen", {
+                  examInfo: item,
+                  userId: userId,
+                  payLoadToDoExam: {
+                    userId: userId,
+                    questions: item.questions.map((quiz: any) => {
+                      return {
+                        id: quiz.id,
+                        question: quiz.name,
+                        type: quiz.type === 1 ? "multiple-choice" : "text",
+                        options:
+                          quiz.type === 1
+                            ? quiz.choices.map((choice: any) => {
+                                return {
+                                  content: choice.content,
+                                  id: choice.id,
+                                };
+                              })
+                            : undefined,
+                      };
+                    }),
+                    time: formatTimeToHHMMSS(item.time),
+                    examId: item.testId,
+                    childrenId: selectedMemberId,
+                  },
+                });
               }}
             />
           </View>
