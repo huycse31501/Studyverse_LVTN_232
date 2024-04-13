@@ -128,7 +128,27 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
           backgroundColor="#41ABF7"
           textColor="#f5f0f0"
           title="Làm lại"
-          onPress={() => {}}
+          onPress={() => {
+            navigation.navigate("DoExamScreen", {
+              userId: Number(userId),
+              questions: questions,
+              time: time,
+              examId: examId,
+              childrenId: childrenId,
+              examInfo: examInfo,
+              routeBefore: "ExamResultScreen",
+              payloadToNavigateBackToExamResultScreen: {
+                userId,
+                timeTaken,
+                currentChoice,
+                questions,
+                time,
+                examId,
+                childrenId,
+                examInfo,
+              }
+            });
+          }}
         />
       </View>
     </View>

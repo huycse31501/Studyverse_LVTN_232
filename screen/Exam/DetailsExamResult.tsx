@@ -101,7 +101,6 @@ const DetailExamResultScreen = ({
     transformQuestions(examInfo)
   );
   const [gradingResults, setGradingResults] = useState<GradingResult[]>([]);
-  console.log(examInfo.submissions[attempIndex]);
   const handleGradeOption = (questionId: any, isCorrect: any) => {
     setGradingResults((prevResults: any) => {
       const index = prevResults.findIndex(

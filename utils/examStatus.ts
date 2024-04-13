@@ -46,7 +46,6 @@ export function getExamStatus(
   if (isEmpty(answers)) {
     let question = questions.find((q: any) => q.type === 2);
     if (question) {
-      console.log(question,answers)
       return "grading"
     }
   }

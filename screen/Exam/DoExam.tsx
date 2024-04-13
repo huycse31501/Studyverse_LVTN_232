@@ -142,6 +142,7 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           answer: null,
         }))
       );
+      flatListRef.current?.scrollToIndex({ animated: false, index: 0 });
     }, [questions])
   );
 
@@ -363,7 +364,17 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           style={styles.backButton}
           onPress={() => {
             if (routeBefore === "ExamResultScreen") {
-
+              navigation.navigate("ExamResultScreen", {
+                userId: payloadToNavigateBackToExamResultScreen.userId,
+                timeTaken: payloadToNavigateBackToExamResultScreen.timeTaken,
+                currentChoice:
+                  payloadToNavigateBackToExamResultScreen.currentChoice,
+                questions: payloadToNavigateBackToExamResultScreen.questions,
+                time: payloadToNavigateBackToExamResultScreen.time,
+                examId: payloadToNavigateBackToExamResultScreen.examId,
+                childrenId: payloadToNavigateBackToExamResultScreen.childrenId,
+                examInfo: payloadToNavigateBackToExamResultScreen.examInfo,
+              });
               return;
             }
             navigation.navigate("ExamHistoryScreen", {
