@@ -10,8 +10,12 @@ import {
   Image,
   Touchable,
   Alert,
+  Modal,
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
+import {
+  FlatList,
+  TouchableWithoutFeedback,
+} from "react-native-gesture-handler";
 import ProgressBar from "../../component/shared/ProgressBar";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -20,6 +24,7 @@ import Constants from "expo-constants";
 import ApplyButton from "../../component/shared/ApplyButton";
 import { formatTimeToHHMMSS } from "../../utils/formatTimeFromSecondToHHMMSS";
 import { convertTimeToSeconds } from "../../utils/convertTimeToSecond";
+import { Ionicons } from "@expo/vector-icons";
 
 export type Option = {
   content: string;
@@ -35,6 +40,7 @@ export type Question = {
   isParentView?: boolean;
   label?: string[];
   answerId?: number;
+  image?: any;
 };
 
 export type Choice = {
@@ -86,6 +92,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
       };
     })
   );
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [imageUri, setImageUri] = useState("");
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeftInSeconds((prevTimeLeftInSeconds) => {
@@ -277,6 +286,21 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
                 <Text style={styles.submitText}>Nộp bài</Text>
               </TouchableOpacity>
             </View>
+            <View style={styles.imageContainer}>
+              <Text style={styles.answerTitleTextStyle}>Ảnh minh họa: </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setImageUri(item.image);
+                  setShowImageModal(true);
+                }}
+              >
+                <Ionicons
+                  name={"images"}
+                  style={{ color: "#0e0e11", marginLeft: 10, marginTop: 7 }}
+                  size={26}
+                />
+              </TouchableOpacity>
+            </View>
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{item.question}</Text>
             </View>
@@ -321,6 +345,21 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
                 onPress={handleSubmitTest}
               >
                 <Text style={styles.submitText}>Nộp bài</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.imageContainer}>
+              <Text style={styles.answerTitleTextStyle}>Ảnh minh họa: </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setImageUri(item.image);
+                  setShowImageModal(true);
+                }}
+              >
+                <Ionicons
+                  name={"images"}
+                  style={{ color: "#0e0e11", marginLeft: 10, marginTop: 7 }}
+                  size={26}
+                />
               </TouchableOpacity>
             </View>
             <View style={styles.textNoticeContainer}>
@@ -427,6 +466,42 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           </View>
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showImageModal}
+        onRequestClose={() => setShowImageModal(false)}
+        statusBarTranslucent
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setShowImageModal(false);
+          }}
+        >
+          <View style={styles.centeredImageModalView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.imageModalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setShowImageModal(false);
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Image
+                  source={{ uri: imageUri }}
+                  style={styles.imageStyle}
+                  resizeMode="contain"
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -440,7 +515,7 @@ const styles = StyleSheet.create({
     marginTop: 60,
     marginLeft: 30,
     position: "absolute",
-    zIndex: 20,
+    zIndex: 3,
     elevation: 20,
   },
   headerContainer: {
@@ -471,6 +546,10 @@ const styles = StyleSheet.create({
     marginTop: -3,
     fontWeight: "400",
   },
+  imageContainer: {
+    marginTop: 15,
+    flexDirection: "row",
+  },
   timeContainer: {
     marginTop: 20,
     marginBottom: 5,
@@ -493,7 +572,7 @@ const styles = StyleSheet.create({
     padding: 15,
     width: 330,
     height: 150,
-    marginTop: 30,
+    marginTop: 10,
     alignSelf: "center",
     marginBottom: 20,
     justifyContent: "flex-start",
@@ -565,7 +644,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 30,
     paddingBottom: 20,
-    marginTop: 60,
+    marginTop: 40,
   },
   navButton: {
     paddingVertical: 8,
@@ -606,6 +685,45 @@ const styles = StyleSheet.create({
   submitText: {
     fontWeight: "500",
     fontSize: 17,
+  },
+  centeredImageModalView: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+  },
+  imageModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: 300,
+    height: 250,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 1,
+  },
+  closeIcon: {
+    width: 30,
+    height: 30,
+  },
+  imageStyle: {
+    width: "80%",
+    height: "80%",
+    alignSelf: "center",
+    marginTop: 20,
   },
 });
 

@@ -252,7 +252,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
         return exam.status === "failed";
       })
     );
-  }, [filterExamsForExamInput]);
+  }, [filterExamsForExamInput, route.params?.newExamCreated]);
 
   useEffect(() => {
     setFilteredExams(filterExamsForSelectedMember());
@@ -333,6 +333,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
                                 };
                               })
                             : undefined,
+                        image: quiz?.image,
                       };
                     }),
                     time: formatTimeToHHMMSS(item.time),
@@ -459,10 +460,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               label="Tạo bài kiểm tra"
               extraStyle={{
                 width: "50%",
-                marginTop:
-                  examToInput.length <= 3 || filteredExams.length <= 3
-                    ? 300
-                    : 50,
+                marginTop: 30,
                 marginBottom: 30,
               }}
               onPress={() => {
@@ -512,7 +510,7 @@ const styles = StyleSheet.create({
     color: "#1E293B",
     fontWeight: "600",
     paddingLeft: 30,
-    marginTop: 30,
+    marginTop: 15,
     marginBottom: 10,
   },
 });

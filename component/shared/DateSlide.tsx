@@ -14,7 +14,7 @@ type Props = {
   onExam?: boolean;
 };
 
-const daysOfWeek = ["CN", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
 const WeekDatePicker: React.FC<Props> = ({
   remind,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   daysOfWeek: {
     color: "#94A3B8",
-    fontSize: 14,
+    fontSize: 16,
   },
   selectedDateText: {
     fontSize: 20,

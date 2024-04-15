@@ -50,6 +50,7 @@ const CreateNewQuestionScreen = ({
   const [questionOptions, setQuestionOptions] = useState(["", "", "", ""]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [correctAnswer, setCorrectAnswer] = useState<number>();
+  const [imageURL, setImageURL] = useState("");
   const toggleTagSelection = (tagName: string) => {
     setSelectedTags((currentSelectedTags) => {
       if (currentSelectedTags.includes(tagName)) {
@@ -206,6 +207,17 @@ const CreateNewQuestionScreen = ({
               </View>
             </>
           )}
+          <View>
+            <Text style={styles.inputTitleText}>Đường dẫn ảnh minh họa</Text>
+            <BlackBorderTextInputField
+              placeHolder="Ví dụ: https://imgur.com/xxxxx"
+              isValid
+              value={imageURL}
+              textInputConfig={{
+                onChangeText: (value) => setImageURL(value),
+              }}
+            />
+          </View>
           <Text style={styles.noteText}>Nhãn bài kiểm tra</Text>
           <View style={styles.tagContainer}>
             {listOfTags.map((tag, index) => (
@@ -219,7 +231,7 @@ const CreateNewQuestionScreen = ({
           </View>
           <View
             style={{
-              marginTop: questionType === "multiple-choice" ? 25 : 250,
+              marginTop: 50,
               marginBottom: 40,
             }}
           >
@@ -234,6 +246,7 @@ const CreateNewQuestionScreen = ({
                       : "text",
                   question: questionTitle,
                   label: selectedTags,
+                  image: imageURL,
                 };
 
                 if (questionType === "multiple-choice") {
@@ -243,7 +256,9 @@ const CreateNewQuestionScreen = ({
                 navigation.navigate("CreateQuestionListScreen", {
                   userId: userId,
                   previousPayload: previousPayload,
-                  currentQuestionList: currentQuestionList ? [...currentQuestionList, newQuestion] : [newQuestion],
+                  currentQuestionList: currentQuestionList
+                    ? [...currentQuestionList, newQuestion]
+                    : [newQuestion],
                 });
               }}
             />

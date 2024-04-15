@@ -51,7 +51,7 @@ const ExamList: React.FC<ExamListProps> = ({
       case "completed":
         return "checkmark-circle";
       case "grading":
-        return "time";
+        return "help-circle";
       case "failed":
         return "close-circle";
       default:
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 10,
     backgroundColor: "#fff",
-    marginBottom: 5,
+    marginBottom: 10,
     borderRadius: 16,
     shadowColor: "rgba(0,0,0,25)",
     shadowOffset: {
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 3,
-    marginVertical: 25,
+    marginTop: 15,
     marginHorizontal: 30,
   },
   textContainer: {
@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginRight: 5,
     width: 40,
+    marginTop: 1,
   },
   tagContainer: {
     flexDirection: "row",

@@ -37,7 +37,6 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
     childrenId,
     examInfo,
   } = route.params;
-
   const pass = getExamStatusForHistoryForDashboard(
     currentChoice,
     examInfo.questions,

@@ -107,7 +107,6 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
   };
 
   const [inputValidation, setInputValidation] = useState({
-    isExamNameValid: regexVault.preventxssValidate.test(inputs.examName.value),
     isExamDateValid: validateValidDate(inputs.examDate.value),
     isExamTimeValid: regexVault.examTime.test(inputs.examTime.value),
     isPassPointValid: regexVault.passPoint.test(inputs.passPoint.value),
@@ -115,9 +114,6 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
 
   useEffect(() => {
     const updatedValidation = {
-      isExamNameValid:
-        inputs.examName.value.length === 0 ||
-        regexVault.preventxssValidate.test(inputs.examName.value),
       isPassPointValid:
         inputs.passPoint.value.length === 0 ||
         regexVault.passPoint.test(inputs.passPoint.value),
@@ -201,9 +197,7 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
     if (!allFieldsFilled) {
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
     } else if (!allFieldsValid) {
-      if (inputValidation.isExamNameValid === false) {
-        Alert.alert("Thông báo", "Tên bài kiểm tra không hợp lệ");
-      } else if (inputValidation.isExamDateValid === false) {
+      if (inputValidation.isExamDateValid === false) {
         Alert.alert("Bạn không thể tạo bài kiểm tra trong quá khứ");
       } else if (inputValidation.isPassPointValid === false) {
         Alert.alert(
@@ -217,7 +211,7 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
       navigation.navigate("CreateQuestionListScreen", {
         userId: userId,
         previousPayload: inputs,
-        currentQuestionList: currentQuestionList
+        currentQuestionList: currentQuestionList,
       });
     }
   };
@@ -295,9 +289,16 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               }}
             />
           </View>
-          <Text style={[styles.inputTitleText, {
-            marginBottom: 5,
-          }]}>Hạn làm bài</Text>
+          <Text
+            style={[
+              styles.inputTitleText,
+              {
+                marginBottom: 5,
+              },
+            ]}
+          >
+            Hạn làm bài
+          </Text>
           <View style={styles.examDateContainer}>
             <DateInputField
               required

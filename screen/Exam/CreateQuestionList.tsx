@@ -92,7 +92,7 @@ const CreateQuestionListScreen = ({
                 tags: convertSubjectsToIds(question?.label),
                 description: "",
                 suggest: "",
-                image: "",
+                image: question?.image,
                 choices:
                   question?.type === "multiple-choice"
                     ? question?.options.map((choice: any) => {
