@@ -14,7 +14,7 @@ type Props = {
   onExam?: boolean;
 };
 
-const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
+const daysOfWeek = ["CN", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
 
 const WeekDatePicker: React.FC<Props> = ({
   remind,
@@ -108,11 +108,6 @@ const WeekDatePicker: React.FC<Props> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.weekDates}>
-        {weekDates.map((dateItem, index) =>
-          renderDate(dateItem, daysOfWeek[index])
-        )}
-      </View>
       <View style={styles.eventDateContainer}>
         <Text style={styles.eventDateText}>
           {remind ? "Nhắc nhở" : onExam ? "Bài kiểm tra" : "Sự kiện"}
@@ -129,6 +124,11 @@ const WeekDatePicker: React.FC<Props> = ({
             style={styles.datePickerLogo}
           ></Image>
         </TouchableOpacity>
+      </View>
+      <View style={styles.weekDates}>
+        {weekDates.map((dateItem, index) =>
+          renderDate(dateItem, daysOfWeek[index])
+        )}
       </View>
 
       {showPicker && (
@@ -151,7 +151,8 @@ const styles = StyleSheet.create({
   },
   weekDates: {
     flexDirection: "row",
-    marginHorizontal: 15,
+    marginHorizontal: 25,
+    marginTop: 5,
   },
   date: {
     width: 50,
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
   },
   daysOfWeek: {
     color: "#94A3B8",
-    fontSize: 16,
+    fontSize: 14,
   },
   selectedDateText: {
     fontSize: 20,
@@ -189,7 +190,6 @@ const styles = StyleSheet.create({
   },
   eventCount: {
     height: 30,
-
     fontSize: 16,
     color: "#DE496E",
     fontWeight: "700",
@@ -197,7 +197,8 @@ const styles = StyleSheet.create({
     paddingTop: 5,
   },
   eventDateContainer: {
-    marginVertical: 20,
+    marginTop: 15,
+    marginBottom: 20,
     flexDirection: "row",
     paddingLeft: 30,
   },

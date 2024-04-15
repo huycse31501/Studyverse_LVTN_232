@@ -112,7 +112,7 @@ const ExamList: React.FC<ExamListProps> = ({
           <View style={styles.gradingContainer}>
             <Ionicons
               name={getIconName(item.status)}
-              style={{ color: "#0e0e11" }}
+              style={{ color: "#0e0e11"}}
               size={24}
             />
             <Text style={styles.gradingText}>{item.result ?? "-----"}</Text>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 10,
+    elevation: 3,
     marginVertical: 25,
     marginHorizontal: 30,
   },
@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginLeft: 10,
     marginRight: 5,
+    width: 40,
   },
   tagContainer: {
     flexDirection: "row",

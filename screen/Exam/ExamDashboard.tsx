@@ -82,6 +82,10 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   );
   const [examData, setExamData] = useState();
   const [filteredExams, setFilteredExams] = useState([]);
+  const [pendingExams, setPendingExams] = useState([]);
+  const [gradingExams, setGradingExams] = useState([]);
+  const [failExams, setFailExams] = useState([]);
+  const [passExams, setPassExams] = useState([]);
   const [examToInput, setExamToInput] = useState<ExamProps[]>([]);
   const [countExam, setCountExam] = useState([]);
   useEffect(() => {
@@ -228,6 +232,26 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   useEffect(() => {
     const examsInput = filterExamsForExamInput();
     setExamToInput(examsInput);
+    setPendingExams(
+      examsInput.filter((exam: any) => {
+        return exam.status === "pending";
+      })
+    );
+    setGradingExams(
+      examsInput.filter((exam: any) => {
+        return exam.status === "grading";
+      })
+    );
+    setPassExams(
+      examsInput.filter((exam: any) => {
+        return exam.status === "completed";
+      })
+    );
+    setFailExams(
+      examsInput.filter((exam: any) => {
+        return exam.status === "failed";
+      })
+    );
   }, [filterExamsForExamInput]);
 
   useEffect(() => {
@@ -282,9 +306,123 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               />
             )}
           </View>
+          <Text
+            style={styles.noteText}
+          >{`Chưa hoàn thành (${pendingExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
-              Exams={examToInput}
+              Exams={pendingExams}
+              pickedDate={selectedDate}
+              onExamItemPress={(item) => {
+                navigation.navigate("ExamHistoryScreen", {
+                  examInfo: item,
+                  userId: userId,
+                  payLoadToDoExam: {
+                    userId: userId,
+                    questions: item.questions.map((quiz: any) => {
+                      return {
+                        id: quiz.id,
+                        question: quiz.name,
+                        type: quiz.type === 1 ? "multiple-choice" : "text",
+                        options:
+                          quiz.type === 1
+                            ? quiz.choices.map((choice: any) => {
+                                return {
+                                  content: choice.content,
+                                  id: choice.id,
+                                };
+                              })
+                            : undefined,
+                      };
+                    }),
+                    time: formatTimeToHHMMSS(item.time),
+                    examId: item.testId,
+                    childrenId: selectedMemberId,
+                  },
+                });
+              }}
+            />
+          </View>
+          <Text
+            style={styles.noteText}
+          >{`Đang được chấm (${gradingExams.length})`}</Text>
+          <View style={styles.examContainer}>
+            <ExamList
+              Exams={gradingExams}
+              pickedDate={selectedDate}
+              onExamItemPress={(item) => {
+                navigation.navigate("ExamHistoryScreen", {
+                  examInfo: item,
+                  userId: userId,
+                  payLoadToDoExam: {
+                    userId: userId,
+                    questions: item.questions.map((quiz: any) => {
+                      return {
+                        id: quiz.id,
+                        question: quiz.name,
+                        type: quiz.type === 1 ? "multiple-choice" : "text",
+                        options:
+                          quiz.type === 1
+                            ? quiz.choices.map((choice: any) => {
+                                return {
+                                  content: choice.content,
+                                  id: choice.id,
+                                };
+                              })
+                            : undefined,
+                      };
+                    }),
+                    time: formatTimeToHHMMSS(item.time),
+                    examId: item.testId,
+                    childrenId: selectedMemberId,
+                  },
+                });
+              }}
+            />
+          </View>
+          <Text
+            style={styles.noteText}
+          >{`Bài kiểm tra đã đạt (${passExams.length})`}</Text>
+          <View style={styles.examContainer}>
+            <ExamList
+              Exams={passExams}
+              pickedDate={selectedDate}
+              onExamItemPress={(item) => {
+                navigation.navigate("ExamHistoryScreen", {
+                  examInfo: item,
+                  userId: userId,
+                  payLoadToDoExam: {
+                    userId: userId,
+                    questions: item.questions.map((quiz: any) => {
+                      return {
+                        id: quiz.id,
+                        question: quiz.name,
+                        type: quiz.type === 1 ? "multiple-choice" : "text",
+                        options:
+                          quiz.type === 1
+                            ? quiz.choices.map((choice: any) => {
+                                return {
+                                  content: choice.content,
+                                  id: choice.id,
+                                };
+                              })
+                            : undefined,
+                      };
+                    }),
+                    time: formatTimeToHHMMSS(item.time),
+                    examId: item.testId,
+                    childrenId: selectedMemberId,
+                  },
+                });
+              }}
+            />
+          </View>
+          <Text
+            style={styles.noteText}
+          >{`Bài kiểm tra chưa đạt (${failExams.length})`}</Text>
+          <View style={styles.examContainer}>
+            <ExamList
+              Exams={failExams}
               pickedDate={selectedDate}
               onExamItemPress={(item) => {
                 navigation.navigate("ExamHistoryScreen", {
@@ -369,6 +507,14 @@ const styles = StyleSheet.create({
     paddingLeft: 25,
   },
   examContainer: {},
+  noteText: {
+    fontSize: 20,
+    color: "#1E293B",
+    fontWeight: "600",
+    paddingLeft: 30,
+    marginTop: 30,
+    marginBottom: 10,
+  },
 });
 
 export default ExamInfoScreen;

@@ -472,7 +472,6 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
           <Text style={styles.noteText}>Những người liên quan đến sự kiện</Text>
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
-              excludeId={userId}
               onSelectedMembersChange={handleSelectedMembersChange}
               defaultValue={eventInfo.tagsToEdit}
             />
