@@ -137,12 +137,7 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   </View>
                 </View>
               </View>
-              <View
-                style={[
-                  styles.activityContainer,
-                  userInfo?.role === "children" && { marginTop: 120 },
-                ]}
-              >
+              <View style={styles.activityContainer}>
                 <TouchableOpacity
                   style={styles.activityButton}
                   onPress={() => {
@@ -160,16 +155,6 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                   />
                 </TouchableOpacity>
 
-                {userInfo?.role === "parent" && (
-                  <TouchableOpacity style={styles.activityButton}>
-                    <Text style={styles.activityText}>Huy hiệu</Text>
-                    <Image
-                      source={require("../../assets/images/dashboard/badgeIcon.png")}
-                      style={styles.activityIcon}
-                    />
-                  </TouchableOpacity>
-                )}
-
                 <TouchableOpacity
                   style={styles.activityButton}
                   onPress={() => {
@@ -185,16 +170,6 @@ const UserDetailsScreen = ({ route, navigation }: UserDetailsScreenProps) => {
                     style={styles.activityIcon}
                   />
                 </TouchableOpacity>
-
-                {userInfo?.role === "parent" && (
-                  <TouchableOpacity style={styles.activityButton}>
-                    <Text style={styles.activityText}>Hoạt động mạng</Text>
-                    <Image
-                      source={require("../../assets/images/dashboard/networkIcon.png")}
-                      style={styles.activityIcon}
-                    />
-                  </TouchableOpacity>
-                )}
               </View>
               <View style={styles.cancelButtonContainer}>
                 {userInfo?.role === "parent" && (
@@ -304,7 +279,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-around",
     alignItems: "center",
-    marginTop: "12.5%",
+    marginTop: 80,
   },
   activityButton: {
     width: 150,
@@ -338,6 +313,7 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     width: 200,
+    marginTop: 150,
   },
   cancelModalContainer: {
     flex: 1,

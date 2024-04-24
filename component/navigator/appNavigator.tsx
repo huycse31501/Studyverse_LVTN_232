@@ -31,6 +31,8 @@ import DetailExamResultScreen from "../../screen/Exam/DetailsExamResult";
 import CreateExamScreen from "../../screen/Exam/CreateExamScreen";
 import CreateQuestionListScreen from "../../screen/Exam/CreateQuestionList";
 import CreateNewQuestionScreen from "../../screen/Exam/CreateNewQuestion";
+import StudyPlanInfoScreen from "../../screen/StudyPlan/StudyPlanInfoScreen";
+import StudyPlanDetailsScreen from "../../screen/StudyPlan/StudyPlanDetails";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -99,7 +101,7 @@ export type RootStackParamList = {
     payLoadToDoExam?: any;
     examInfo?: any;
     routeBefore?: any;
-    payloadToNavigateBackToExamResultScreen?: any
+    payloadToNavigateBackToExamResultScreen?: any;
   };
   DetailExamResultScreen: {
     timeFinish: string;
@@ -125,6 +127,19 @@ export type RootStackParamList = {
     userId: number;
     previousPayload?: any;
     currentQuestionList?: any;
+  };
+  StudyPlanInfoScreen: {
+    userId: number;
+    routeBefore?: string;
+    newPlanCreated?: boolean;
+    fromFooter?: string;
+  };
+  StudyPlanDetailsScreen: {
+    userId: number;
+    routeBefore?: string;
+    newPlanCreated?: boolean;
+    fromFooter?: string;
+    studyPackage?: any;
   };
 };
 
@@ -178,6 +193,14 @@ const AppNavigator = () => {
         <Stack.Screen
           name="CreateNewQuestionScreen"
           component={CreateNewQuestionScreen}
+        />
+        <Stack.Screen
+          name="StudyPlanInfoScreen"
+          component={StudyPlanInfoScreen}
+        />
+        <Stack.Screen
+          name="StudyPlanDetailsScreen"
+          component={StudyPlanDetailsScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

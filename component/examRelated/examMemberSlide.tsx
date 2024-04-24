@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 20,
     margin: 10,
+
   },
   statusContainer: {
     width: 90,
