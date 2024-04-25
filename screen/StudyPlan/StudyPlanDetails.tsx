@@ -109,7 +109,10 @@ const StudyPlanDetailsScreen = ({
           </View>
           <Text style={styles.headerText}>{studyPackage?.courseName}</Text>
           <View style={styles.studyPlanlistContainer}>
-            <StudyPlanList logo={studyPackage.logoType} color={studyPackage.color} />
+            <StudyPlanList
+              logo={studyPackage.logoType}
+              color={studyPackage.color}
+            />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
@@ -120,7 +123,13 @@ const StudyPlanDetailsScreen = ({
           position: "absolute",
           bottom: 50,
         }}
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate("CreateStudyPlanScreen", {
+            userId: userId,
+            studyPackage: studyPackage,
+
+          });
+        }}
       />
     </SafeAreaView>
   );

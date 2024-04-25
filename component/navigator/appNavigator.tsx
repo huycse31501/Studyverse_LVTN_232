@@ -33,6 +33,7 @@ import CreateQuestionListScreen from "../../screen/Exam/CreateQuestionList";
 import CreateNewQuestionScreen from "../../screen/Exam/CreateNewQuestion";
 import StudyPlanInfoScreen from "../../screen/StudyPlan/StudyPlanInfoScreen";
 import StudyPlanDetailsScreen from "../../screen/StudyPlan/StudyPlanDetails";
+import CreateStudyPlanScreen from "../../screen/StudyPlan/CreateStudyPlan";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -141,6 +142,12 @@ export type RootStackParamList = {
     fromFooter?: string;
     studyPackage?: any;
   };
+  CreateStudyPlanScreen: {
+    userId: number;
+    routeBefore?: string;
+    fromFooter?: string;
+    studyPackage?: any;
+  };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -202,9 +209,14 @@ const AppNavigator = () => {
           name="StudyPlanDetailsScreen"
           component={StudyPlanDetailsScreen}
         />
+        <Stack.Screen
+          name="CreateStudyPlanScreen"
+          component={CreateStudyPlanScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
 export default AppNavigator;
+CreateStudyPlanScreen;

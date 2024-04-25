@@ -92,7 +92,15 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({ logo, color }) => {
           <View style={styles.contentContainer}>
             <Image source={logo} style={styles.iconStyles} />
             <View style={styles.studyPlanInfoContainer}>
-              <Text style={styles.studyPlanText}>{item.name}</Text>
+              <View style={styles.studyPlanTextContainer}>
+                <Text style={styles.studyPlanText}>{item.name}</Text>
+                <TouchableOpacity>
+                  <Image
+                    source={require("../../assets/images/shared/addQuestion.png")}
+                    style={styles.editLogoStyle}
+                  />
+                </TouchableOpacity>
+              </View>
               <View style={styles.studyPlanTimeRangeContainer}>
                 <Image
                   style={styles.studyPlanLogo}
@@ -123,7 +131,6 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({ logo, color }) => {
                   item.currentProgress * 100
                 }%`}</Text>
               </View>
-
             </View>
           </View>
         </TouchableOpacity>
@@ -183,6 +190,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     color: "#131313",
     marginLeft: 15,
+    width: 100,
   },
   progressContainer: {
     flexDirection: "row",
@@ -207,7 +215,18 @@ const styles = StyleSheet.create({
     left: 180,
     top: -1,
     color: "rgba(0,0,0,0.85)",
-  }
+  },
+  studyPlanTextContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end"
+  },
+  editLogoStyle: {
+    width: 30,
+    height: 30,
+    position: "absolute",
+    top: -30,
+    left: 80,
+  },
 });
 
 export default StudyPlanList;

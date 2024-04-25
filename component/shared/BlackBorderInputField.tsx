@@ -49,7 +49,6 @@ const BlackBorderTextInputField = ({
         autoCorrect={false}
         value={value}
 
-
         {...textInputConfig}
       />
       {showError && (
