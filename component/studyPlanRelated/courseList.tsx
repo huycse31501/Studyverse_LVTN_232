@@ -76,7 +76,8 @@ const SubjectList: React.FC<SubjectListProps> = ({ selectedMemberId }) => {
               studyPackage: {
                 courseName: item.name,
                 logoType: item.logo,
-                color: getBackgroundColor(String(index))
+                color: getBackgroundColor(String(index)),
+                userId: Number(selectedMemberId),
               },
             });
           }}

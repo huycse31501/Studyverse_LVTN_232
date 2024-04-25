@@ -12,50 +12,32 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
+
+// const initialMilestones = [
+//   { key: "1", name: "TOEIC", status: "done" },
+//   { key: "2", name: "IELTS", status: "done" },
+//   { key: "3", name: "Giao tiếp", status: "done" },
+//   { key: "4", name: "Giao tiếp", status: "pending" },
+//   { key: "5", name: "Giao tiếp", status: "in-progress" },
+//   { key: "6", name: "IELTS", status: "in-progress" },
+//   { key: "7", name: "Unit 7: Learning", status: "in-progress" },
+// ];
+
 interface MilestoneListProps {
   studyPackage?: any;
+  deleteMilestone: (index: number) => void;
+  shiftLeft: (index: number) => void;
+  shiftRight: (index: number) => void;
 }
 
-const initialMilestones = [
-  { key: "1", name: "TOEIC", status: "done" },
-  { key: "2", name: "IELTS", status: "done" },
-  { key: "3", name: "Giao tiếp", status: "done" },
-  { key: "4", name: "Giao tiếp", status: "pending" },
-  { key: "5", name: "Giao tiếp", status: "in-progress" },
-  { key: "6", name: "IELTS", status: "in-progress" },
-  { key: "7", name: "Unit 7: Learning", status: "in-progress" },
-];
-
 const isCreate = true;
-const MilestoneList: React.FC<MilestoneListProps> = ({ studyPackage }) => {
-  const [milestones, setMilestones] = useState(initialMilestones);
-
-  const deleteMilestone = (index: number) => {
-    const newMilestones = milestones.filter((_, i) => i !== index);
-    setMilestones(newMilestones);
-  };
-
-  const shiftLeft = (index: number) => {
-    if (index > 0) {
-      const newMilestones = [...milestones];
-      [newMilestones[index], newMilestones[index - 1]] = [
-        newMilestones[index - 1],
-        newMilestones[index],
-      ];
-      setMilestones(newMilestones);
-    }
-  };
-
-  const shiftRight = (index: number) => {
-    if (index < milestones.length - 1) {
-      const newMilestones = [...milestones];
-      [newMilestones[index], newMilestones[index + 1]] = [
-        newMilestones[index + 1],
-        newMilestones[index],
-      ];
-      setMilestones(newMilestones);
-    }
-  };
+const MilestoneList: React.FC<MilestoneListProps> = ({
+  studyPackage,
+  deleteMilestone,
+  shiftLeft,
+  shiftRight,
+}) => {
+  const { milestones } = studyPackage;
 
   return (
     <ScrollView style={{ marginBottom: 20 }}>
@@ -127,7 +109,9 @@ const MilestoneList: React.FC<MilestoneListProps> = ({ studyPackage }) => {
                             </TouchableOpacity>
                           </>
                         )}
-                        <TouchableOpacity onPress={() => deleteMilestone(index)}>
+                        <TouchableOpacity
+                          onPress={() => deleteMilestone(index)}
+                        >
                           <Image
                             source={require("../../assets/images/studyPlan/deleteMilestone.png")}
                             style={styles.milestoneEditLogo}
@@ -190,7 +174,9 @@ const MilestoneList: React.FC<MilestoneListProps> = ({ studyPackage }) => {
                             </TouchableOpacity>
                           </>
                         )}
-                        <TouchableOpacity onPress={() => deleteMilestone(index)}>
+                        <TouchableOpacity
+                          onPress={() => deleteMilestone(index)}
+                        >
                           <Image
                             source={require("../../assets/images/studyPlan/deleteMilestone.png")}
                             style={styles.milestoneEditLogo}
@@ -282,12 +268,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({ studyPackage }) => {
           )}
         </View>
       ))}
-      <TouchableOpacity style={styles.addMileStoneContainer}>
-        <Image
-          source={require("../../assets/images/studyPlan/addMileStone.png")}
-          style={styles.addLogo}
-        />
-      </TouchableOpacity>
+
     </ScrollView>
   );
 };

@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Alert,
-  Image,
+  TextInput,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import { RouteProp } from "@react-navigation/native";
@@ -25,25 +25,28 @@ import SelectBox from "react-native-multi-selectbox-typescript";
 import Tag, { listOfTags } from "../../component/shared/Tags";
 import TagToSelect from "../../component/shared/TagsToSelect";
 import ApplyButton from "../../component/shared/ApplyButton";
-import MilestoneList from "../../component/studyPlanRelated/mileStoneRoadMap";
+import ToggleSwitch from "toggle-switch-react-native";
+import Constants from "expo-constants";
+import { isEqual } from "lodash";
+import ExamToLinkMilestoneList from "../../component/studyPlanRelated/examToLinkList";
 
-type CreateStudyPlanRouteProp = RouteProp<
+type CreateMilestoneRouteProp = RouteProp<
   RootStackParamList,
-  "CreateStudyPlanScreen"
+  "CreateMilestoneScreen"
 >;
 
-interface CreateStudyPlanScreenProps {
-  route: CreateStudyPlanRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "CreateStudyPlanScreen">;
+interface CreateMilestoneScreenProps {
+  route: CreateMilestoneRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "CreateMilestoneScreen">;
 }
 const validateValidStartDate = (checkDate: string) => {
   const [day, month, year] = checkDate.split("/");
-  const studyPlanStartDate = new Date(+year, +month - 1, +day);
+  const MilestoneStartDate = new Date(+year, +month - 1, +day);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (studyPlanStartDate < today) {
+  if (MilestoneStartDate < today) {
     return false;
   }
   return true;
@@ -52,96 +55,103 @@ const validateValidStartDate = (checkDate: string) => {
 const validateValidEndDate = (startDate: string, endDate: string) => {
   const start = startDate.split("/").map(Number);
   const end = endDate.split("/").map(Number);
-  const studyPlanStartDate = new Date(start[2], start[1] - 1, start[0]);
-  const studyPlanEndDate = new Date(end[2], end[1] - 1, end[0]);
+  const MilestoneStartDate = new Date(start[2], start[1] - 1, start[0]);
+  const MilestoneEndDate = new Date(end[2], end[1] - 1, end[0]);
 
-  studyPlanStartDate.setHours(0, 0, 0, 0);
-  studyPlanEndDate.setHours(0, 0, 0, 0);
+  MilestoneStartDate.setHours(0, 0, 0, 0);
+  MilestoneEndDate.setHours(0, 0, 0, 0);
 
-  return studyPlanEndDate > studyPlanStartDate;
+  return MilestoneEndDate > MilestoneStartDate;
 };
 
-const CreateStudyPlanScreen = ({
+const CreateMilestoneScreen = ({
   route,
   navigation,
-}: CreateStudyPlanScreenProps) => {
+}: CreateMilestoneScreenProps) => {
   const { userId, studyPackage } = route.params;
+  let host = Constants?.expoConfig?.extra?.host;
+  let port = Constants?.expoConfig?.extra?.port;
+
+  const user = useSelector((state: RootState) => state.user.user);
 
   const [inputs, setInputs] = useState({
-    studyPlanName: {
+    MilestoneName: {
       value: "",
       required: true,
     },
-    studyPlanStartDate: {
+    MilestoneStartDate: {
       value: "",
       required: true,
     },
-    studyPlanEndDate: {
+    MilestoneEndDate: {
       value: "",
       required: true,
     },
-    tagsUser: {
-      value: "[]",
-      required: true,
+    noteContent: {
+      value: "",
+      required: false,
     },
   });
-
-  const [milestones, setMilestones] = useState(studyPackage?.milestones || []);
+  const [isLinkExam, setIsLinkExam] = useState(false);
+  const [examData, setExamData] = useState();
+  const [selectedExamId, setSelectedExamId] = useState<number | null>(null);
+  const handleExamSelect = (examId: number) => {
+    setSelectedExamId(examId);
+  };
   useEffect(() => {
-    if (studyPackage?.milestones) {
-      setMilestones(studyPackage.milestones);
-    }
-  }, [studyPackage]);
-  const deleteMilestone = (index: number) => {
-    const newMilestones = milestones.filter((_: any, i: any) => i !== index);
-    setMilestones(newMilestones);
-  };
-
-  const shiftLeft = (index: number) => {
-    if (index > 0) {
-      const newMilestones = [...milestones];
-      [newMilestones[index], newMilestones[index - 1]] = [
-        newMilestones[index - 1],
-        newMilestones[index],
-      ];
-      setMilestones(newMilestones);
-    }
-  };
-
-  const shiftRight = (index: number) => {
-    if (index < milestones.length - 1) {
-      const newMilestones = [...milestones];
-      [newMilestones[index], newMilestones[index + 1]] = [
-        newMilestones[index + 1],
-        newMilestones[index],
-      ];
-      setMilestones(newMilestones);
-    }
-  };
-
+    const requestExamList = async () => {
+      let requestExamURL = `https://${host}/test/${user?.familyId}`;
+      try {
+        const response = await fetch(requestExamURL, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        if (!isEqual(data, examData)) {
+          setExamData(
+            data?.[studyPackage?.userId]
+              ?.filter((exam: any) => {
+                return exam.submissions.length === 0;
+              })
+              .map((exam: any) => {
+                return {
+                  name: exam.name,
+                  examId: exam.id,
+                };
+              }) ?? []
+          );
+        }
+      } catch (e) {
+        console.error("Error fetching events:", e);
+      }
+    };
+    requestExamList();
+  }, [host, userId]);
   const [inputValidation, setInputValidation] = useState({
-    isStudyPlanStartDateValid: validateValidStartDate(
-      inputs.studyPlanStartDate.value
+    isMilestoneStartDateValid: validateValidStartDate(
+      inputs.MilestoneStartDate.value
     ),
-    isStudyPlanEndDateValid: validateValidEndDate(
-      inputs.studyPlanStartDate.value,
-      inputs.studyPlanEndDate.value
+    isMilestoneEndDateValid: validateValidEndDate(
+      inputs.MilestoneStartDate.value,
+      inputs.MilestoneEndDate.value
     ),
   });
 
   useEffect(() => {
     const updatedValidation = {
-      isStudyPlanStartDateValid: validateValidStartDate(
-        inputs.studyPlanStartDate.value
+      isMilestoneStartDateValid: validateValidStartDate(
+        inputs.MilestoneStartDate.value
       ),
-      isStudyPlanEndDateValid: validateValidEndDate(
-        inputs.studyPlanStartDate.value,
-        inputs.studyPlanEndDate.value
+      isMilestoneEndDateValid: validateValidEndDate(
+        inputs.MilestoneStartDate.value,
+        inputs.MilestoneEndDate.value
       ),
     };
 
     setInputValidation(updatedValidation);
-  }, [inputs.studyPlanStartDate.value, inputs.studyPlanEndDate.value]);
+  }, [inputs.MilestoneStartDate.value, inputs.MilestoneEndDate.value]);
 
   const inputChangedHandler = useCallback(
     (inputIdentifier: keyof typeof inputs, enteredValue: string) => {
@@ -164,34 +174,23 @@ const CreateStudyPlanScreen = ({
 
   const resetInputs = () => {
     setInputs({
-      studyPlanName: {
+      MilestoneName: {
         value: "",
         required: true,
       },
-      studyPlanStartDate: {
+      MilestoneStartDate: {
         value: "",
         required: true,
       },
-      studyPlanEndDate: {
+      MilestoneEndDate: {
         value: "",
         required: true,
       },
-      tagsUser: {
-        value: "[]",
-        required: true,
+      noteContent: {
+        value: "",
+        required: false,
       },
     });
-  };
-  const handleSelectedMembersChange = (selectedMemberIds: number[]) => {
-    const selectedMembersString = `[${selectedMemberIds.join(",")}]`;
-
-    setInputs((currentInputs) => ({
-      ...currentInputs,
-      tagsUser: {
-        ...currentInputs.tagsUser,
-        value: selectedMembersString,
-      },
-    }));
   };
 
   const continueHandle = () => {
@@ -208,12 +207,39 @@ const CreateStudyPlanScreen = ({
     if (!allFieldsFilled) {
       Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
     } else if (!allFieldsValid) {
-      if (inputValidation.isStudyPlanStartDateValid === false) {
-        Alert.alert("Bạn không thể tạo kế hoạch học tập trong quá khứ");
-      } else if (inputValidation.isStudyPlanEndDateValid === false) {
-        Alert.alert("Bạn không thể tạo kế hoạch học tập trong quá khứ");
+      if (inputValidation.isMilestoneStartDateValid === false) {
+        Alert.alert("Bạn không thể tạo cột mốc học tập trong quá khứ");
+      } else if (inputValidation.isMilestoneEndDateValid === false) {
+        Alert.alert("Bạn không thể tạo cột mốc học tập trong quá khứ");
       }
     } else {
+      navigation.navigate("CreateStudyPlanScreen", {
+        userId: userId,
+        studyPackage: {
+          ...studyPackage,
+          milestones: [
+            ...(studyPackage?.milestones ?? []),
+            {
+              name: inputs.MilestoneName.value,
+              status: "in-progress",
+              startDate: inputs.MilestoneStartDate.value,
+              endDate: inputs.MilestoneEndDate.value,
+              noteText: inputs.noteContent.value,
+              linkedExam: isLinkExam ? selectedExamId : null,
+            },
+          ],
+        },
+      });
+
+      // const initialMilestones = [
+      //   { key: "1", name: "TOEIC", status: "done" },
+      //   { key: "2", name: "IELTS", status: "done" },
+      //   { key: "3", name: "Giao tiếp", status: "done" },
+      //   { key: "4", name: "Giao tiếp", status: "pending" },
+      //   { key: "5", name: "Giao tiếp", status: "in-progress" },
+      //   { key: "6", name: "IELTS", status: "in-progress" },
+      //   { key: "7", name: "Unit 7: Learning", status: "in-progress" },
+      // ];
     }
   };
   const insets = useSafeAreaInsets();
@@ -248,16 +274,16 @@ const CreateStudyPlanScreen = ({
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Tạo kế hoạch mới</Text>
+          <Text style={styles.headerText}>Tạo cột mốc mới</Text>
           <View>
-            <Text style={styles.inputTitleText}>Tên kế hoạch</Text>
+            <Text style={styles.inputTitleText}>Tên cột mốc</Text>
             <BlackBorderTextInputField
-              placeHolder="Kế hoạch học tập"
+              placeHolder="Cột mốc học tập"
               isValid
               required
-              value={inputs.studyPlanName.value}
+              value={inputs.MilestoneName.value}
               textInputConfig={{
-                onChangeText: inputChangedHandler.bind(this, "studyPlanName"),
+                onChangeText: inputChangedHandler.bind(this, "MilestoneName"),
               }}
             />
           </View>
@@ -280,18 +306,18 @@ const CreateStudyPlanScreen = ({
               },
             ]}
           >
-            Thời gian bắt đầu kế hoạch
+            Thời gian bắt đầu cột mốc
           </Text>
-          <View style={styles.studyPlanDateContainer}>
+          <View style={styles.MilestoneDateContainer}>
             <DateInputField
               required
               isValid
               placeHolder="Ngày bắt đầu"
-              dateStr={inputs.studyPlanStartDate.value}
+              dateStr={inputs.MilestoneStartDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
                   this,
-                  "studyPlanStartDate"
+                  "MilestoneStartDate"
                 ),
               }}
             />
@@ -304,58 +330,58 @@ const CreateStudyPlanScreen = ({
               },
             ]}
           >
-            Thời gian kết thúc kế hoạch
+            Thời gian kết thúc cột mốc
           </Text>
-          <View style={styles.studyPlanDateContainer}>
+          <View style={styles.MilestoneDateContainer}>
             <DateInputField
               required
               isValid
               placeHolder="Ngày kết thúc"
-              dateStr={inputs.studyPlanEndDate.value}
+              dateStr={inputs.MilestoneEndDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
                   this,
-                  "studyPlanEndDate"
+                  "MilestoneEndDate"
                 ),
               }}
             />
           </View>
-          <Text style={styles.noteText}>Thành viên tham gia kế hoạch</Text>
+          <Text style={styles.inputTitleText}>Nội dung cột mốc</Text>
 
-          <View style={styles.memberChoiceContainer}>
-            <MemberTagList
-              onSelectedMembersChange={handleSelectedMembersChange}
+          <View style={styles.textNoticeContainer}>
+            <TextInput
+              value={inputs?.noteContent?.value || ""}
+              onChangeText={inputChangedHandler.bind(this, "noteContent")}
+              style={styles.noticeInput}
+              placeholder="Điền nội dung cột mốc"
             />
           </View>
-          <Text style={styles.noteText}>Tạo cột mốc học tập</Text>
 
-          <View style={styles.mileStoneContainer}>
-            <MilestoneList
-              studyPackage={{
-                ...studyPackage,
-                milestones,
-              }}
-              deleteMilestone={deleteMilestone}
-              shiftLeft={shiftLeft}
-              shiftRight={shiftRight}
-            />
+          <View style={styles.linkTextContainer}>
+            <Text style={styles.inputTitleText}>Liên kết bài kiểm tra</Text>
+
+            <View style={styles.toggleContainer}>
+              <ToggleSwitch
+                isOn={isLinkExam}
+                onColor="#4CD964"
+                offColor="#e0dddd"
+                size="large"
+                onToggle={() => {
+                  setIsLinkExam(!isLinkExam);
+                }}
+                circleColor={"#FFFFFF"}
+              />
+            </View>
           </View>
-          <TouchableOpacity
-            style={styles.addMileStoneContainer}
-            onPress={() => {
-              navigation.navigate("CreateMilestoneScreen", {
-                studyPackage: studyPackage,
-                userId: userId,
-              });
-            }}
-          >
-            <Image
-              source={require("../../assets/images/studyPlan/addMileStone.png")}
-              style={styles.addLogo}
+          {isLinkExam && (
+            <ExamToLinkMilestoneList
+              ExamToLinkMilestones={examData || []}
+              onExamToLinkMilestoneItemPress={handleExamSelect}
+              selectedExamId={selectedExamId}
             />
-          </TouchableOpacity>
+          )}
           <View style={styles.nextButtonContainer}>
-            <ApplyButton label="Tạo kế hoạch" onPress={continueHandle} />
+            <ApplyButton label="Tạo cột mốc" onPress={continueHandle} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
@@ -401,14 +427,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  studyPlanDateContainer: {
+  MilestoneDateContainer: {
     width: "85%",
     marginLeft: "6.5%",
     marginVertical: 10,
-  },
-  memberChoiceContainer: {
-    paddingLeft: 25,
-    marginTop: 10,
   },
   noteText: {
     fontSize: 20,
@@ -426,21 +448,39 @@ const styles = StyleSheet.create({
     marginLeft: 20,
   },
   nextButtonContainer: {
-    marginTop: 50,
+    marginTop: 30,
     marginBottom: 50,
   },
-  mileStoneContainer: {
-    marginTop: 30,
-  },
-  addMileStoneContainer: {
-    marginRight: 70,
-  },
-  addLogo: {
-    width: 90,
-    height: 90,
+  textNoticeContainer: {
+    backgroundColor: "#e0e6f0",
+    borderRadius: 10,
+    padding: 15,
+    width: 330,
+    height: 150,
+    marginTop: 10,
     alignSelf: "center",
-    marginLeft: 60,
+    marginBottom: 20,
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+  },
+  noticeInput: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#413636",
+    marginTop: 10,
+    alignSelf: "center",
+    width: "100%",
+    height: "100%",
+    textAlignVertical: "top",
+  },
+  linkTextContainer: {
+    flexDirection: "row",
     marginTop: 10,
   },
+  toggleContainer: {
+    marginHorizontal: 20,
+    alignSelf: "center",
+    top: -5,
+  },
 });
-export default CreateStudyPlanScreen;
+export default CreateMilestoneScreen;
