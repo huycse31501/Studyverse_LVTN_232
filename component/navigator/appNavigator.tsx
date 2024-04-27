@@ -35,6 +35,9 @@ import StudyPlanInfoScreen from "../../screen/StudyPlan/StudyPlanInfoScreen";
 import StudyPlanDetailsScreen from "../../screen/StudyPlan/StudyPlanDetails";
 import CreateStudyPlanScreen from "../../screen/StudyPlan/CreateStudyPlan";
 import CreateMilestoneScreen from "../../screen/StudyPlan/AddMilestoneScreen";
+import ViewStudyPlansScreen from "../../screen/StudyPlan/ViewStudyPlan";
+import AddMoreMilestoneScreen from "../../screen/StudyPlan/AddMileStoneForExistingStudyPlanScreen";
+import EditMilestoneScreen from "../../screen/StudyPlan/EditMileStoneScreen";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -151,9 +154,30 @@ export type RootStackParamList = {
   };
   CreateMilestoneScreen: {
     userId: number;
+
+    tagUser?: any;
     routeBefore?: string;
     fromFooter?: string;
     studyPackage?: any;
+  };
+  ViewStudyPlansScreen: {
+    userId: number;
+    routeBefore?: string;
+    studyPackage?: any;
+    index?: any;
+  };
+  AddMoreMilestoneScreen: {
+    userId: number;
+    routeBefore?: string;
+    studyPackage?: any;
+    index?: any;
+  };
+  EditMilestoneScreen: {
+    userId: number;
+    routeBefore?: string;
+    studyPackage?: any;
+    index?: any;
+    currentMilestone?: any;
   };
 };
 
@@ -223,6 +247,18 @@ const AppNavigator = () => {
         <Stack.Screen
           name="CreateMilestoneScreen"
           component={CreateMilestoneScreen}
+        />
+        <Stack.Screen
+          name="ViewStudyPlansScreen"
+          component={ViewStudyPlansScreen}
+        />
+        <Stack.Screen
+          name="AddMoreMilestoneScreen"
+          component={AddMoreMilestoneScreen}
+        />
+        <Stack.Screen
+          name="EditMilestoneScreen"
+          component={EditMilestoneScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

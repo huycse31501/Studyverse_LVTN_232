@@ -234,7 +234,16 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           questions: currentChoice,
         }),
       });
-
+      console.log(
+        JSON.stringify({
+          startDate: new Date(),
+          endDate: new Date(),
+          testId: examId,
+          childrenId: childrenId,
+          time: convertTimeToSeconds(formattedElapsedTime),
+          questions: currentChoice,
+        })
+      );
       const data = await response.json();
       if (data.msg == "1") {
         navigation.navigate("ExamResultScreen", {

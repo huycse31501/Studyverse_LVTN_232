@@ -9,9 +9,16 @@ import {
   Image,
   ScrollView,
   Touchable,
+  Modal,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import userReducer from "../../redux/reducers/userReducer";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import ApplyButton from "../shared/ApplyButton";
+import Constants from "expo-constants";
 
 // const initialMilestones = [
 //   { key: "1", name: "TOEIC", status: "done" },
@@ -25,24 +32,135 @@ import { LinearGradient } from "expo-linear-gradient";
 
 interface MilestoneListProps {
   studyPackage?: any;
-  deleteMilestone: (index: number) => void;
-  shiftLeft: (index: number) => void;
-  shiftRight: (index: number) => void;
+  deleteMilestone?: (index: number) => void;
+  shiftLeft?: (index: number) => void;
+  shiftRight?: (index: number) => void;
+  isCreated?: Boolean;
+  indexPass?: any;
+  studyPackageToPass?: any;
+  childrenId?: any;
+  userId?: any;
 }
 
-const isCreate = true;
+type MilestonesNavigationProp = StackNavigationProp<{
+  AddMoreMilestoneScreen: {
+    userId: number;
+    routeBefore?: string;
+    studyPackage?: any;
+    index?: any;
+  };
+  EditMilestoneScreen: {
+    userId: number;
+    routeBefore?: string;
+    studyPackage?: any;
+    index?: any;
+    currentMilestone?: any;
+  };
+}>;
+
+let host = Constants?.expoConfig?.extra?.host;
+
 const MilestoneList: React.FC<MilestoneListProps> = ({
   studyPackage,
   deleteMilestone,
   shiftLeft,
   shiftRight,
+  isCreated,
+  indexPass,
+  userId,
+  studyPackageToPass,
+  childrenId,
 }) => {
-  const { milestones } = studyPackage;
+  const navigation = useNavigation<MilestonesNavigationProp>();
+  const user = useSelector((state: RootState) => state.user.user);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+
+  const [currentCompleteMilestone, setCurrentCompleteMilestone] =
+    useState<any>(null);
+  const [currentDeleteMilestone, setCurrentDeleteMilestone] =
+    useState<any>(null);
+  let { milestones } = studyPackage;
+  const getMilestoneStatus = (milestone: any, index: any, milestones: any) => {
+    if (milestone.pass) {
+      return "done";
+    } else if (index === milestones.findIndex((m: any) => !m.pass)) {
+      return "in-progress";
+    }
+    return "pending";
+  };
+
+  const handleDeleteMilestone = async (
+    milestoneId: string | number | undefined
+  ) => {
+    if (milestoneId === undefined) {
+      return;
+    }
+
+    let requestCreateEventURL = `https://${host}/milestone/${currentDeleteMilestone?.id}`;
+    try {
+      const response = await fetch(requestCreateEventURL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      if (data.msg == "1") {
+        const index = studyPackage.milestones.findIndex(
+          (item: any) => item.id === milestoneId
+        );
+        if (index !== -1) {
+          studyPackage.milestones.splice(index, 1);
+          setShowDeleteModal(false);
+        }
+      } else {
+        Alert.alert("Thất bại", "Xóa cột mốc thất bại");
+      }
+    } catch (e) {
+      Alert.alert(`Xóa cột mốc thất bại`);
+    }
+  };
+
+  const completeMilestone = async (milestoneId: any, childrenId: any) => {
+    let requestCompleteMilestoneURL = `https://${host}/milestone/complete`;
+    try {
+      const response = await fetch(requestCompleteMilestoneURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: Number(milestoneId),
+          childrenId: Number(childrenId),
+        }),
+      });
+
+      const data = await response.json();
+      if (data.msg == "1") {
+        const updatedMilestones = studyPackage.milestones.map(
+          (milestone: any) => {
+            if (milestone.id === milestoneId) {
+              return { ...milestone, pass: true };
+            }
+            return milestone;
+          }
+        );
+        studyPackage.milestones = updatedMilestones;
+        setShowCompleteModal(false);
+      } else {
+        Alert.alert("Thất bại", "Hoàn thành cột mốc thất bại");
+      }
+    } catch (e) {
+      Alert.alert(`Hoàn thành cột mốc thất bại`);
+    }
+  };
 
   return (
     <ScrollView style={{ marginBottom: 20 }}>
       {milestones.map((item: any, index: any) => (
-        <View style={styles.totalContainer} key={item.index}>
+        <View style={styles.totalContainer} key={index}>
           {index % 2 == 0 ? (
             <View
               style={[
@@ -60,7 +178,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                 >
                   <Image
                     source={
-                      item.status == "in-progress"
+                      item.status == "in-progress" || item.pass !== true
                         ? require("../../assets/images/studyPlan/leftCircle.png")
                         : require("../../assets/images/studyPlan/leftCircle-done.png")
                     }
@@ -76,12 +194,25 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                       },
                     ]}
                   >
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate("EditMilestoneScreen", {
+                          userId: userId,
+                          studyPackage: studyPackageToPass,
+                          index: indexPass,
+                          currentMilestone: item,
+                        });
+                      }}
+                    >
                       <Image
                         source={
-                          item.status === "in-progress"
+                          item.status === "in-progress" ||
+                          getMilestoneStatus(item, index, milestones) ===
+                            "pending"
                             ? require("../../assets/images/studyPlan/padlock.png")
-                            : item.status === "done"
+                            : item.status === "done" ||
+                              getMilestoneStatus(item, index, milestones) ===
+                                "done"
                             ? require("../../assets/images/studyPlan/doneMilestone.png")
                             : require("../../assets/images/studyPlan/milestone-inprogress.png")
                         }
@@ -93,7 +224,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                         {item.name.slice(0, 20)}
                       </Text>
                       <View style={styles.logoListContainer}>
-                        {isCreate && (
+                        {isCreated && shiftLeft && shiftRight && (
                           <>
                             <TouchableOpacity onPress={() => shiftLeft(index)}>
                               <Image
@@ -107,16 +238,62 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                                 style={styles.milestoneEditLogo}
                               />
                             </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => {
+                                if (deleteMilestone) {
+                                  deleteMilestone(index);
+                                }
+                              }}
+                            >
+                              <Image
+                                source={require("../../assets/images/studyPlan/deleteMilestone.png")}
+                                style={styles.milestoneEditLogo}
+                              />
+                            </TouchableOpacity>
                           </>
                         )}
-                        <TouchableOpacity
-                          onPress={() => deleteMilestone(index)}
-                        >
-                          <Image
-                            source={require("../../assets/images/studyPlan/deleteMilestone.png")}
-                            style={styles.milestoneEditLogo}
-                          />
-                        </TouchableOpacity>
+                        {!isCreated &&
+                          user?.role === "parent" &&
+                          item.pass !== true &&
+                          !item?.isNewCreated && (
+                            <>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setShowDeleteModal(true);
+                                  setCurrentDeleteMilestone({
+                                    id: item.id,
+                                    name: item.name,
+                                  });
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/images/studyPlan/deleteMilestone.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                            </>
+                          )}
+                        {user?.role === "parent" &&
+                          !isCreated &&
+                          getMilestoneStatus(item, index, milestones) ===
+                            "in-progress" && (
+                            <>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setShowCompleteModal(true);
+                                  setCurrentCompleteMilestone({
+                                    milestoneId: item.id,
+                                    name: item.name,
+                                  });
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/images/shared/acceptIcon.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                            </>
+                          )}
                       </View>
                     </View>
                   </View>
@@ -125,7 +302,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                 <>
                   <Image
                     source={
-                      item.status == "in-progress"
+                      item.status == "in-progress" || item.pass !== true
                         ? require("../../assets/images/studyPlan/progressCircle.png")
                         : require("../../assets/images/studyPlan/in-progress-done.png")
                     }
@@ -141,12 +318,25 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                       },
                     ]}
                   >
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate("EditMilestoneScreen", {
+                          userId: userId,
+                          studyPackage: studyPackageToPass,
+                          index: indexPass,
+                          currentMilestone: item,
+                        });
+                      }}
+                    >
                       <Image
                         source={
-                          item.status === "in-progress"
+                          item.status === "in-progress" ||
+                          getMilestoneStatus(item, index, milestones) ===
+                            "pending"
                             ? require("../../assets/images/studyPlan/padlock.png")
-                            : item.status === "done"
+                            : item.status === "done" ||
+                              getMilestoneStatus(item, index, milestones) ===
+                                "done"
                             ? require("../../assets/images/studyPlan/doneMilestone.png")
                             : require("../../assets/images/studyPlan/milestone-inprogress.png")
                         }
@@ -158,30 +348,83 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                         {item.name.slice(0, 20)}
                       </Text>
                       <View style={styles.logoListContainer}>
-                        {isCreate && (
-                          <>
-                            <TouchableOpacity onPress={() => shiftLeft(index)}>
-                              <Image
-                                source={require("../../assets/images/studyPlan/shiftLeft.png")}
-                                style={styles.milestoneEditLogo}
-                              />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => shiftRight(index)}>
-                              <Image
-                                source={require("../../assets/images/studyPlan/shiftRight.png")}
-                                style={styles.milestoneEditLogo}
-                              />
-                            </TouchableOpacity>
-                          </>
-                        )}
-                        <TouchableOpacity
-                          onPress={() => deleteMilestone(index)}
-                        >
-                          <Image
-                            source={require("../../assets/images/studyPlan/deleteMilestone.png")}
-                            style={styles.milestoneEditLogo}
-                          />
-                        </TouchableOpacity>
+                        {isCreated &&
+                          shiftLeft &&
+                          shiftRight &&
+                          !item?.isNewCreated(
+                            <>
+                              <TouchableOpacity
+                                onPress={() => shiftLeft(index)}
+                              >
+                                <Image
+                                  source={require("../../assets/images/studyPlan/shiftLeft.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                onPress={() => shiftRight(index)}
+                              >
+                                <Image
+                                  source={require("../../assets/images/studyPlan/shiftRight.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  if (deleteMilestone) {
+                                    deleteMilestone(index);
+                                  }
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/images/studyPlan/deleteMilestone.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                            </>
+                          )}
+                        {!isCreated &&
+                          user?.role === "parent" &&
+                          item.pass !== true &&
+                          !item?.isNewCreated && (
+                            <>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setShowDeleteModal(true);
+                                  setCurrentDeleteMilestone({
+                                    id: item.id,
+                                    name: item.name,
+                                  });
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/images/studyPlan/deleteMilestone.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                            </>
+                          )}
+                        {user?.role === "parent" &&
+                          getMilestoneStatus(item, index, milestones) ===
+                            "in-progress" &&
+                          !isCreated && (
+                            <>
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setShowCompleteModal(true);
+                                  setCurrentCompleteMilestone({
+                                    milestoneId: item.id,
+                                    name: item.name,
+                                  });
+                                }}
+                              >
+                                <Image
+                                  source={require("../../assets/images/shared/acceptIcon.png")}
+                                  style={styles.milestoneEditLogo}
+                                />
+                              </TouchableOpacity>
+                            </>
+                          )}
                       </View>
                     </View>
                   </View>
@@ -199,7 +442,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
             >
               <Image
                 source={
-                  item.status == "in-progress"
+                  item.status == "in-progress" || item.pass !== true
                     ? require("../../assets/images/studyPlan/rightCircle.png")
                     : require("../../assets/images/studyPlan/rightCircle-done.png")
                 }
@@ -227,7 +470,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                     {item.name.slice(0, 20)}
                   </Text>
                   <View style={styles.logoListContainer}>
-                    {isCreate && (
+                    {isCreated && shiftLeft && shiftRight && (
                       <>
                         <TouchableOpacity onPress={() => shiftLeft(index)}>
                           <Image
@@ -241,22 +484,81 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                             style={styles.milestoneEditLogo}
                           />
                         </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            if (deleteMilestone) {
+                              deleteMilestone(index);
+                            }
+                          }}
+                        >
+                          <Image
+                            source={require("../../assets/images/studyPlan/deleteMilestone.png")}
+                            style={styles.milestoneEditLogo}
+                          />
+                        </TouchableOpacity>
                       </>
                     )}
-                    <TouchableOpacity onPress={() => deleteMilestone(index)}>
-                      <Image
-                        source={require("../../assets/images/studyPlan/deleteMilestone.png")}
-                        style={styles.milestoneEditLogo}
-                      />
-                    </TouchableOpacity>
+                    {!isCreated &&
+                      user?.role === "parent" &&
+                      item.pass !== true &&
+                      !item?.isNewCreated && (
+                        <>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setShowDeleteModal(true);
+                              setCurrentDeleteMilestone({
+                                id: item.id,
+                                name: item.name,
+                              });
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/images/studyPlan/deleteMilestone.png")}
+                              style={styles.milestoneEditLogo}
+                            />
+                          </TouchableOpacity>
+                        </>
+                      )}
+                    {user?.role === "parent" &&
+                      getMilestoneStatus(item, index, milestones) ===
+                        "in-progress" &&
+                      !isCreated && (
+                        <>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setShowCompleteModal(true);
+                              setCurrentCompleteMilestone({
+                                milestoneId: item.id,
+                                name: item.name,
+                              });
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/images/shared/acceptIcon.png")}
+                              style={styles.milestoneEditLogo}
+                            />
+                          </TouchableOpacity>
+                        </>
+                      )}
                   </View>
                 </View>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("EditMilestoneScreen", {
+                      userId: userId,
+                      studyPackage: studyPackageToPass,
+                      index: indexPass,
+                      currentMilestone: item,
+                    });
+                  }}
+                >
                   <Image
                     source={
-                      item.status === "in-progress"
+                      item.status === "in-progress" ||
+                      getMilestoneStatus(item, index, milestones) === "pending"
                         ? require("../../assets/images/studyPlan/padlock.png")
-                        : item.status === "done"
+                        : item.status === "done" ||
+                          getMilestoneStatus(item, index, milestones) === "done"
                         ? require("../../assets/images/studyPlan/doneMilestone.png")
                         : require("../../assets/images/studyPlan/milestone-inprogress.png")
                     }
@@ -268,7 +570,128 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
           )}
         </View>
       ))}
-
+      {!isCreated && user?.role === "parent" && (
+        <TouchableOpacity
+          style={styles.addMileStoneContainer}
+          onPress={() => {
+            navigation.navigate("AddMoreMilestoneScreen", {
+              userId: userId,
+              studyPackage: studyPackageToPass,
+              index: indexPass,
+            });
+          }}
+        >
+          <Image
+            source={require("../../assets/images/studyPlan/addMileStone.png")}
+            style={styles.addLogo}
+          />
+        </TouchableOpacity>
+      )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDeleteModal}
+        onRequestClose={() => {
+          setShowDeleteModal(false);
+          setCurrentDeleteMilestone(null);
+        }}
+        statusBarTranslucent
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setShowDeleteModal(false);
+            setCurrentDeleteMilestone(null);
+          }}
+        >
+          <View style={styles.centeredDeleteModalView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.DeleteModalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setShowDeleteModal(false);
+                    setCurrentDeleteMilestone(null);
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.deleteHeaderText}>Xóa cột mốc</Text>
+                <Text style={styles.deleteMilestoneText}>
+                  {currentDeleteMilestone?.name}
+                </Text>
+                <View style={styles.deleteButtonContainer}>
+                  <ApplyButton
+                    label="Xác nhận"
+                    extraStyle={{
+                      width: 150,
+                    }}
+                    onPress={() =>
+                      handleDeleteMilestone(currentDeleteMilestone?.id)
+                    }
+                  />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showCompleteModal}
+        onRequestClose={() => {
+          setShowCompleteModal(false);
+          setCurrentCompleteMilestone(null);
+        }}
+        statusBarTranslucent
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setShowCompleteModal(false);
+            setCurrentCompleteMilestone(null);
+          }}
+        >
+          <View style={styles.centeredDeleteModalView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.DeleteModalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setShowCompleteModal(false);
+                    setCurrentCompleteMilestone(null);
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.deleteHeaderText}>Hoàn thành </Text>
+                <Text style={styles.deleteMilestoneText}>
+                  {currentCompleteMilestone?.name}
+                </Text>
+                <View style={styles.deleteButtonContainer}>
+                  <ApplyButton
+                    label="Xác nhận"
+                    extraStyle={{
+                      width: 150,
+                    }}
+                    onPress={() =>
+                      completeMilestone(
+                        currentCompleteMilestone.milestoneId,
+                        childrenId
+                      )
+                    }
+                  />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </ScrollView>
   );
 };
@@ -287,6 +710,7 @@ const styles = StyleSheet.create({
   },
   addMileStoneContainer: {
     marginRight: 70,
+    marginTop: 50,
   },
   roadLogo: {
     width: 222,
@@ -324,6 +748,52 @@ const styles = StyleSheet.create({
     height: 25,
     marginHorizontal: 7,
     marginTop: 7,
+  },
+  centeredDeleteModalView: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+  },
+  DeleteModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: 300,
+    height: 250,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 1,
+  },
+  closeIcon: {
+    width: 30,
+    height: 30,
+  },
+  deleteHeaderText: {
+    fontSize: 25,
+    fontWeight: "600",
+    top: -60,
+  },
+  deleteMilestoneText: {
+    fontSize: 20,
+    fontWeight: "500",
+    top: -5,
+  },
+  deleteButtonContainer: {
+    bottom: -45,
   },
 });
 

@@ -38,7 +38,6 @@ let host = Constants?.expoConfig?.extra?.host;
 let port = Constants?.expoConfig?.extra?.port;
 
 const StatusDashboard = () => {
-
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
@@ -138,7 +137,6 @@ const StatusDashboard = () => {
             avatarId: String(item.avatar),
           }))
           .filter((item: any) => item.userId !== String(user?.userId));
-
         dispatch(setFamilyMember(familyListPayload));
       } catch (e) {
         console.log("Error while fetching family lists", e);

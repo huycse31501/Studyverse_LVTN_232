@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import { RouteProp } from "@react-navigation/native";
@@ -26,6 +27,11 @@ import Tag, { listOfTags } from "../../component/shared/Tags";
 import TagToSelect from "../../component/shared/TagsToSelect";
 import ApplyButton from "../../component/shared/ApplyButton";
 import MilestoneList from "../../component/studyPlanRelated/mileStoneRoadMap";
+import {
+  convertSubjectToId,
+  convertSubjectsToIds,
+} from "../../component/shared/constants/convertSubjectToId";
+import Constants from "expo-constants";
 
 type CreateStudyPlanRouteProp = RouteProp<
   RootStackParamList,
@@ -60,6 +66,7 @@ const validateValidEndDate = (startDate: string, endDate: string) => {
 
   return studyPlanEndDate > studyPlanStartDate;
 };
+let host = Constants?.expoConfig?.extra?.host;
 
 const CreateStudyPlanScreen = ({
   route,
@@ -87,6 +94,8 @@ const CreateStudyPlanScreen = ({
   });
 
   const [milestones, setMilestones] = useState(studyPackage?.milestones || []);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     if (studyPackage?.milestones) {
       setMilestones(studyPackage.milestones);
@@ -194,7 +203,7 @@ const CreateStudyPlanScreen = ({
     }));
   };
 
-  const continueHandle = () => {
+  const continueHandle = async () => {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -214,8 +223,42 @@ const CreateStudyPlanScreen = ({
         Alert.alert("Bạn không thể tạo kế hoạch học tập trong quá khứ");
       }
     } else {
+      let requestCreateTestURL = `https://${host}/studyPlan/create`;
+
+      try {
+        const response = await fetch(requestCreateTestURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: inputs.studyPlanName.value,
+            startDate: inputs.studyPlanStartDate.value,
+            endDate: inputs.studyPlanEndDate.value,
+            subjectId: convertSubjectToId[studyPackage?.courseName],
+            childrenIds: inputs.tagsUser.value,
+            milestones: milestones,
+          }),
+        });
+        const data = await response.json();
+        if (data.msg == "1") {
+          setIsLoading(false);
+          navigation.navigate("StudyPlanInfoScreen", {
+            userId: Number(userId),
+            routeBefore: "CreateStudyPlanScreen",
+            newPlanCreated: true,
+          });
+        } else {
+          setIsLoading(false);
+          Alert.alert("Thất bại", "Tạo kế hoạch thất bại");
+        }
+      } catch (e) {
+        setIsLoading(false);
+        Alert.alert(`Tạo kế hoạch thất bại`);
+      }
     }
   };
+
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -327,38 +370,50 @@ const CreateStudyPlanScreen = ({
               onSelectedMembersChange={handleSelectedMembersChange}
             />
           </View>
-          <Text style={styles.noteText}>Tạo cột mốc học tập</Text>
 
-          <View style={styles.mileStoneContainer}>
-            <MilestoneList
-              studyPackage={{
-                ...studyPackage,
-                milestones,
-              }}
-              deleteMilestone={deleteMilestone}
-              shiftLeft={shiftLeft}
-              shiftRight={shiftRight}
-            />
-          </View>
-          <TouchableOpacity
-            style={styles.addMileStoneContainer}
-            onPress={() => {
-              navigation.navigate("CreateMilestoneScreen", {
-                studyPackage: studyPackage,
-                userId: userId,
-              });
-            }}
-          >
-            <Image
-              source={require("../../assets/images/studyPlan/addMileStone.png")}
-              style={styles.addLogo}
-            />
-          </TouchableOpacity>
+          {inputs.tagsUser.value !== "[]" && (
+            <>
+              <Text style={styles.noteText}>Tạo cột mốc học tập</Text>
+
+              <View style={styles.mileStoneContainer}>
+                <MilestoneList
+                  studyPackage={{
+                    ...studyPackage,
+                    milestones,
+                  }}
+                  deleteMilestone={deleteMilestone}
+                  shiftLeft={shiftLeft}
+                  shiftRight={shiftRight}
+                  isCreated
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.addMileStoneContainer}
+                onPress={() => {
+                  navigation.navigate("CreateMilestoneScreen", {
+                    studyPackage: studyPackage,
+                    tagUser: inputs.tagsUser.value,
+                    userId: userId
+                  });
+                }}
+              >
+                <Image
+                  source={require("../../assets/images/studyPlan/addMileStone.png")}
+                  style={styles.addLogo}
+                />
+              </TouchableOpacity>
+            </>
+          )}
           <View style={styles.nextButtonContainer}>
             <ApplyButton label="Tạo kế hoạch" onPress={continueHandle} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -441,6 +496,16 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginLeft: 60,
     marginTop: 10,
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 export default CreateStudyPlanScreen;

@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import regexVault from "../../utils/regex";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -30,14 +30,14 @@ import Constants from "expo-constants";
 import { isEqual } from "lodash";
 import ExamToLinkMilestoneList from "../../component/studyPlanRelated/examToLinkList";
 
-type CreateMilestoneRouteProp = RouteProp<
+type AddMoreMilestoneRouteProp = RouteProp<
   RootStackParamList,
-  "CreateMilestoneScreen"
+  "AddMoreMilestoneScreen"
 >;
 
-interface CreateMilestoneScreenProps {
-  route: CreateMilestoneRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "CreateMilestoneScreen">;
+interface AddMoreMilestoneScreenProps {
+  route: AddMoreMilestoneRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "AddMoreMilestoneScreen">;
 }
 const validateValidStartDate = (checkDate: string) => {
   const [day, month, year] = checkDate.split("/");
@@ -64,14 +64,14 @@ const validateValidEndDate = (startDate: string, endDate: string) => {
   return MilestoneEndDate > MilestoneStartDate;
 };
 
-const CreateMilestoneScreen = ({
+const AddMoreMilestoneScreen = ({
   route,
   navigation,
-}: CreateMilestoneScreenProps) => {
-  const { userId, tagUser, studyPackage } = route.params;
+}: AddMoreMilestoneScreenProps) => {
+  const { userId, studyPackage, index } = route.params;
+
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-
   const user = useSelector((state: RootState) => state.user.user);
 
   const [inputs, setInputs] = useState({
@@ -110,29 +110,26 @@ const CreateMilestoneScreen = ({
           },
         });
         const data = await response.json();
-        const tagUserArray = JSON.parse(tagUser);
-        
-        const examsForTagUsers = tagUserArray.map((tagId: any) =>
-          (data[tagId] ?? []).filter((exam: any) => exam.submissions.length === 0)
-        );
-  
-        const commonExams = examsForTagUsers.reduce((common: any, current: any) => {
-          if (!common) return current;
-          return common.filter((commonExam: any) => current.some((exam: any) => exam.id === commonExam.id));
-        });
-  
-        if (!isEqual(commonExams, examData)) {
-          setExamData(commonExams.map((exam: any) => ({
-            name: exam.name,
-            examId: exam.id,
-          })));
+        if (!isEqual(data, examData)) {
+          setExamData(
+            data?.[userId]
+              ?.filter((exam: any) => {
+                return exam.submissions.length === 0;
+              })
+              .map((exam: any) => {
+                return {
+                  name: exam.name,
+                  examId: exam.id,
+                };
+              }) ?? []
+          );
         }
       } catch (e) {
         console.error("Error fetching events:", e);
       }
     };
     requestExamList();
-  }, []);
+  }, [host, userId]);
   const [inputValidation, setInputValidation] = useState({
     isMilestoneStartDateValid: validateValidStartDate(
       inputs.MilestoneStartDate.value
@@ -197,55 +194,80 @@ const CreateMilestoneScreen = ({
     });
   };
 
-  const continueHandle = () => {
+  const continueHandle = async () => {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
     for (const [key, value] of Object.entries(inputs)) {
       if (value.required && !value.value) {
         allFieldsFilled = false;
-
         break;
       }
     }
+
     if (!allFieldsFilled) {
-      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
     } else if (!allFieldsValid) {
-      if (inputValidation.isMilestoneStartDateValid === false) {
-        Alert.alert("Bạn không thể tạo cột mốc học tập trong quá khứ");
-      } else if (inputValidation.isMilestoneEndDateValid === false) {
-        Alert.alert("Bạn không thể tạo cột mốc học tập trong quá khứ");
+      if (!inputValidation.isMilestoneStartDateValid) {
+        Alert.alert("Lỗi", "Bạn không thể tạo cột mốc học tập trong quá khứ");
+      } else if (!inputValidation.isMilestoneEndDateValid) {
+        Alert.alert("Lỗi", "Ngày kết thúc phải sau ngày bắt đầu");
       }
     } else {
-      navigation.navigate("CreateStudyPlanScreen", {
-        userId: userId,
-        studyPackage: {
-          ...studyPackage,
-          milestones: [
-            ...(studyPackage?.milestones ?? []),
-            {
-              name: inputs.MilestoneName.value,
-              status: "in-progress",
-              startDate: inputs.MilestoneStartDate.value,
-              endDate: inputs.MilestoneEndDate.value,
-              content: inputs.noteContent.value,
-              testId: isLinkExam ? selectedExamId : null,
-            },
-          ],
-        },
-      });
+      const newMilestone = {
+        name: inputs.MilestoneName.value,
+        startDate: inputs.MilestoneStartDate.value,
+        endDate: inputs.MilestoneEndDate.value,
+        content: inputs.noteContent.value,
+        pass: false,
+        isNewCreated: true,
+      };
 
-      // const initialMilestones = [
-      //   { key: "1", name: "TOEIC", status: "done" },
-      //   { key: "2", name: "IELTS", status: "done" },
-      //   { key: "3", name: "Giao tiếp", status: "done" },
-      //   { key: "4", name: "Giao tiếp", status: "pending" },
-      //   { key: "5", name: "Giao tiếp", status: "in-progress" },
-      //   { key: "6", name: "IELTS", status: "in-progress" },
-      //   { key: "7", name: "Unit 7: Learning", status: "in-progress" },
-      // ];
+      const updatedStudyPackage = {
+        ...studyPackage,
+        courseInfo: studyPackage.courseInfo.map((course: any, idx: any) => {
+          if (idx === index) {
+            return {
+              ...course,
+              milestones: [...course.milestones, newMilestone],
+            };
+          }
+          return course;
+        }),
+      };
+      //studyPackage.courseInfo[index].id
+      let requestAddMilestoneURL = `https://${host}/milestone/add`;
+      try {
+        const response = await fetch(requestAddMilestoneURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: inputs.MilestoneName.value,
+            startDate: inputs.MilestoneStartDate.value,
+            endDate: inputs.MilestoneEndDate.value,
+            content: inputs.noteContent.value,
+            studyPlanId: studyPackage.courseInfo[index].id,
+            testId: isLinkExam ? selectedExamId : null,
+          }),
+        });
+        const data = await response.json();
+        if (data.msg == "1") {
+          navigation.navigate("ViewStudyPlansScreen", {
+            userId: userId,
+            studyPackage: updatedStudyPackage,
+            index: index,
+          });
+        } else {
+          Alert.alert("Thất bại", "Tạo cột mốc thất bại");
+        }
+      } catch (e) {
+        Alert.alert(`Tạo cột mốc thất bại`);
+      }
     }
   };
+
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -268,9 +290,10 @@ const CreateMilestoneScreen = ({
               style={styles.backButton}
               onPress={() => {
                 resetInputs();
-                navigation.navigate("CreateStudyPlanScreen", {
+                navigation.navigate("ViewStudyPlansScreen", {
                   userId: userId,
                   studyPackage: studyPackage,
+                  index: index,
                 });
               }}
             >
@@ -486,4 +509,4 @@ const styles = StyleSheet.create({
     top: -5,
   },
 });
-export default CreateMilestoneScreen;
+export default AddMoreMilestoneScreen;

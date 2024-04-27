@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import regexVault from "../../utils/regex";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -29,15 +29,16 @@ import ToggleSwitch from "toggle-switch-react-native";
 import Constants from "expo-constants";
 import { isEqual } from "lodash";
 import ExamToLinkMilestoneList from "../../component/studyPlanRelated/examToLinkList";
+import { formatDate } from "../../utils/formatDate";
 
-type CreateMilestoneRouteProp = RouteProp<
+type EditMilestoneRouteProp = RouteProp<
   RootStackParamList,
-  "CreateMilestoneScreen"
+  "EditMilestoneScreen"
 >;
 
-interface CreateMilestoneScreenProps {
-  route: CreateMilestoneRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "CreateMilestoneScreen">;
+interface EditMilestoneScreenProps {
+  route: EditMilestoneRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "EditMilestoneScreen">;
 }
 const validateValidStartDate = (checkDate: string) => {
   const [day, month, year] = checkDate.split("/");
@@ -64,38 +65,39 @@ const validateValidEndDate = (startDate: string, endDate: string) => {
   return MilestoneEndDate > MilestoneStartDate;
 };
 
-const CreateMilestoneScreen = ({
+const EditMilestoneScreen = ({
   route,
   navigation,
-}: CreateMilestoneScreenProps) => {
-  const { userId, tagUser, studyPackage } = route.params;
+}: EditMilestoneScreenProps) => {
+  const { userId, studyPackage, index, currentMilestone } = route.params;
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-
   const user = useSelector((state: RootState) => state.user.user);
 
   const [inputs, setInputs] = useState({
     MilestoneName: {
-      value: "",
+      value: currentMilestone.name,
       required: true,
     },
     MilestoneStartDate: {
-      value: "",
+      value: formatDate(currentMilestone.startDate),
       required: true,
     },
     MilestoneEndDate: {
-      value: "",
+      value: formatDate(currentMilestone.endDate),
       required: true,
     },
     noteContent: {
-      value: "",
+      value: currentMilestone.content,
       required: false,
     },
   });
 
-  const [isLinkExam, setIsLinkExam] = useState(false);
+  const [isLinkExam, setIsLinkExam] = useState(currentMilestone.test !== null);
   const [examData, setExamData] = useState();
-  const [selectedExamId, setSelectedExamId] = useState<number | null>(null);
+  const [selectedExamId, setSelectedExamId] = useState<number | null>(
+    currentMilestone.test !== null ? currentMilestone.test.id : null
+  );
   const handleExamSelect = (examId: number) => {
     setSelectedExamId(examId);
   };
@@ -110,29 +112,26 @@ const CreateMilestoneScreen = ({
           },
         });
         const data = await response.json();
-        const tagUserArray = JSON.parse(tagUser);
-        
-        const examsForTagUsers = tagUserArray.map((tagId: any) =>
-          (data[tagId] ?? []).filter((exam: any) => exam.submissions.length === 0)
-        );
-  
-        const commonExams = examsForTagUsers.reduce((common: any, current: any) => {
-          if (!common) return current;
-          return common.filter((commonExam: any) => current.some((exam: any) => exam.id === commonExam.id));
-        });
-  
-        if (!isEqual(commonExams, examData)) {
-          setExamData(commonExams.map((exam: any) => ({
-            name: exam.name,
-            examId: exam.id,
-          })));
+        if (!isEqual(data, examData)) {
+          setExamData(
+            data?.[userId]
+              ?.filter((exam: any) => {
+                return exam.submissions.length === 0;
+              })
+              .map((exam: any) => {
+                return {
+                  name: exam.name,
+                  examId: exam.id,
+                };
+              }) ?? []
+          );
         }
       } catch (e) {
         console.error("Error fetching events:", e);
       }
     };
     requestExamList();
-  }, []);
+  }, [host, userId]);
   const [inputValidation, setInputValidation] = useState({
     isMilestoneStartDateValid: validateValidStartDate(
       inputs.MilestoneStartDate.value
@@ -197,55 +196,99 @@ const CreateMilestoneScreen = ({
     });
   };
 
-  const continueHandle = () => {
+  const continueHandle = async () => {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
     for (const [key, value] of Object.entries(inputs)) {
       if (value.required && !value.value) {
         allFieldsFilled = false;
-
         break;
       }
     }
+
     if (!allFieldsFilled) {
-      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
+      Alert.alert("Thông báo", "Bạn cần nhập đủ thông tin bắt buộc");
     } else if (!allFieldsValid) {
-      if (inputValidation.isMilestoneStartDateValid === false) {
-        Alert.alert("Bạn không thể tạo cột mốc học tập trong quá khứ");
-      } else if (inputValidation.isMilestoneEndDateValid === false) {
-        Alert.alert("Bạn không thể tạo cột mốc học tập trong quá khứ");
+      if (!inputValidation.isMilestoneStartDateValid) {
+        Alert.alert(
+          "Lỗi",
+          "Bạn không thể chỉnh sửa cột mốc học tập trong quá khứ"
+        );
+      } else if (!inputValidation.isMilestoneEndDateValid) {
+        Alert.alert("Lỗi", "Ngày kết thúc phải sau ngày bắt đầu");
       }
     } else {
-      navigation.navigate("CreateStudyPlanScreen", {
-        userId: userId,
-        studyPackage: {
-          ...studyPackage,
-          milestones: [
-            ...(studyPackage?.milestones ?? []),
-            {
-              name: inputs.MilestoneName.value,
-              status: "in-progress",
-              startDate: inputs.MilestoneStartDate.value,
-              endDate: inputs.MilestoneEndDate.value,
-              content: inputs.noteContent.value,
-              testId: isLinkExam ? selectedExamId : null,
-            },
-          ],
-        },
-      });
+      const updatedMilestone = {
+        id: currentMilestone.id,
+        name: inputs.MilestoneName.value,
+        startDate: inputs.MilestoneStartDate.value,
+        endDate: inputs.MilestoneEndDate.value,
+        content: inputs.noteContent.value,
+        test: isLinkExam ? { id: selectedExamId } : null,
+        pass: currentMilestone.pass,
+      };
 
-      // const initialMilestones = [
-      //   { key: "1", name: "TOEIC", status: "done" },
-      //   { key: "2", name: "IELTS", status: "done" },
-      //   { key: "3", name: "Giao tiếp", status: "done" },
-      //   { key: "4", name: "Giao tiếp", status: "pending" },
-      //   { key: "5", name: "Giao tiếp", status: "in-progress" },
-      //   { key: "6", name: "IELTS", status: "in-progress" },
-      //   { key: "7", name: "Unit 7: Learning", status: "in-progress" },
-      // ];
+      const updatedStudyPackage = {
+        ...studyPackage,
+        courseInfo: studyPackage.courseInfo.map((course: any) => {
+          if (course.id === studyPackage.courseInfo[index].id) {
+            return {
+              ...course,
+              milestones: course.milestones.map((milestone: any) => {
+                if (milestone.id === currentMilestone.id) {
+                  return updatedMilestone;
+                }
+                return milestone;
+              }),
+            };
+          }
+          return course;
+        }),
+      };
+      let requestEditilestoneURL = `https://${host}/milestone/${currentMilestone.id}`;
+
+      try {
+        const response = await fetch(requestEditilestoneURL, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: inputs.MilestoneName.value,
+            startDate: inputs.MilestoneStartDate.value,
+            endDate: inputs.MilestoneEndDate.value,
+            content: inputs.noteContent.value,
+            testId: isLinkExam ? selectedExamId : null,
+          }),
+        });
+        const data = await response.json();
+        console.log(
+          requestEditilestoneURL,
+          data,
+          JSON.stringify({
+            name: inputs.MilestoneName.value,
+            startDate: inputs.MilestoneStartDate.value,
+            endDate: inputs.MilestoneEndDate.value,
+            content: inputs.noteContent.value,
+            testId: isLinkExam ? selectedExamId : null,
+          })
+        );
+        if (data.msg == "1") {
+          navigation.navigate("ViewStudyPlansScreen", {
+            userId: userId,
+            studyPackage: updatedStudyPackage,
+            index: index,
+          });
+        } else {
+          Alert.alert("Thất bại", "Chỉnh sửa cột mốc thất bại");
+        }
+      } catch (e) {
+        Alert.alert(`Chỉnh sửa cột mốc thất bại`);
+      }
     }
   };
+
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -268,16 +311,21 @@ const CreateMilestoneScreen = ({
               style={styles.backButton}
               onPress={() => {
                 resetInputs();
-                navigation.navigate("CreateStudyPlanScreen", {
+                navigation.navigate("ViewStudyPlansScreen", {
                   userId: userId,
                   studyPackage: studyPackage,
+                  index: index,
                 });
               }}
             >
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Tạo cột mốc mới</Text>
+          <Text style={styles.headerText}>
+            {user?.role === "parent"
+              ? `Chỉnh sửa cột mốc`
+              : `Thông tin cột mốc`}
+          </Text>
           <View>
             <Text style={styles.inputTitleText}>Tên cột mốc</Text>
             <BlackBorderTextInputField
@@ -360,22 +408,24 @@ const CreateMilestoneScreen = ({
             />
           </View>
 
-          <View style={styles.linkTextContainer}>
-            <Text style={styles.inputTitleText}>Liên kết bài kiểm tra</Text>
+          {currentMilestone.pass === false && (
+            <View style={styles.linkTextContainer}>
+              <Text style={styles.inputTitleText}>Liên kết bài kiểm tra</Text>
 
-            <View style={styles.toggleContainer}>
-              <ToggleSwitch
-                isOn={isLinkExam}
-                onColor="#4CD964"
-                offColor="#e0dddd"
-                size="large"
-                onToggle={() => {
-                  setIsLinkExam(!isLinkExam);
-                }}
-                circleColor={"#FFFFFF"}
-              />
+              <View style={styles.toggleContainer}>
+                <ToggleSwitch
+                  isOn={isLinkExam}
+                  onColor="#4CD964"
+                  offColor="#e0dddd"
+                  size="large"
+                  onToggle={() => {
+                    setIsLinkExam(!isLinkExam);
+                  }}
+                  circleColor={"#FFFFFF"}
+                />
+              </View>
             </View>
-          </View>
+          )}
           {isLinkExam && (
             <ExamToLinkMilestoneList
               ExamToLinkMilestones={examData || []}
@@ -383,9 +433,11 @@ const CreateMilestoneScreen = ({
               selectedExamId={selectedExamId}
             />
           )}
-          <View style={styles.nextButtonContainer}>
-            <ApplyButton label="Tạo cột mốc" onPress={continueHandle} />
-          </View>
+          {user?.role === "parent" && (
+            <View style={styles.nextButtonContainer}>
+              <ApplyButton label="Cập nhật" onPress={continueHandle} />
+            </View>
+          )}
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -486,4 +538,4 @@ const styles = StyleSheet.create({
     top: -5,
   },
 });
-export default CreateMilestoneScreen;
+export default EditMilestoneScreen;

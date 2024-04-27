@@ -31,6 +31,7 @@ import { RootStackParamList } from "../../component/navigator/appNavigator";
 import MemberOption from "../../component/examRelated/examMemberSlide";
 
 import SubjectList from "../../component/studyPlanRelated/courseList";
+import { isEqual } from "lodash";
 
 type StudyPlanInfoRouteProp = RouteProp<
   RootStackParamList,
@@ -69,16 +70,59 @@ const StudyPlanInfoScreen = ({
     user?.role === "parent" ? Number(memberStatusData[0].userId) : user?.userId
   );
 
+  const [studyPlanData, setStudyPlanData] = useState();
+
+  const [filteredstudyPlan, setFilteredstudyPlan] = useState({});
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const requestStudyPlanList = async () => {
+        let requestStudyPlanURL = `https://${host}/studyPlan/${user?.familyId}`;
+        try {
+          const response = await fetch(requestStudyPlanURL, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const data = await response.json();
+          if (!isEqual(data, studyPlanData)) {
+            setStudyPlanData(data);
+          }
+        } catch (e) {
+          console.error("Error fetching events:", e);
+        }
+      };
+      requestStudyPlanList();
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [host, userId, studyPlanData, route.params?.newPlanCreated]);
+
+  const filterExamsForSelectedMember = useCallback(() => {
+    if (!studyPlanData || selectedMemberId == null) return [];
+
+    const examsForSelectedMember = (studyPlanData as any)[selectedMemberId];
+    if (!examsForSelectedMember) return [];
+
+    return examsForSelectedMember;
+  }, [studyPlanData, selectedMemberId]);
+
+  useEffect(() => {
+    const studyPlans = filterExamsForSelectedMember();
+    setFilteredstudyPlan(studyPlans);
+  }, [filterExamsForSelectedMember]);
+
+  const [isSubjectListEnabled, setIsSubjectListEnabled] = useState(false);
+
+  useEffect(() => {
+    setIsSubjectListEnabled(Object.keys(filteredstudyPlan).length > 0);
+  }, [filteredstudyPlan, studyPlanData, selectedMemberId]);
+
+  // console.log(filteredstudyPlan)
+
   const onBackPress = useCallback(() => {
-    if (memberToRender.userId === user?.userId) {
-      navigation.navigate("StatusDashboard");
-    } else {
-      navigation.navigate("UserDetailsScreen", {
-        user: {
-          userId: userId,
-        },
-      });
-    }
+    navigation.navigate("StatusDashboard");
   }, [navigation, memberToRender.userId, user?.userId, userId]);
   const handleSelectedMemberChange = useCallback((memberId: number | null) => {
     setSelectedMemberId(memberId as any);
@@ -127,7 +171,13 @@ const StudyPlanInfoScreen = ({
             )}
           </View>
           <View style={styles.subjectListContainer}>
-            <SubjectList selectedMemberId={selectedMemberId} />
+            <SubjectList
+              selectedMemberId={selectedMemberId}
+              studyPackage={{
+                studyPlanInfo: filteredstudyPlan,
+              }}
+              isEnabled={isSubjectListEnabled}
+            />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

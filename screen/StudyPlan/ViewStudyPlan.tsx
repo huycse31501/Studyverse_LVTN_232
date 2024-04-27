@@ -4,7 +4,7 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -27,53 +27,38 @@ import { RootStackParamList } from "../../component/navigator/appNavigator";
 import MemberOption from "../../component/examRelated/examMemberSlide";
 import ApplyButton from "../../component/shared/ApplyButton";
 import StudyPlanList from "../../component/studyPlanRelated/studyPlanList";
-type StudyPlanDetailsRouteProp = RouteProp<
+import MilestoneList from "../../component/studyPlanRelated/mileStoneRoadMap";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { isEqual } from "lodash";
+type ViewStudyPlansRouteProp = RouteProp<
   RootStackParamList,
-  "StudyPlanDetailsScreen"
+  "ViewStudyPlansScreen"
 >;
 
-interface StudyPlanDetailsScreenProps {
-  route: StudyPlanDetailsRouteProp;
-  navigation: StackNavigationProp<RootStackParamList, "StudyPlanDetailsScreen">;
+interface ViewStudyPlansScreenProps {
+  route: ViewStudyPlansRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "ViewStudyPlansScreen">;
 }
 
-const StudyPlanDetailsScreen = ({
+const ViewStudyPlansScreen = ({
   route,
   navigation,
-}: StudyPlanDetailsScreenProps) => {
+}: ViewStudyPlansScreenProps) => {
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-  const { userId, routeBefore, fromFooter, studyPackage } = route.params;
+
+  const { userId, routeBefore, studyPackage, index } = route.params;
 
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
+
   const totalList = user ? [...familyList, user] : familyList;
-  const memberToRender = totalList.filter(
-    (user) => user.userId === String(userId)
-  )[0];
-  const excludeList = totalList
-    .filter((member) => member.role === "parent")
-    .map((member) => Number(member.userId));
-  const memberStatusData = totalList.filter((userInTotalList) => {
-    const userIdNumber = Number(userInTotalList.userId);
-    return !isNaN(userIdNumber) && !excludeList.includes(userIdNumber);
-  });
-  const [selectedMemberId, setSelectedMemberId] = useState(
-    user?.role === "parent" ? Number(memberStatusData[0].userId) : user?.userId
-  );
 
-  const onBackPress = useCallback(() => {
-    navigation.navigate("StudyPlanInfoScreen", {
-      userId: Number(user?.userId),
-      routeBefore: "StatusDashboard",
-    });
-  }, [navigation, memberToRender.userId, user?.userId, userId]);
-  const handleSelectedMemberChange = useCallback((memberId: number | null) => {
-    setSelectedMemberId(memberId as any);
-  }, []);
-
+  const memberToRender = totalList.filter((user) => {
+    return user.userId === String(userId);
+  })[0];
 
   const insets = useSafeAreaInsets();
   return (
@@ -94,7 +79,15 @@ const StudyPlanDetailsScreen = ({
         >
           <View style={styles.header}>
             <View style={styles.backButtonContainer}>
-              <TouchableOpacity style={styles.backButton} onPress={onBackPress}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => {
+                  navigation.navigate("StudyPlanDetailsScreen", {
+                    userId: Number(memberToRender?.userId),
+                    studyPackage: studyPackage,
+                  });
+                }}
+              >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
             </View>
@@ -108,32 +101,22 @@ const StudyPlanDetailsScreen = ({
               style={styles.avatar}
             />
           </View>
-          <Text style={styles.headerText}>{studyPackage?.courseName}</Text>
-          <View style={styles.studyPlanlistContainer}>
-            <StudyPlanList
-              logo={studyPackage.logoType}
-              color={studyPackage.color}
-              studyPackage={studyPackage}
+          <Text style={styles.headerText}>
+            {studyPackage.courseInfo[index].name}
+          </Text>
+
+          <View style={styles.mileStoneContainer}>
+            <MilestoneList
+              studyPackage={studyPackage.courseInfo[index]}
+              isCreated={false}
+              indexPass={index}
               userId={Number(userId)}
+              studyPackageToPass={studyPackage}
+              childrenId={memberToRender.userId}
             />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
-      <ApplyButton
-        label="Tạo kế hoạch mới"
-        extraStyle={{
-          width: "50%",
-          position: "absolute",
-          bottom: 50,
-        }}
-        onPress={() => {
-          navigation.navigate("CreateStudyPlanScreen", {
-            userId: userId,
-            studyPackage: studyPackage,
-
-          });
-        }}
-      />
     </SafeAreaView>
   );
 };
@@ -169,6 +152,9 @@ const styles = StyleSheet.create({
   studyPlanlistContainer: {
     marginTop: 5,
   },
+  mileStoneContainer: {
+    marginTop: 30,
+  },
 });
 
-export default StudyPlanDetailsScreen;
+export default ViewStudyPlansScreen;

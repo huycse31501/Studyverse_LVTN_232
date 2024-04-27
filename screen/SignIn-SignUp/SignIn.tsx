@@ -93,7 +93,6 @@ const SignIn = () => {
             },
           });
           const familyListData = await familyListResponse.json();
-
           const data = familyListData.data;
           const familyListPayload = data
             .map((item: any) => ({

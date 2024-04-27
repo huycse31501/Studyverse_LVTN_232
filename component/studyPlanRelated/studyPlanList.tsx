@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { formatDate } from "../../utils/formatDate";
 const MathIcon = require("../../assets/images/courseLogo/Math.png");
 const PhysicsIcon = require("../../assets/images/courseLogo/Physics.png");
 const BiologyIcon = require("../../assets/images/courseLogo/Biology.png");
@@ -20,6 +21,8 @@ const LiteratureIcon = require("../../assets/images/courseLogo/Literature.png");
 interface StudyPlanListProps {
   logo?: any;
   color?: any;
+  studyPackage?: any;
+  userId?: any;
 }
 
 type StudyDetailsNavigationProp = StackNavigationProp<{
@@ -30,64 +33,51 @@ type StudyDetailsNavigationProp = StackNavigationProp<{
     fromFooter?: string;
     studyPackage?: any;
   };
+  ViewStudyPlansScreen: {
+    userId: number;
+    routeBefore?: string;
+    studyPackage?: any;
+    index?: any;
+  };
 }>;
-const StudyPlans = [
-  { key: "1", name: "Toán", logo: MathIcon },
-  {
-    key: "2",
-    name: "Ngữ Văn",
-    logo: LiteratureIcon,
-  },
-  { key: "3", name: "Anh Văn", logo: EnglishIcon },
-  { key: "4", name: "Vật Lý", logo: PhysicsIcon },
-  {
-    key: "5",
-    name: "Hóa Học",
-    logo: ChemistryIcon,
-  },
-  {
-    key: "6",
-    name: "Sinh Học",
-    logo: BiologyIcon,
-  },
-];
 
-const StudyPlansList = [
-  {
-    key: "1",
-    name: "TOEIC",
-    dateStart: "10/07/2023",
-    dateEnd: "10/12/2023",
-    nextMileStone: "Unit 7 - Food",
-    currentProgress: 6 / 10,
-  },
-  {
-    key: "2",
-    name: "IELTS",
-    dateStart: "10/07/2023",
-    dateEnd: "10/12/2023",
-    nextMileStone: "Unit 5 - Entertainment",
-    currentProgress: 3 / 10,
-  },
+const StudyPlanList: React.FC<StudyPlanListProps> = ({
+  logo,
+  color,
+  studyPackage,
+  userId,
+}) => {
+  const navigation = useNavigation<StudyDetailsNavigationProp>();
 
-  {
-    key: "3",
-    name: "Giao tiếp",
-    dateStart: "10/07/2023",
-    dateEnd: "10/12/2023",
-    nextMileStone: "Unit 9 - Interview",
-    currentProgress: 9 / 10,
-  },
-];
+  const studyPackageToRender = studyPackage.courseInfo.map((item: any) => {
+    // console.log(item.milestones)
 
-const StudyPlanList: React.FC<StudyPlanListProps> = ({ logo, color }) => {
+    return {
+      name: item.name,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      currentProgress: Math.floor(
+        (item.milestones.filter((milestone: any) => {
+          return milestone.pass === true;
+        }).length /
+          item.milestones.length) *
+          100
+      ),
+    };
+  });
   return (
     <ScrollView style={{ marginBottom: 30 }}>
-      {StudyPlansList.map((item, index) => (
+      {studyPackageToRender.map((item: any, index: any) => (
         <TouchableOpacity
           style={[styles.container, { backgroundColor: color }]}
           key={index}
-          onPress={() => {}}
+          onPress={() => {
+            navigation.navigate("ViewStudyPlansScreen", {
+              userId: userId,
+              studyPackage: studyPackage,
+              index: index,
+            });
+          }}
         >
           <View style={styles.contentContainer}>
             <Image source={logo} style={styles.iconStyles} />
@@ -108,7 +98,7 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({ logo, color }) => {
                 />
                 <Text
                   style={styles.studyPlanTimeText}
-                >{`${item.dateStart} - ${item.dateEnd}`}</Text>
+                >{`${formatDate(item.startDate)} - ${formatDate(item.endDate)}`}</Text>
               </View>
               <View style={styles.progressContainer}>
                 <LinearGradient
@@ -118,18 +108,14 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({ logo, color }) => {
                   style={[
                     styles.progressBar,
                     {
-                      width: `${item.currentProgress * 100}%`,
+                      width: `${item.currentProgress}%`,
                       borderTopLeftRadius: 10,
                       borderBottomLeftRadius: 10,
-                      borderTopRightRadius: item.currentProgress === 1 ? 10 : 0,
-                      borderBottomRightRadius:
-                        item.currentProgress === 1 ? 10 : 0,
+                      borderBottomRightRadius: 10,
                     },
                   ]}
                 />
-                <Text style={styles.label}>{`${
-                  item.currentProgress * 100
-                }%`}</Text>
+                <Text style={styles.label}>{`${item.currentProgress}%`}</Text>
               </View>
             </View>
           </View>
@@ -218,7 +204,7 @@ const styles = StyleSheet.create({
   },
   studyPlanTextContainer: {
     flexDirection: "row",
-    alignItems: "flex-end"
+    alignItems: "flex-end",
   },
   editLogoStyle: {
     width: 30,
