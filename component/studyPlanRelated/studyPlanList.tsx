@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,18 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Alert,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { formatDate } from "../../utils/formatDate";
-const MathIcon = require("../../assets/images/courseLogo/Math.png");
-const PhysicsIcon = require("../../assets/images/courseLogo/Physics.png");
-const BiologyIcon = require("../../assets/images/courseLogo/Biology.png");
-const ChemistryIcon = require("../../assets/images/courseLogo/Chemistry.png");
-const EnglishIcon = require("../../assets/images/courseLogo/English.png");
-const LiteratureIcon = require("../../assets/images/courseLogo/Literature.png");
+import Constants from "expo-constants";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import ApplyButton from "../shared/ApplyButton";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+
+let host = Constants?.expoConfig?.extra?.host;
 
 interface StudyPlanListProps {
   logo?: any;
@@ -39,6 +42,14 @@ type StudyDetailsNavigationProp = StackNavigationProp<{
     studyPackage?: any;
     index?: any;
   };
+  EditStudyPlanScreen: {
+    userId: number;
+    routeBefore?: string;
+    newPlanCreated?: boolean;
+    fromFooter?: string;
+    studyPackage?: any;
+    editStudyPlan?: any;
+  };
 }>;
 
 const StudyPlanList: React.FC<StudyPlanListProps> = ({
@@ -47,24 +58,63 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({
   studyPackage,
   userId,
 }) => {
+  const user = useSelector((state: RootState) => state.user.user);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [currentDeleteStudyPlan, setCurrentDeleteStudyPlan] =
+    useState<any>(null);
+
   const navigation = useNavigation<StudyDetailsNavigationProp>();
+  const [studyPackageToRender, setStudyPackageToRender] = useState(
+    studyPackage.courseInfo.map((item: any) => {
+      return {
+        id: item.id,
+        name: item.name,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        currentProgress: Math.floor(
+          (item.milestones.filter((milestone: any) => {
+            return milestone.pass === true;
+          }).length /
+            item.milestones.length) *
+            100
+        ),
+      };
+    })
+  );
 
-  const studyPackageToRender = studyPackage.courseInfo.map((item: any) => {
-    // console.log(item.milestones)
+  const handleDeleteStudyPlan = async (
+    studyPlanId: string | number | undefined
+  ) => {
+    if (studyPlanId === undefined) {
+      return;
+    }
+    let requestCreateEventURL = `https://${host}/studyPlan/${studyPlanId}`;
+    try {
+      const response = await fetch(requestCreateEventURL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    return {
-      name: item.name,
-      startDate: item.startDate,
-      endDate: item.endDate,
-      currentProgress: Math.floor(
-        (item.milestones.filter((milestone: any) => {
-          return milestone.pass === true;
-        }).length /
-          item.milestones.length) *
-          100
-      ),
-    };
-  });
+      const data = await response.json();
+
+      if (data.msg == "1") {
+        const updatedStudyPlans = studyPackageToRender.filter(
+          (item: any) => item.id !== studyPlanId
+        );
+        setStudyPackageToRender(updatedStudyPlans);
+        setShowDeleteModal(false);
+        setShowDeleteModal(false);
+      } else {
+        Alert.alert("Thất bại", "Xóa cột mốc thất bại");
+      }
+    } catch (e) {
+      Alert.alert(`Xóa cột mốc thất bại`);
+    }
+  };
+
   return (
     <ScrollView style={{ marginBottom: 30 }}>
       {studyPackageToRender.map((item: any, index: any) => (
@@ -84,21 +134,47 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({
             <View style={styles.studyPlanInfoContainer}>
               <View style={styles.studyPlanTextContainer}>
                 <Text style={styles.studyPlanText}>{item.name}</Text>
-                <TouchableOpacity>
-                  <Image
-                    source={require("../../assets/images/shared/addQuestion.png")}
-                    style={styles.editLogoStyle}
-                  />
-                </TouchableOpacity>
+                {user?.role === "parent" && (
+                  <>
+                    <TouchableOpacity
+                      onPress={() => {
+                        navigation.navigate("EditStudyPlanScreen", {
+                          userId: userId,
+                          studyPackage: studyPackage,
+                          editStudyPlan: item,
+                        });
+                      }}
+                    >
+                      <Image
+                        source={require("../../assets/images/shared/plus.png")}
+                        style={styles.editLogoStyle}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowDeleteModal(true);
+                        setCurrentDeleteStudyPlan({
+                          id: item.id,
+                          name: item.name,
+                        });
+                      }}
+                    >
+                      <Image
+                        source={require("../../assets/images/shared/minus.png")}
+                        style={styles.minusLogoStyle}
+                      />
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
               <View style={styles.studyPlanTimeRangeContainer}>
                 <Image
                   style={styles.studyPlanLogo}
                   source={require("../../assets/images/shared/calendarStudyPlan.png")}
                 />
-                <Text
-                  style={styles.studyPlanTimeText}
-                >{`${formatDate(item.startDate)} - ${formatDate(item.endDate)}`}</Text>
+                <Text style={styles.studyPlanTimeText}>{`${formatDate(
+                  item.startDate
+                )} - ${formatDate(item.endDate)}`}</Text>
               </View>
               <View style={styles.progressContainer}>
                 <LinearGradient
@@ -121,6 +197,54 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({
           </View>
         </TouchableOpacity>
       ))}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDeleteModal}
+        onRequestClose={() => {
+          setShowDeleteModal(false);
+        }}
+        statusBarTranslucent
+      >
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setShowDeleteModal(false);
+          }}
+        >
+          <View style={styles.centeredDeleteModalView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.DeleteModalView}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setShowDeleteModal(false);
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/images/shared/closedModal.png")}
+                    style={styles.closeIcon}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.deleteHeaderText}>Xóa kế hoạch</Text>
+                <Text style={styles.deleteMilestoneText}>
+                  {currentDeleteStudyPlan?.name}
+                </Text>
+                <View style={styles.deleteButtonContainer}>
+                  <ApplyButton
+                    label="Xác nhận"
+                    extraStyle={{
+                      width: 150,
+                    }}
+                    onPress={() =>
+                      handleDeleteStudyPlan(currentDeleteStudyPlan?.id)
+                    }
+                  />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </ScrollView>
   );
 };
@@ -207,11 +331,66 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   editLogoStyle: {
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
     position: "absolute",
     top: -30,
     left: 80,
+    opacity: 0.85,
+  },
+  minusLogoStyle: {
+    width: 20,
+    height: 20,
+    position: "absolute",
+    top: -30,
+    left: 110,
+    opacity: 0.85,
+  },
+  centeredDeleteModalView: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+  },
+  DeleteModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    width: 300,
+    height: 250,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 1,
+  },
+  closeIcon: {
+    width: 30,
+    height: 30,
+  },
+  deleteHeaderText: {
+    fontSize: 25,
+    fontWeight: "600",
+    top: -60,
+  },
+  deleteMilestoneText: {
+    fontSize: 20,
+    fontWeight: "500",
+    top: -5,
+  },
+  deleteButtonContainer: {
+    bottom: -45,
   },
 });
 

@@ -45,6 +45,9 @@ const StudyPlanDetailsScreen = ({
   let port = Constants?.expoConfig?.extra?.port;
   const { userId, routeBefore, fromFooter, studyPackage } = route.params;
 
+  const [localStudyPackage, setLocalStudyPackage] = useState(studyPackage);
+
+
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
@@ -60,9 +63,6 @@ const StudyPlanDetailsScreen = ({
     const userIdNumber = Number(userInTotalList.userId);
     return !isNaN(userIdNumber) && !excludeList.includes(userIdNumber);
   });
-  const [selectedMemberId, setSelectedMemberId] = useState(
-    user?.role === "parent" ? Number(memberStatusData[0].userId) : user?.userId
-  );
 
   const onBackPress = useCallback(() => {
     navigation.navigate("StudyPlanInfoScreen", {
@@ -70,10 +70,6 @@ const StudyPlanDetailsScreen = ({
       routeBefore: "StatusDashboard",
     });
   }, [navigation, memberToRender.userId, user?.userId, userId]);
-  const handleSelectedMemberChange = useCallback((memberId: number | null) => {
-    setSelectedMemberId(memberId as any);
-  }, []);
-
 
   const insets = useSafeAreaInsets();
   return (
@@ -130,7 +126,6 @@ const StudyPlanDetailsScreen = ({
           navigation.navigate("CreateStudyPlanScreen", {
             userId: userId,
             studyPackage: studyPackage,
-
           });
         }}
       />
