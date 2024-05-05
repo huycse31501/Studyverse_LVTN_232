@@ -28,6 +28,8 @@ import DateInputField from "../../component/signin-signup/DateInputField";
 import isDateValid from "../../utils/checkValidDate";
 import { formatTime } from "../../utils/timeFormat";
 import MemberTagList from "../../component/EventRelated/tagFamilyMember";
+import * as Notifications from "expo-notifications";
+import { subMinutes } from "date-fns";
 
 type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
 
@@ -53,6 +55,25 @@ const notiOptions: Option[] = [
   { label: "Trước 45 phút", value: "45" },
   { label: "Trước 1 giờ", value: "60" },
 ];
+
+interface Event {
+  name: string;
+  timeStart: string;
+  remindTime: number;
+}
+
+async function scheduleNotificationForEvent(event: Event): Promise<void> {
+  const eventStartTime = new Date(event.timeStart);
+  const notificationTime = subMinutes(eventStartTime, event.remindTime);
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Sự kiện sắp diễn ra",
+      body: `${event.name} sẽ diễn ra sau ${event.remindTime} phút.`,
+    },
+    trigger: notificationTime,
+  });
+}
 
 const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   const { userId } = route.params;
@@ -298,6 +319,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   };
 
   async function submitHandler() {
+
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -327,6 +349,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
       let requestCreateEventURL = `https://${host}/event/createEvent`;
 
       try {
+        setIsLoading(true);
         const response = await fetch(requestCreateEventURL, {
           method: "POST",
           headers: {
@@ -350,6 +373,15 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
 
         const data = await response.json();
         if (data.msg == "1") {
+          if (inputs.isNoti.value) {
+            const event: Event = {
+              name: inputs.eventName.value,
+              timeStart: inputs.eventStartTime.value,
+              remindTime: parseInt(inputs.notiBefore.value, 10),
+            };
+            await scheduleNotificationForEvent(event);
+          }
+
           setIsLoading(false);
           resetInputs();
           navigation.navigate("EventInfoScreen", {

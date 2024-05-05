@@ -23,6 +23,10 @@ type FooterNavigateProp = StackNavigationProp<{
     newExamCreated?: boolean;
     fromFooter?: string;
   };
+  StudyStatisticScreen: {
+    userId: number;
+    fromFooter?: string;
+  };
 }>;
 
 const Footer = () => {
@@ -57,13 +61,18 @@ const Footer = () => {
           userId: Number(user?.userId),
           routeBefore: "StatusDashboard",
           fromFooter: "1",
-        })
+        });
       },
     },
     {
       id: "4",
       uri: require("../../assets/images/footer/studyplan.png"),
-      onPress: () => console.log("Icon pressed"),
+      onPress: () => {
+        navigation.navigate("StudyStatisticScreen", {
+          userId: Number(user?.userId),
+          fromFooter: "1",
+        });
+      },
     },
   ];
   return (

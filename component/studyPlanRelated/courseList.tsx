@@ -42,7 +42,7 @@ const subjects = [
     logo: LiteratureIcon,
   },
   { key: "3", name: "Anh văn", logo: EnglishIcon },
-  { key: "4", name: "Vật lý", logo: PhysicsIcon },
+  { key: "4", name: "Vật lý", logo: PhysicsIcon },
   {
     key: "5",
     name: "Hóa học",

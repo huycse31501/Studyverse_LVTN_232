@@ -14,6 +14,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import ApplyButton from "../../component/shared/ApplyButton";
@@ -56,6 +57,8 @@ const Setting = () => {
   const [createFamilyModalVisible, setcreateFamilyModalVisible] =
     useState(false);
   const [familyLinkInfo, setFamilyLinkInfo] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleApplyPress = () => {
     setFamilyLinkedModalVisible(true);
@@ -204,6 +207,7 @@ const Setting = () => {
       image: require("../../assets/images/shared/logout.png"),
       onPress: async () => {
         try {
+          setIsLoading(true);
           let requestlogoutUserUrl = `https://${host}/user/logout`;
           const logoutUserResponse = await fetch(requestlogoutUserUrl, {
             method: "POST",
@@ -215,6 +219,8 @@ const Setting = () => {
             }),
           });
           const logoutResponse = await logoutUserResponse.json();
+          setIsLoading(false);
+
           if (logoutResponse.msg === "1") {
             dispatch(setUser(null as any));
             dispatch(setWaitList([] as any));
@@ -223,7 +229,7 @@ const Setting = () => {
             // Alert.alert("Đăng xuất thất bại");
           }
         } catch (e) {
-          console.log(e);
+          setIsLoading(false);
           Alert.alert("Lỗi xảy ra trong quá trình đăng xuất");
         }
         dispatch(logout());
@@ -431,6 +437,11 @@ const Setting = () => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -472,6 +483,16 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
   account: {
     color: "#090A0A",

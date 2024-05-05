@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Alert,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { RootStackParamList } from "../../component/navigator/appNavigator";
 import { RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -95,6 +96,8 @@ const AddMoreMilestoneScreen = ({
 
   const [isLinkExam, setIsLinkExam] = useState(false);
   const [examData, setExamData] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [selectedExamId, setSelectedExamId] = useState<number | null>(null);
   const handleExamSelect = (examId: number) => {
     setSelectedExamId(examId);
@@ -214,6 +217,7 @@ const AddMoreMilestoneScreen = ({
         Alert.alert("Lỗi", "Ngày kết thúc phải sau ngày bắt đầu");
       }
     } else {
+      setIsLoading(true);
       const newMilestone = {
         name: inputs.MilestoneName.value,
         startDate: inputs.MilestoneStartDate.value,
@@ -235,7 +239,6 @@ const AddMoreMilestoneScreen = ({
           return course;
         }),
       };
-      //studyPackage.courseInfo[index].id
       let requestAddMilestoneURL = `https://${host}/milestone/add`;
       try {
         const response = await fetch(requestAddMilestoneURL, {
@@ -253,6 +256,8 @@ const AddMoreMilestoneScreen = ({
           }),
         });
         const data = await response.json();
+        setIsLoading(false);
+
         if (data.msg == "1") {
           navigation.navigate("ViewStudyPlansScreen", {
             userId: userId,
@@ -263,6 +268,8 @@ const AddMoreMilestoneScreen = ({
           Alert.alert("Thất bại", "Tạo cột mốc thất bại");
         }
       } catch (e) {
+        setIsLoading(false);
+
         Alert.alert(`Tạo cột mốc thất bại`);
       }
     }
@@ -411,11 +418,27 @@ const AddMoreMilestoneScreen = ({
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    zIndex: 999,
+  },
   backButtonContainer: {
     flexDirection: "row",
     backgroundColor: "#9cef76",

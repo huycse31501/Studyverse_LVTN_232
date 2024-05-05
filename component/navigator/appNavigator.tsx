@@ -39,6 +39,7 @@ import ViewStudyPlansScreen from "../../screen/StudyPlan/ViewStudyPlan";
 import AddMoreMilestoneScreen from "../../screen/StudyPlan/AddMileStoneForExistingStudyPlanScreen";
 import EditMilestoneScreen from "../../screen/StudyPlan/EditMileStoneScreen";
 import EditStudyPlanScreen from "../../screen/StudyPlan/EditStudyPlan";
+import StudyStatisticScreen from "../../screen/Statistic/StudyStatistic";
 
 export type RootStackParamList = {
   ForgotPassword: undefined;
@@ -172,6 +173,7 @@ export type RootStackParamList = {
     routeBefore?: string;
     studyPackage?: any;
     index?: any;
+    updateStudyPackage?: any;
   };
   EditMilestoneScreen: {
     userId: number;
@@ -187,6 +189,10 @@ export type RootStackParamList = {
     fromFooter?: string;
     studyPackage?: any;
     editStudyPlan?: any;
+  };
+  StudyStatisticScreen: {
+    userId: number;
+    fromFooter?: string;
   };
 };
 
@@ -272,6 +278,10 @@ const AppNavigator = () => {
         <Stack.Screen
           name="EditStudyPlanScreen"
           component={EditStudyPlanScreen}
+        />
+        <Stack.Screen
+          name="StudyStatisticScreen"
+          component={StudyStatisticScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -111,21 +111,29 @@ const CreateMilestoneScreen = ({
         });
         const data = await response.json();
         const tagUserArray = JSON.parse(tagUser);
-        
+
         const examsForTagUsers = tagUserArray.map((tagId: any) =>
-          (data[tagId] ?? []).filter((exam: any) => exam.submissions.length === 0)
+          (data[tagId] ?? []).filter(
+            (exam: any) => exam.submissions.length === 0
+          )
         );
-  
-        const commonExams = examsForTagUsers.reduce((common: any, current: any) => {
-          if (!common) return current;
-          return common.filter((commonExam: any) => current.some((exam: any) => exam.id === commonExam.id));
-        });
-  
+
+        const commonExams = examsForTagUsers.reduce(
+          (common: any, current: any) => {
+            if (!common) return current;
+            return common.filter((commonExam: any) =>
+              current.some((exam: any) => exam.id === commonExam.id)
+            );
+          }
+        );
+
         if (!isEqual(commonExams, examData)) {
-          setExamData(commonExams.map((exam: any) => ({
-            name: exam.name,
-            examId: exam.id,
-          })));
+          setExamData(
+            commonExams.map((exam: any) => ({
+              name: exam.name,
+              examId: exam.id,
+            }))
+          );
         }
       } catch (e) {
         console.error("Error fetching events:", e);

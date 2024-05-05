@@ -71,7 +71,6 @@ const StudyPlanInfoScreen = ({
   );
 
   const [studyPlanData, setStudyPlanData] = useState();
-
   const [filteredstudyPlan, setFilteredstudyPlan] = useState({});
 
   useEffect(() => {

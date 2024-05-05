@@ -45,8 +45,6 @@ const StudyPlanDetailsScreen = ({
   let port = Constants?.expoConfig?.extra?.port;
   const { userId, routeBefore, fromFooter, studyPackage } = route.params;
 
-  const [localStudyPackage, setLocalStudyPackage] = useState(studyPackage);
-
 
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
@@ -59,10 +57,7 @@ const StudyPlanDetailsScreen = ({
   const excludeList = totalList
     .filter((member) => member.role === "parent")
     .map((member) => Number(member.userId));
-  const memberStatusData = totalList.filter((userInTotalList) => {
-    const userIdNumber = Number(userInTotalList.userId);
-    return !isNaN(userIdNumber) && !excludeList.includes(userIdNumber);
-  });
+
 
   const onBackPress = useCallback(() => {
     navigation.navigate("StudyPlanInfoScreen", {
@@ -70,6 +65,7 @@ const StudyPlanDetailsScreen = ({
       routeBefore: "StatusDashboard",
     });
   }, [navigation, memberToRender.userId, user?.userId, userId]);
+
 
   const insets = useSafeAreaInsets();
   return (

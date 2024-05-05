@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -65,6 +65,7 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({
     useState<any>(null);
 
   const navigation = useNavigation<StudyDetailsNavigationProp>();
+
   const [studyPackageToRender, setStudyPackageToRender] = useState(
     studyPackage.courseInfo.map((item: any) => {
       return {
@@ -82,6 +83,30 @@ const StudyPlanList: React.FC<StudyPlanListProps> = ({
       };
     })
   );
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (studyPackage) {
+        const newRender = studyPackage.courseInfo.map((item: any) => {
+          return {
+            id: item.id,
+            name: item.name,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            currentProgress: Math.floor(
+              (item.milestones.filter(
+                (milestone: any) => milestone.pass === true
+              ).length /
+                item.milestones.length) *
+                100
+            ),
+          };
+        });
+        setStudyPackageToRender(newRender);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [studyPackage]);
 
   const handleDeleteStudyPlan = async (
     studyPlanId: string | number | undefined

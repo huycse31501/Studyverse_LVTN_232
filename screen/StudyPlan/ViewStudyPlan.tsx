@@ -1,6 +1,7 @@
 import {
   RouteProp,
   useFocusEffect,
+  useIsFocused,
   useNavigation,
 } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -60,6 +61,8 @@ const ViewStudyPlansScreen = ({
     return user.userId === String(userId);
   })[0];
 
+  const [updatedStudyPackage, setUpdatedStudyPackage] = useState(studyPackage);
+
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -113,6 +116,7 @@ const ViewStudyPlansScreen = ({
               userId={Number(userId)}
               studyPackageToPass={studyPackage}
               childrenId={memberToRender.userId}
+              updateStudyPackage={setUpdatedStudyPackage}
             />
           </View>
         </KeyboardAwareScrollView>
