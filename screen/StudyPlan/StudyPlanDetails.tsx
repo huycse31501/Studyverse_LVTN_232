@@ -45,7 +45,6 @@ const StudyPlanDetailsScreen = ({
   let port = Constants?.expoConfig?.extra?.port;
   const { userId, routeBefore, fromFooter, studyPackage } = route.params;
 
-
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
@@ -58,14 +57,12 @@ const StudyPlanDetailsScreen = ({
     .filter((member) => member.role === "parent")
     .map((member) => Number(member.userId));
 
-
   const onBackPress = useCallback(() => {
     navigation.navigate("StudyPlanInfoScreen", {
       userId: Number(user?.userId),
       routeBefore: "StatusDashboard",
     });
   }, [navigation, memberToRender.userId, user?.userId, userId]);
-
 
   const insets = useSafeAreaInsets();
   return (
@@ -111,20 +108,22 @@ const StudyPlanDetailsScreen = ({
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
-      <ApplyButton
-        label="Tạo kế hoạch mới"
-        extraStyle={{
-          width: "50%",
-          position: "absolute",
-          bottom: 50,
-        }}
-        onPress={() => {
-          navigation.navigate("CreateStudyPlanScreen", {
-            userId: userId,
-            studyPackage: studyPackage,
-          });
-        }}
-      />
+      {user?.role === "parent" && (
+        <ApplyButton
+          label="Tạo kế hoạch mới"
+          extraStyle={{
+            width: "50%",
+            position: "absolute",
+            bottom: 50,
+          }}
+          onPress={() => {
+            navigation.navigate("CreateStudyPlanScreen", {
+              userId: userId,
+              studyPackage: studyPackage,
+            });
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 };

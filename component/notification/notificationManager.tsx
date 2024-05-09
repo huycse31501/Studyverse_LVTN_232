@@ -27,6 +27,7 @@ const NotificationManager = () => {
       Notifications.removeNotificationSubscription(responseSubscription);
     };
   }, []);
+
   useEffect(() => {
     if (user?.userId) {
       registerForNotifications();
@@ -60,40 +61,56 @@ const NotificationManager = () => {
         },
       });
 
-        const events = await response.json();
-        console.log(events)
+      const events = await response.json();
+      console.log(events);
       events.forEach(scheduleNotificationForEvent);
     } catch (e) {
+      console.error("Error fetching events:", e);
     }
   }
 
   function scheduleNotificationForEvent(event: any) {
-    if (typeof event.timeStart !== 'string') {
+    if (typeof event.timeStart !== "string" || typeof event.timeEnd !== "string") {
+      console.error("Event time information is incomplete.");
       return;
     }
-  
-    const eventStartTime = new Date(event.timeStart);
-    if (isNaN(eventStartTime.getTime())) {
-      console.error('Invalid event timeStart:', event.timeStart);
+
+    const gmtPlus7Offset = '+07:00';
+    const eventStartTimeWithZone = event.timeStart.includes('Z') || event.timeStart.includes('+') ? event.timeStart : `${event.timeStart}${gmtPlus7Offset}`;
+    const eventEndTimeWithZone = event.timeEnd.includes('Z') || event.timeEnd.includes('+') ? event.timeEnd : `${event.timeEnd}${gmtPlus7Offset}`;
+
+    const eventStartTime = new Date(eventStartTimeWithZone);
+    const eventEndTime = new Date(eventEndTimeWithZone);
+
+    const now = new Date();
+    const currentTime = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds()));
+    currentTime.setHours(currentTime.getHours() + 7);
+
+    if (isNaN(eventStartTime.getTime()) || isNaN(eventEndTime.getTime())) {
+      console.error("Invalid event time:", event.timeStart, event.endTime);
       return;
     }
-  
+
     const remindTime = typeof event.remindTime === 'number' && event.remindTime > 0 ? event.remindTime : 0;
-    
-    const notificationTime = subMinutes(eventStartTime, remindTime);
-  
+    let notificationTime = subMinutes(eventStartTime, remindTime);
+
+    if (currentTime > notificationTime && currentTime < eventEndTime) {
+      notificationTime = currentTime; 
+    }
+
     Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Sự kiện sắp diễn ra',
-        body: `${event.name} sẽ diễn ra sau ${remindTime} phút`,
+        title: "Sự kiện sắp diễn ra",
+        body: `${event.name} sẽ diễn ra sau ${remindTime} phút.`,
       },
-      trigger: notificationTime.getTime(),
+      trigger: notificationTime > currentTime ? notificationTime.getTime() : null,
     }).then(response => {
       console.log('Notification scheduled:', response, notificationTime);
     }).catch(error => {
       console.error('Error scheduling notification:', error);
     });
   }
+
   return null;
 };
 

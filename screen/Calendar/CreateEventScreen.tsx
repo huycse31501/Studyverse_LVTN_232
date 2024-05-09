@@ -62,18 +62,6 @@ interface Event {
   remindTime: number;
 }
 
-async function scheduleNotificationForEvent(event: Event): Promise<void> {
-  const eventStartTime = new Date(event.timeStart);
-  const notificationTime = subMinutes(eventStartTime, event.remindTime);
-
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "Sự kiện sắp diễn ra",
-      body: `${event.name} sẽ diễn ra sau ${event.remindTime} phút.`,
-    },
-    trigger: notificationTime,
-  });
-}
 
 const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   const { userId } = route.params;
@@ -373,15 +361,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
 
         const data = await response.json();
         if (data.msg == "1") {
-          if (inputs.isNoti.value) {
-            const event: Event = {
-              name: inputs.eventName.value,
-              timeStart: inputs.eventStartTime.value,
-              remindTime: parseInt(inputs.notiBefore.value, 10),
-            };
-            await scheduleNotificationForEvent(event);
-          }
-
           setIsLoading(false);
           resetInputs();
           navigation.navigate("EventInfoScreen", {
