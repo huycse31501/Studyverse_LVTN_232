@@ -20,14 +20,19 @@ import { useNavigation } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import Constants from "expo-constants";
 
 type ForgotPasswordNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
-  OTPScreen: undefined;
+  OTPScreen: {
+    email?: any;
+  };
 }>;
 
 const ForgotPassword = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigation = useNavigation<ForgotPasswordNavigationProp>();
   const isEnglishEnabled = useSelector(
     (state: RootState) => state.language.isEnglishEnabled
@@ -71,7 +76,7 @@ const ForgotPassword = () => {
     });
   }
 
-  function submitHandler() {
+  async function submitHandler() {
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -87,14 +92,39 @@ const ForgotPassword = () => {
     } else if (!allFieldsValid) {
       Alert.alert("Thông báo", "Thông tin email chưa hợp lệ");
     } else {
-      setInputs({
-        email: { value: "", required: true },
-      });
-      setInputValidation({
-        isEmailValid: true,
-      });
-      Alert.alert("Thành công", "Xác thực");
-      navigation.navigate("OTPScreen");
+      try {
+        setIsLoading(true);
+        let host = Constants?.expoConfig?.extra?.host;
+        const requestOTPURL = `https://${host}/user/sendOTP`;
+        const response = await fetch(requestOTPURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: inputs.email.value,
+          }),
+        });
+        const message = await response.json();
+        console.log(message, inputs.email.value)
+        setIsLoading(false);
+
+        if (message.msg == "1") {
+          setIsLoading(false);
+          setInputs({
+            email: { value: "", required: true },
+          });
+          setInputValidation({
+            isEmailValid: true,
+          });
+          navigation.navigate("OTPScreen", {
+            email: inputs.email.value,
+          });
+        } else Alert.alert("Thất bại", "Xác thực thất bại");
+      } catch (e) {
+        setIsLoading(false);
+        Alert.alert("Lỗi trong quá trình xác thực - Email không tồn tại");
+      }
     }
   }
 
@@ -115,11 +145,15 @@ const ForgotPassword = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <RedTextHeader text={isEnglishEnabled ? "FORGOT PASSWORD" :"QUÊN MẬT KHẨU"} />
+            <RedTextHeader
+              text={isEnglishEnabled ? "FORGOT PASSWORD" : "QUÊN MẬT KHẨU"}
+            />
           </View>
           <View style={styles.introText}>
             <Text style={styles.introTextStyle}>
-              {isEnglishEnabled ? "What is your email address?" :"Nhập địa chỉ email của bạn"}
+              {isEnglishEnabled
+                ? "What is your email address?"
+                : "Nhập địa chỉ email của bạn"}
             </Text>
           </View>
           <View style={styles.inputField}>
@@ -134,32 +168,61 @@ const ForgotPassword = () => {
             />
           </View>
           <View style={styles.backToSignIn}>
-            <Text style={styles.backToSignInText}>{isEnglishEnabled ? "Back to" :"Trở lại"}</Text>
+            <Text style={styles.backToSignInText}>
+              {isEnglishEnabled ? "Back to" : "Trở lại"}
+            </Text>
             <TouchableTextComponent
-              text={isEnglishEnabled ? "Sign In" :"Đăng nhập"}
-              onPress={() => navigation.navigate("SignIn")}
+              text={isEnglishEnabled ? "Sign In" : "Đăng nhập"}
+              onPress={() => {
+                setInputs({
+                  email: { value: "", required: true },
+                });
+                setInputValidation({
+                  isEmailValid: true,
+                });
+                navigation.navigate("SignIn");
+              }}
             />
           </View>
           <View style={styles.sendOTPButton}>
             <ApplyButton
-              label={isEnglishEnabled ? "SEND VALIDATION CODE" :"GỬI MÃ XÁC THỰC"}
+              label={
+                isEnglishEnabled ? "SEND VALIDATION CODE" : "GỬI MÃ XÁC THỰC"
+              }
               extraStyle={styles.OTPButton}
               onPress={submitHandler}
             />
           </View>
           <View style={styles.askToSignUp}>
-            <Text style={styles.askToSignUpText}>{isEnglishEnabled ? "You have no account yet?" :"Bạn chưa có tài khoản?"}</Text>
+            <Text style={styles.askToSignUpText}>
+              {isEnglishEnabled
+                ? "You have no account yet?"
+                : "Bạn chưa có tài khoản?"}
+            </Text>
           </View>
           <View style={styles.backToSignUpContainer}>
             <ApplyButton
-              label={isEnglishEnabled ? "SIGN UP" :"ĐĂNG KÝ"}
+              label={isEnglishEnabled ? "SIGN UP" : "ĐĂNG KÝ"}
               extraStyle={styles.backToSignUpButton}
               extraTextStyle={styles.backToSignUpButtonTextStyle}
-              onPress={() => navigation.navigate("SignUp")}
+              onPress={() => {
+                setInputs({
+                  email: { value: "", required: true },
+                });
+                setInputValidation({
+                  isEmailValid: true,
+                });
+                navigation.navigate("SignUp");
+              }}
             />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -222,6 +285,16 @@ const styles = StyleSheet.create({
   },
   backToSignUpButtonTextStyle: {
     color: "#000000",
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 

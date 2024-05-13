@@ -45,14 +45,18 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   SignUp: undefined;
   SignIn: undefined;
-  OTPScreen: undefined;
+  OTPScreen: {
+    email?: any
+  };
   StatusDashboard: undefined;
   UserDetailsScreen: { user: User };
   Setting: undefined;
   FamilyInfoScreen: {
     routeBefore?: string;
   };
-  NewPasswordScreen: undefined;
+  NewPasswordScreen: {
+    email?: any;
+  };
   FamilyAcceptScreen: undefined;
   UserInformationScreen: undefined;
   EventInfoScreen: {

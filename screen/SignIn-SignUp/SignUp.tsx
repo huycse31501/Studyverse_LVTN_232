@@ -7,6 +7,7 @@ import {
   Platform,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import TextInputField from "../../component/signin-signup/TextInputField";
@@ -57,6 +58,7 @@ const SignUp = () => {
       required: false,
     },
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const [inputValidation, setInputValidation] = useState({
     isPhoneNumberValid:
@@ -155,6 +157,7 @@ const SignUp = () => {
         isEmailValid: true,
       });
       try {
+        setIsLoading(true);
         let host = Constants?.expoConfig?.extra?.host;
         let port = Constants?.expoConfig?.extra?.port;
         const requestSignUpURL = `https://${host}/user/signup`;
@@ -174,10 +177,14 @@ const SignUp = () => {
           }),
         });
         const message = await response.json();
+        setIsLoading(false);
+
         if (message.msg == "1") {
+          setIsLoading(false);
           Alert.alert("Thành công", "Đăng ký thành công");
         } else Alert.alert("Thất bại", "Đăng ký thất bại");
       } catch (e) {
+        setIsLoading(false);
         Alert.alert("Lỗi trong quá trình đăng ký");
       }
     }
@@ -209,7 +216,7 @@ const SignUp = () => {
             style={styles.logo}
           />
           <View style={styles.authButton}>
-            <AuthButton type="SignUp" onEnglish={isEnglishEnabled}/>
+            <AuthButton type="SignUp" onEnglish={isEnglishEnabled} />
           </View>
           <View style={styles.inputField}>
             <TextInputField
@@ -230,7 +237,7 @@ const SignUp = () => {
               }}
             />
             <TextInputField
-              placeHolder={isEnglishEnabled ? "Last name" :"Họ"}
+              placeHolder={isEnglishEnabled ? "Last name" : "Họ"}
               required
               value={inputs.lastName.value}
               isValid={inputValidation.isLastNameValid}
@@ -239,7 +246,7 @@ const SignUp = () => {
               }}
             />
             <TextInputField
-              placeHolder={isEnglishEnabled ? "First name" :"Tên"}
+              placeHolder={isEnglishEnabled ? "First name" : "Tên"}
               required
               isValid={inputValidation.isFirstNameValid}
               value={inputs.firstName.value}
@@ -249,7 +256,7 @@ const SignUp = () => {
             />
             <DateInputField
               required
-              placeHolder={isEnglishEnabled ? "Date of birth" :"Ngày sinh"}
+              placeHolder={isEnglishEnabled ? "Date of birth" : "Ngày sinh"}
               isValid={inputValidation.isDOBValid}
               dateStr={inputs.dob.value}
               signUpType={curSignUpType}
@@ -257,9 +264,12 @@ const SignUp = () => {
                 onChangeText: inputChangedHandler.bind(this, "dob"),
               }}
             />
-            <OptionSelector onOptionChange={handleOptionChange} onEnglish={isEnglishEnabled} />
+            <OptionSelector
+              onOptionChange={handleOptionChange}
+              onEnglish={isEnglishEnabled}
+            />
             <TextInputField
-              placeHolder={isEnglishEnabled ? "Phone number" :"Số điện thoại"}
+              placeHolder={isEnglishEnabled ? "Phone number" : "Số điện thoại"}
               required={false}
               value={inputs.phoneNumber.value}
               isValid={inputValidation.isPhoneNumberValid}
@@ -269,10 +279,18 @@ const SignUp = () => {
             />
           </View>
           <View style={styles.applyButton}>
-            <ApplyButton label={isEnglishEnabled ? "SIGN UP" :"ĐĂNG KÝ"} onPress={submitHandler} />
+            <ApplyButton
+              label={isEnglishEnabled ? "SIGN UP" : "ĐĂNG KÝ"}
+              onPress={submitHandler}
+            />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -299,6 +317,16 @@ const styles = StyleSheet.create({
   },
   authButton: {
     marginBottom: "5%",
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 

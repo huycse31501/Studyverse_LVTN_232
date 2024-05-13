@@ -16,20 +16,33 @@ import TextInputField from "../../component/signin-signup/TextInputField";
 import TouchableTextComponent from "../../component/shared/TouchableText";
 import ApplyButton from "../../component/shared/ApplyButton";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
 import OTPInput from "../../component/shared/OTPInput";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import { RootStackParamList } from "../../component/navigator/appNavigator";
+import Constants from "expo-constants";
 
 type OTPScreenNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
-  NewPasswordScreen: undefined;
+  NewPasswordScreen: {
+    email?: any;
+  };
 }>;
 
-const OTPScreen = () => {
-  const navigation = useNavigation<OTPScreenNavigationProp>();
+type OTPRouteProp = RouteProp<RootStackParamList, "OTPScreen">;
+
+interface OTPScreenProps {
+  route: OTPRouteProp;
+  navigation: StackNavigationProp<RootStackParamList, "OTPScreen">;
+}
+
+const OTPScreen = ({ route, navigation }: OTPScreenProps) => {
+  const { email } = route.params;
+  const [isLoading, setIsLoading] = useState(false);
+
   const isEnglishEnabled = useSelector(
     (state: RootState) => state.language.isEnglishEnabled
   );
@@ -46,10 +59,40 @@ const OTPScreen = () => {
     setOTPInput(newInput);
   };
 
-  function submitHandler() {
-    setOTPInput(["", "", "", ""]);
-    Alert.alert("Thành công", `Xác thực OTP: ${OTPinput.join("")}`);
-    navigation.navigate("NewPasswordScreen");
+  async function submitHandler() {
+    try {
+      setIsLoading(true);
+      let host = Constants?.expoConfig?.extra?.host;
+      const sendOTPURL = `https://${host}/user/confirmOTP`;
+      const response = await fetch(sendOTPURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          otp: OTPinput.join(""),
+        }),
+      });
+      const message = await response.json();
+
+      setIsLoading(false);
+
+      if (message.msg == "1") {
+        setIsLoading(false);
+        setOTPInput(["", "", "", ""]);
+        navigation.navigate("NewPasswordScreen", {
+          email: email,
+        });
+      } else {
+        setIsLoading(false);
+
+        Alert.alert("Thất bại", "Xác thực thất bại");
+      }
+    } catch (e) {
+      setIsLoading(false);
+      Alert.alert("Lỗi trong quá trình xác thực - OTP không  đúng");
+    }
   }
 
   return (
@@ -69,45 +112,62 @@ const OTPScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <RedTextHeader text={isEnglishEnabled ? "VALIDATION CODE" :"ĐIỀN MÃ XÁC THỰC"} />
+            <RedTextHeader
+              text={isEnglishEnabled ? "VALIDATION CODE" : "ĐIỀN MÃ XÁC THỰC"}
+            />
           </View>
           <View style={styles.OTPContainer}>
             <OTPInput input={OTPinput} onInputChange={handleInputChange} />
           </View>
           <View style={styles.resendOTP}>
-            <Text style={styles.resendOTPText}>{isEnglishEnabled ? "Did not receive OTP yet?" :"Không nhận được mã?"}</Text>
+            <Text style={styles.resendOTPText}>
+              {isEnglishEnabled
+                ? "Did not receive OTP yet?"
+                : "Không nhận được mã?"}
+            </Text>
             <TouchableTextComponent
-              text={isEnglishEnabled ? "Resend" :"Gửi lại"}
+              text={isEnglishEnabled ? "Resend" : "Gửi lại"}
               onPress={() => Alert.alert("Handle gửi lại OTP")}
             />
           </View>
           <View style={styles.sendOTPButton}>
             <ApplyButton
-              label={isEnglishEnabled ? "SUBMIT" :"XÁC THỰC"}
+              label={isEnglishEnabled ? "SUBMIT" : "XÁC THỰC"}
               extraStyle={styles.OTPButton}
               onPress={submitHandler}
             />
           </View>
           <View style={styles.askToSignUp}>
-          <Text style={styles.askToSignUpText}>{isEnglishEnabled ? "You have no account yet?" :"Bạn chưa có tài khoản?"}</Text>
+            <Text style={styles.askToSignUpText}>
+              {isEnglishEnabled
+                ? "You have no account yet?"
+                : "Bạn chưa có tài khoản?"}
+            </Text>
           </View>
           <View style={styles.backToSignUpContainer}>
             <ApplyButton
-              label={isEnglishEnabled ? "SIGN UP" :"ĐĂNG KÝ"}
+              label={isEnglishEnabled ? "SIGN UP" : "ĐĂNG KÝ"}
               extraStyle={styles.backToSignUpButton}
               extraTextStyle={styles.backToSignUpButtonTextStyle}
               onPress={() => navigation.navigate("SignUp")}
             />
           </View>
           <View style={styles.backToSignIn}>
-          <Text style={styles.backToSignInText}>{isEnglishEnabled ? "Back to" :"Trở lại"}</Text>
+            <Text style={styles.backToSignInText}>
+              {isEnglishEnabled ? "Back to" : "Trở lại"}
+            </Text>
             <TouchableTextComponent
-              text={isEnglishEnabled ? "Sign In" :"Đăng nhập"}
+              text={isEnglishEnabled ? "Sign In" : "Đăng nhập"}
               onPress={() => navigation.navigate("SignIn")}
             />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
+      {isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0b0b0d" />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -175,6 +235,16 @@ const styles = StyleSheet.create({
     color: "#666666",
     paddingRight: "2%",
     fontWeight: "500",
+  },
+  loadingContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
 });
 
