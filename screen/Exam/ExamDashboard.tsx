@@ -351,7 +351,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{isEnglishEnabled ?  `Grading exams (${pendingExams.length})` :`Đang được chấm (${gradingExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Grading exams (${gradingExams.length})` :`Đang được chấm (${gradingExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={gradingExams}
@@ -388,7 +388,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{isEnglishEnabled ?  `Passed exams (${pendingExams.length})` :`Bài kiểm tra đã đạt (${passExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Passed exams (${passExams.length})` :`Bài kiểm tra đã đạt (${passExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={passExams}
@@ -425,7 +425,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{isEnglishEnabled ?  `Failed exams (${pendingExams.length})` :`Bài kiểm tra chưa đạt (${failExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Failed exams (${failExams.length})` :`Bài kiểm tra chưa đạt (${failExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={failExams}
