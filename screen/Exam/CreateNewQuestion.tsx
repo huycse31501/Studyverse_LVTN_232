@@ -76,7 +76,9 @@ const CreateNewQuestionScreen = ({
       return updatedOptions;
     });
   };
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -115,7 +117,7 @@ const CreateNewQuestionScreen = ({
                       : styles.text
                   }
                 >
-                  Trắc nghiệm
+                  {isEnglishEnabled ? "Multiple-choice" :"Trắc nghiệm"}
                 </Text>
                 {questionType === "multiple-choice" && (
                   <View style={styles.underline} />
@@ -134,16 +136,16 @@ const CreateNewQuestionScreen = ({
                       : styles.text
                   }
                 >
-                  Tự luận
+                  {isEnglishEnabled ? "Text" :"Tự luận"}
                 </Text>
                 {questionType === "text" && <View style={styles.underline} />}
               </View>
             </TouchableOpacity>
           </View>
           <View>
-            <Text style={styles.inputTitleText}>Tiêu đề câu hỏi</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Question's title" : "Tiêu đề câu hỏi"}</Text>
             <BlackBorderTextInputField
-              placeHolder="Tiêu đề"
+              placeHolder={isEnglishEnabled ? "Title" : "Tiêu đề"}
               isValid
               required
               value={questionTitle}
@@ -157,7 +159,7 @@ const CreateNewQuestionScreen = ({
               <View style={{}}>
                 <Text style={styles.inputTitleText}>Đáp án</Text>
                 <BlackBorderTextInputField
-                  placeHolder="Lựa chọn 1"
+                  placeHolder={isEnglishEnabled ? "Option 1" : "Lựa chọn 1"}
                   isValid
                   required
                   value={questionOptions[0]}
@@ -166,7 +168,7 @@ const CreateNewQuestionScreen = ({
                   }}
                 />
                 <BlackBorderTextInputField
-                  placeHolder="Lựa chọn 2"
+                  placeHolder={isEnglishEnabled ? "Option 2" : "Lựa chọn 2"}
                   isValid
                   required
                   value={questionOptions[1]}
@@ -175,7 +177,7 @@ const CreateNewQuestionScreen = ({
                   }}
                 />
                 <BlackBorderTextInputField
-                  placeHolder="Lựa chọn 3"
+                  placeHolder={isEnglishEnabled ? "Option 3" : "Lựa chọn 3"}
                   isValid
                   required
                   value={questionOptions[2]}
@@ -184,7 +186,7 @@ const CreateNewQuestionScreen = ({
                   }}
                 />
                 <BlackBorderTextInputField
-                  placeHolder="Lựa chọn 4"
+                  placeHolder={isEnglishEnabled ? "Option 4" : "Lựa chọn 4"}
                   isValid
                   required
                   value={questionOptions[3]}
@@ -196,7 +198,7 @@ const CreateNewQuestionScreen = ({
               <View style={{}}>
                 <Text style={styles.inputTitleText}>Lựa chọn đúng</Text>
                 <BlackBorderTextInputField
-                  placeHolder="Điền vị trí lựa chọn (1,2,3,4)"
+                  placeHolder={isEnglishEnabled ? "Choose correct option (1 to 4)" :"Điền vị trí lựa chọn (1,2,3,4)"}
                   isValid
                   required
                   value={correctAnswer ? String(correctAnswer) : ""}
@@ -208,9 +210,9 @@ const CreateNewQuestionScreen = ({
             </>
           )}
           <View>
-            <Text style={styles.inputTitleText}>Đường dẫn ảnh minh họa</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Image's URL" :"Đường dẫn ảnh minh họa"}</Text>
             <BlackBorderTextInputField
-              placeHolder="Ví dụ: https://imgur.com/xxxxx"
+              placeHolder={isEnglishEnabled ? "Example: https://imgur.com/xxxxx" :"Ví dụ: https://imgur.com/xxxxx"}
               isValid
               value={imageURL}
               textInputConfig={{
@@ -218,7 +220,7 @@ const CreateNewQuestionScreen = ({
               }}
             />
           </View>
-          <Text style={styles.noteText}>Nhãn bài kiểm tra</Text>
+          <Text style={styles.noteText}>{isEnglishEnabled ? "Question's tag" :"Nhãn bài kiểm tra"}</Text>
           <View style={styles.tagContainer}>
             {listOfTags.map((tag, index) => (
               <TagToSelect
@@ -236,7 +238,7 @@ const CreateNewQuestionScreen = ({
             }}
           >
             <ApplyButton
-              label="Tạo câu hỏi"
+              label={isEnglishEnabled ? "Create question" :"Tạo câu hỏi"}
               onPress={() => {
                 const newQuestion: any = {
                   id: currentQuestionList ? currentQuestionList.length + 1 : 0,

@@ -72,6 +72,9 @@ const StudyPlanInfoScreen = ({
 
   const [studyPlanData, setStudyPlanData] = useState();
   const [filteredstudyPlan, setFilteredstudyPlan] = useState({});
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -160,7 +163,9 @@ const StudyPlanInfoScreen = ({
               style={styles.avatar}
             />
           </View>
-          <Text style={styles.headerText}>Kế hoạch học tập</Text>
+          <Text style={styles.headerText}>
+            {isEnglishEnabled ? "Study plan" : "Kế hoạch học tập"}
+          </Text>
 
           <View style={styles.memberChoiceContainer}>
             {user?.role === "parent" && (
@@ -176,6 +181,7 @@ const StudyPlanInfoScreen = ({
                 studyPlanInfo: filteredstudyPlan,
               }}
               isEnabled={isSubjectListEnabled}
+              onEnglish={isEnglishEnabled}
             />
           </View>
         </KeyboardAwareScrollView>

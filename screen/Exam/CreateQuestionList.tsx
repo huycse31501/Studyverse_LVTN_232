@@ -53,7 +53,9 @@ const CreateQuestionListScreen = ({
   const { userId, previousPayload, currentQuestionList } = route.params;
   const [isLoading, setIsLoading] = useState(false);
   const [questionList, setQuestionList] = useState(currentQuestionList)
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   useEffect(() => {
     if (currentQuestionList) {
       setQuestionList(currentQuestionList);
@@ -164,9 +166,9 @@ const CreateQuestionListScreen = ({
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Tạo bài kiểm tra</Text>
+          <Text style={styles.headerText}>{isEnglishEnabled ? "Create Exam" :"Tạo bài kiểm tra"}</Text>
           <View style={styles.titleContainer}>
-            <Text style={styles.inputTitleText}>Danh sách câu hỏi</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Question list" :"Danh sách câu hỏi"}</Text>
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate("CreateNewQuestionScreen", {
@@ -202,7 +204,7 @@ const CreateQuestionListScreen = ({
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
       <View style={styles.nextButtonContainer}>
-        <ApplyButton label="Xác nhận" onPress={handleSubmitCreateQuestion} />
+        <ApplyButton label={isEnglishEnabled ? "Confirm" : "Xác nhận"} onPress={handleSubmitCreateQuestion} />
       </View>
       {isLoading && (
         <View style={styles.loadingContainer}>

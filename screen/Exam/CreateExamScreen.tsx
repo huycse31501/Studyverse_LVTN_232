@@ -46,7 +46,9 @@ const validateValidDate = (checkDate: string) => {
 
 const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
   const { userId, previousPayload, currentQuestionList } = route.params;
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const [inputs, setInputs] = useState({
     examName: {
       value: "",
@@ -247,11 +249,11 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Tạo bài kiểm tra</Text>
+          <Text style={styles.headerText}>{isEnglishEnabled ? "Create Exam" :"Tạo bài kiểm tra"}</Text>
           <View>
-            <Text style={styles.inputTitleText}>Tên bài kiểm tra</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Exam's name" :"Tên bài kiểm tra"}</Text>
             <BlackBorderTextInputField
-              placeHolder="Bài kiểm tra"
+              placeHolder={isEnglishEnabled ? "Exam" :"Bài kiểm tra"}
               isValid
               required
               value={inputs.examName.value}
@@ -263,10 +265,10 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
 
           <View>
             <Text style={styles.inputTitleText}>
-              Số điểm cần để vượt qua bài kiểm tra
+              {isEnglishEnabled ? "Grade to pass" :"Số điểm cần để vượt qua bài kiểm tra"}
             </Text>
             <BlackBorderTextInputField
-              placeHolder="Điền số từ 1 tới 10"
+              placeHolder={isEnglishEnabled ? "Between 1 and 10" :"Điền số từ 1 tới 10"}
               isValid
               required
               value={inputs.passPoint.value}
@@ -278,9 +280,9 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
           </View>
 
           <View>
-            <Text style={styles.inputTitleText}>Thời gian làm bài</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Exam time" :"Thời gian làm bài"}</Text>
             <BlackBorderTextInputField
-              placeHolder="Định dạng HH:MM:SS"
+              placeHolder={isEnglishEnabled ? "Input as HH:MM:SS" :"Định dạng HH:MM:SS"}
               isValid
               required
               value={inputs.examTime.value}
@@ -297,13 +299,13 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
               },
             ]}
           >
-            Hạn làm bài
+            {isEnglishEnabled ? "Submission date" :"Hạn làm bài"}
           </Text>
           <View style={styles.examDateContainer}>
             <DateInputField
               required
               isValid
-              placeHolder="Ngày nộp bài"
+              placeHolder={isEnglishEnabled ? "Date to submit" :"Ngày nộp bài"}
               dateStr={inputs.examDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(this, "examDate"),
@@ -311,13 +313,13 @@ const CreateExamScreen = ({ route, navigation }: CreateExamScreenProps) => {
             />
           </View>
 
-          <Text style={styles.noteText}>Thành viên cần làm bài</Text>
+          <Text style={styles.noteText}>{isEnglishEnabled ? "Tag family member" :"Thành viên cần làm bài"}</Text>
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
               onSelectedMembersChange={handleSelectedMembersChange}
             />
           </View>
-          <Text style={styles.noteText}>Nhãn bài kiểm tra</Text>
+          <Text style={styles.noteText}>{isEnglishEnabled ? "Exam's tag" :"Nhãn bài kiểm tra"}</Text>
           <View style={styles.tagContainer}>
             {listOfTags.map((tag, index) => (
               <TagToSelect

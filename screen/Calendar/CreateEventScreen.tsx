@@ -30,6 +30,8 @@ import { formatTime } from "../../utils/timeFormat";
 import MemberTagList from "../../component/EventRelated/tagFamilyMember";
 import * as Notifications from "expo-notifications";
 import { subMinutes } from "date-fns";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 type CreateEventRouteProp = RouteProp<RootStackParamList, "CreateEventScreen">;
 
@@ -43,31 +45,42 @@ type Option = {
   value: string;
 };
 
-const options: Option[] = [
-  { label: "Hằng ngày", value: "1" },
-  { label: "Hằng tuần", value: "2" },
-  { label: "Hằng tháng", value: "3" },
-];
-
-const notiOptions: Option[] = [
-  { label: "Trước 15 phút", value: "15" },
-  { label: "Trước 30 phút", value: "30" },
-  { label: "Trước 45 phút", value: "45" },
-  { label: "Trước 1 giờ", value: "60" },
-];
-
 interface Event {
   name: string;
   timeStart: string;
   remindTime: number;
 }
 
-
 const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   const { userId } = route.params;
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
   const [isLoading, setIsLoading] = useState(false);
+
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+  const options: Option[] = [
+    { label: isEnglishEnabled ? "Daily" : "Hằng ngày", value: "1" },
+    { label: isEnglishEnabled ? "Weekly" : "Hằng tuần", value: "2" },
+    { label: isEnglishEnabled ? "Monthly" : "Hằng tháng", value: "3" },
+  ];
+
+  const notiOptions: Option[] = [
+    {
+      label: isEnglishEnabled ? "Before 15 minutes" : "Trước 15 phút",
+      value: "15",
+    },
+    {
+      label: isEnglishEnabled ? "Before 30 minutes" : "Trước 30 phút",
+      value: "30",
+    },
+    {
+      label: isEnglishEnabled ? "Before 45 minutes" : "Trước 45 phút",
+      value: "45",
+    },
+    { label: isEnglishEnabled ? "Before an hour" : "Trước 1 giờ", value: "60" },
+  ];
 
   const getCurrentDateFormatted = () => {
     const date = new Date();
@@ -307,7 +320,6 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
   };
 
   async function submitHandler() {
-
     let allFieldsFilled = true;
     let allFieldsValid = Object.values(inputValidation).every((valid) => valid);
 
@@ -401,18 +413,26 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
                 style={styles.backButton}
                 onPress={() => {
                   resetInputs();
-                  navigation.navigate("StatusDashboard");
+                  navigation.navigate("EventInfoScreen", {
+                    userId: Number(userId),
+                    routeBefore: "StatusDashboard",
+                    fromFooter: "1",
+                  });
                 }}
               >
                 <Text style={styles.backButtonText}>Back</Text>
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={styles.headerText}>Thêm sự kiện</Text>
+          <Text style={styles.headerText}>
+            {isEnglishEnabled ? "Add an event" : "Thêm sự kiện"}
+          </Text>
           <View style={styles.eventNameContainer}>
-            <Text style={styles.timePickerText}>Tên sự kiện</Text>
+            <Text style={styles.timePickerText}>
+              {isEnglishEnabled ? "Event name" : "Tên sự kiện"}
+            </Text>
             <BlackBorderTextInputField
-              placeHolder="Sự kiện"
+              placeHolder={isEnglishEnabled ? "Event" : "Sự kiện"}
               isValid
               value={inputs.eventName.value}
               textInputConfig={{
@@ -421,7 +441,9 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             />
           </View>
 
-          <Text style={styles.timePickerText}>Chọn khung giờ</Text>
+          <Text style={styles.timePickerText}>
+            {isEnglishEnabled ? "Time range" : "Chọn khung giờ"}
+          </Text>
           <View style={{ height: 150 }}>
             <TimePicker
               onStartTimeSelect={handleStartTimeChange}
@@ -433,6 +455,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             onDateSelect={(selectedDate) => {
               inputChangedHandler("eventDate", selectedDate);
             }}
+            onEnglish={isEnglishEnabled}
           />
           <View style={styles.eventLoopContainer}>
             <ToggleSwitch
@@ -446,7 +469,9 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               }}
               circleColor={"#FFFFFF"}
             />
-            <Text style={styles.eventLoopText}>Lặp lại</Text>
+            <Text style={styles.eventLoopText}>
+              {isEnglishEnabled ? "Looping" : "Lặp lại"}
+            </Text>
           </View>
           {isEventLoopEnabled && (
             <View style={styles.loopChoiceContainer}>
@@ -487,7 +512,9 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
                 <DateInputField
                   required
                   isValid
-                  placeHolder="Ngày kết thúc lặp"
+                  placeHolder={
+                    isEnglishEnabled ? "End date" : "Ngày kết thúc lặp"
+                  }
                   dateStr={inputs.endLoopDate.value}
                   textInputConfig={{
                     onChangeText: inputChangedHandler.bind(this, "endLoopDate"),
@@ -511,7 +538,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               }}
               circleColor={"#FFFFFF"}
             />
-            <Text style={styles.eventLoopText}>Nhắc nhở</Text>
+            <Text style={styles.eventLoopText}>{isEnglishEnabled ? "Notification" :"Nhắc nhở"}</Text>
           </View>
           {isNotiEnabled && (
             <View style={styles.loopChoiceContainer}>
@@ -550,7 +577,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               ))}
             </View>
           )}
-          <Text style={styles.noteText}>Những người liên quan đến sự kiện</Text>
+          <Text style={styles.noteText}>{isEnglishEnabled ? "Tag family member" :"Những người liên quan đến sự kiện"}</Text>
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
               isEvent
@@ -566,7 +593,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             />
           </View>
           <ApplyButton
-            label="Tạo sự kiện"
+            label={isEnglishEnabled ? "Create event" :"Tạo sự kiện"}
             extraStyle={{ width: "50%", marginTop: 50, marginBottom: 30 }}
             onPress={submitHandler}
           />

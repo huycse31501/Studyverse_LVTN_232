@@ -75,6 +75,10 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
     (user) => user.userId === String(userId)
   )[0];
 
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+
   const [eventsData, setEventsData] = useState([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [listOfEvent, setListOfEvent] = useState([]);
@@ -264,6 +268,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             <WeekDatePicker
               listOfEventCount={listOfEventCount}
               onDateSelect={handleDateSelect}
+              onEnglish={isEnglishEnabled}
             />
           </View>
           <View style={styles.eventContainer}>
@@ -275,11 +280,14 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
                   userId={Number(userId)}
                   routeBefore={routeBefore}
                   fromFooter={fromFooter}
+                  onEnglish={isEnglishEnabled}
                 />
               ) : (
                 <View style={styles.eventPlaceHolder}>
                   <Text style={styles.eventNotFound}>
-                    Ngày đang chọn không có sự kiện gì
+                    {isEnglishEnabled
+                      ? "There is no events on this day"
+                      : "Ngày đang chọn không có sự kiện gì"}
                   </Text>
                   <TouchableOpacity
                     style={styles.addTask}
@@ -289,7 +297,9 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
                       })
                     }
                   >
-                    <Text style={styles.addTaskText}>Thêm sự kiện</Text>
+                    <Text style={styles.addTaskText}>
+                      {isEnglishEnabled ? "Add an event" : "Thêm sự kiện"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -309,11 +319,15 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
                 });
               }}
             >
-              <Text style={styles.remindText}>Nhắc nhở</Text>
+              <Text style={styles.remindText}>
+                {isEnglishEnabled ? "Remind" : "Nhắc nhở"}
+              </Text>
             </TouchableOpacity>
             {listOfRemindEvent.length !== 0 && (
               <Text style={styles.remindNotForgetText}>
-                Đừng bỏ lỡ những sự kiện sau vào ngày mai nhé
+                {isEnglishEnabled
+                  ? "Don't miss these important events tomorrow"
+                  : "Đừng bỏ lỡ những sự kiện sau vào ngày mai nhé"}
               </Text>
             )}
           </View>
@@ -330,7 +344,9 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
                   marginLeft: 10,
                 }}
               >
-                Không có sự kiện đáng lưu ý vào ngày mai
+                {isEnglishEnabled
+                  ? "There is no important events tomorrow"
+                  : "Không có sự kiện đáng lưu ý vào ngày mai"}
               </Text>
               <TouchableOpacity
                 style={styles.addTask}
@@ -346,7 +362,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             routeBefore === "familyMemberDetails" && user?.role === "children"
           ) && (
             <ApplyButton
-              label="Tạo sự kiện"
+              label={isEnglishEnabled ? "Add an event"  : "Tạo sự kiện"}
               extraStyle={{
                 width: 200,
                 height: 50,

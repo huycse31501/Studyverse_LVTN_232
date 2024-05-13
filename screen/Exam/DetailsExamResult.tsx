@@ -61,8 +61,12 @@ const DetailExamResultScreen = ({
     attempIndex,
     childrenId,
     payloadToDoExam,
-    result
+    result,
   } = route.params;
+
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
 
   const user = useSelector((state: RootState) => state.user.user);
   const isParentView = user?.role === "parent";
@@ -179,7 +183,9 @@ const DetailExamResultScreen = ({
       case "multiple-choice":
         return (
           <View style={[styles.questionContainer]}>
-            <Text style={styles.headerText}>Câu hỏi</Text>
+            <Text style={styles.headerText}>
+              {isEnglishEnabled ? "Question" : "Câu hỏi"}
+            </Text>
             <View style={styles.progessBarContainer}>
               <ProgressBar progress={progress} width={300} />
               <Text style={styles.progressTextStyle}>{progressText}</Text>
@@ -196,7 +202,9 @@ const DetailExamResultScreen = ({
                   style={styles.submitButton}
                   onPress={handleGradeTest}
                 >
-                  <Text style={styles.submitText}>Hoàn thành</Text>
+                  <Text style={styles.submitText}>
+                    {isEnglishEnabled ? "Submit" : "Hoàn thành"}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -236,9 +244,13 @@ const DetailExamResultScreen = ({
                 ]}
               >
                 <Text style={styles.notificationText}>
-                  {`Câu trả lời ${
-                    isCorrect === "incorrect" ? "không " : ""
-                  }chính xác`}
+                  {isEnglishEnabled
+                    ? `The answer is ${
+                        isCorrect === "incorrect" ? "not " : ""
+                      }correct`
+                    : `Câu trả lời ${
+                        isCorrect === "incorrect" ? "không " : ""
+                      }chính xác`}
                 </Text>
               </View>
             )}
@@ -247,7 +259,9 @@ const DetailExamResultScreen = ({
       case "text":
         return (
           <View style={[styles.questionContainer]}>
-            <Text style={styles.headerText}>Câu hỏi</Text>
+            <Text style={styles.headerText}>
+              {isEnglishEnabled ? `Question` : "Câu hỏi"}
+            </Text>
             <View style={styles.progessBarContainer}>
               <ProgressBar progress={progress} width={300} />
               <Text style={styles.progressTextStyle}>{progressText}</Text>
@@ -264,14 +278,18 @@ const DetailExamResultScreen = ({
                   style={styles.submitButton}
                   onPress={handleGradeTest}
                 >
-                  <Text style={styles.submitText}>Hoàn thành</Text>
+                  <Text style={styles.submitText}>
+                    {isEnglishEnabled ? "Submit" : "Hoàn thành"}
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{item.question}</Text>
             </View>
-            <Text style={styles.answerTitleTextStyle}>Trả lời</Text>
+            <Text style={styles.answerTitleTextStyle}>
+              {isEnglishEnabled ? "Answer" : "Trả lời"}
+            </Text>
 
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{userAnswer || " "}</Text>
@@ -284,9 +302,13 @@ const DetailExamResultScreen = ({
                 ]}
               >
                 <Text style={styles.notificationText}>
-                  {`Câu trả lời ${
-                    isCorrect === "incorrect" ? "không " : ""
-                  }chính xác`}
+                  {isEnglishEnabled
+                    ? `The answer is ${
+                        isCorrect === "incorrect" ? "not " : ""
+                      }correct`
+                    : `Câu trả lời ${
+                        isCorrect === "incorrect" ? "không " : ""
+                      }chính xác`}
                 </Text>
               </View>
             )}
@@ -299,7 +321,9 @@ const DetailExamResultScreen = ({
                   ]}
                   onPress={() => handleGradeOption(item.id, true)}
                 >
-                  <Text style={styles.optionText}>Đúng</Text>
+                  <Text style={styles.optionText}>
+                    {isEnglishEnabled ? "Correct" : "Đúng"}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
@@ -308,7 +332,9 @@ const DetailExamResultScreen = ({
                   ]}
                   onPress={() => handleGradeOption(item.id, false)}
                 >
-                  <Text style={styles.optionText}>Sai</Text>
+                  <Text style={styles.optionText}>
+                    {isEnglishEnabled ? "Incorrect" : "Sai"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -358,7 +384,9 @@ const DetailExamResultScreen = ({
           disabled={currentIndex === 0}
         >
           <View style={styles.nextContainer}>
-            <Text style={styles.navButtonText}>{"Trước"}</Text>
+            <Text style={styles.navButtonText}>
+              {isEnglishEnabled ? "Previous" : "Trước"}
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -368,7 +396,9 @@ const DetailExamResultScreen = ({
           disabled={currentIndex === questions.length - 1}
         >
           <View style={styles.nextContainer}>
-            <Text style={styles.navButtonText}>{"Sau"}</Text>
+            <Text style={styles.navButtonText}>
+              {isEnglishEnabled ? "Next" : "Sau"}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>

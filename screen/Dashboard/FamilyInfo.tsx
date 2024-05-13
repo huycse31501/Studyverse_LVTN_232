@@ -36,7 +36,6 @@ interface FamilyInfoScreenProps {
 
 let host = Constants?.expoConfig?.extra?.host;
 
-
 const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
   const [headerState, setHeaderState] = useState<"List" | "WaitList">("List");
 
@@ -47,6 +46,10 @@ const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
   const waitList = useSelector((state: RootState) => state.waitList.waitList);
   const familyMemberList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
+  );
+
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
   );
 
   const dispatch = useDispatch<AppDispatch>();
@@ -124,6 +127,7 @@ const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
               onListPress={() => {
                 setHeaderState("List");
               }}
+              onEnglish={isEnglishEnabled}
             />
           </View>
           {headerState === "List" ? (
@@ -139,13 +143,15 @@ const FamilyInfoScreen = ({ route, navigation }: FamilyInfoScreenProps) => {
                         />
                         <View style={styles.textContainer}>
                           <Text style={styles.textInfo}>
-                            Họ và tên: {member.fullName}
+                            {isEnglishEnabled ? "Full name" : "Họ và tên"}:{" "}
+                            {member.fullName}
                           </Text>
                           <Text style={styles.textInfo}>
-                            Biệt danh: {member.nickName}
+                            {isEnglishEnabled ? "Nick name" : "Biệt danh"}:{" "}
+                            {member.nickName}
                           </Text>
                           <Text style={styles.textInfo}>
-                            Ngày sinh: {member.birthday}
+                            {isEnglishEnabled ? "Date of Birth" : "Ngày sinh"}: {member.birthday}
                           </Text>
                         </View>
                       </View>

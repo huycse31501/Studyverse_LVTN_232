@@ -19,6 +19,9 @@ import isDateValid from "../../utils/checkValidDate";
 import AuthButton from "../../component/signin-signup/AuthButton";
 import calculateAge from "../../utils/calculateAge";
 import Constants from "expo-constants";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import LanguageDropdown from "../../component/shared/languageDropdown";
 
 type OptionType = "parent" | "children";
 
@@ -179,7 +182,9 @@ const SignUp = () => {
       }
     }
   }
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
       <KeyboardAvoidingView
@@ -196,12 +201,15 @@ const SignUp = () => {
           enableAutomaticScroll={true}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.languageContainer}>
+            <LanguageDropdown />
+          </View>
           <Image
             source={require("../../assets/images/signIn-signUp/appLogo.png")}
             style={styles.logo}
           />
           <View style={styles.authButton}>
-            <AuthButton type="SignUp" />
+            <AuthButton type="SignUp" onEnglish={isEnglishEnabled}/>
           </View>
           <View style={styles.inputField}>
             <TextInputField
@@ -214,7 +222,7 @@ const SignUp = () => {
               }}
             />
             <PasswordInputField
-              placeHolder="Mật khẩu"
+              placeHolder={isEnglishEnabled ? "Password" : "Mật khẩu"}
               isValid={inputValidation.isPasswordValid}
               value={inputs.password.value}
               textInputConfig={{
@@ -222,7 +230,7 @@ const SignUp = () => {
               }}
             />
             <TextInputField
-              placeHolder="Họ"
+              placeHolder={isEnglishEnabled ? "Last name" :"Họ"}
               required
               value={inputs.lastName.value}
               isValid={inputValidation.isLastNameValid}
@@ -231,7 +239,7 @@ const SignUp = () => {
               }}
             />
             <TextInputField
-              placeHolder="Tên"
+              placeHolder={isEnglishEnabled ? "First name" :"Tên"}
               required
               isValid={inputValidation.isFirstNameValid}
               value={inputs.firstName.value}
@@ -241,7 +249,7 @@ const SignUp = () => {
             />
             <DateInputField
               required
-              placeHolder="Ngày sinh"
+              placeHolder={isEnglishEnabled ? "Date of birth" :"Ngày sinh"}
               isValid={inputValidation.isDOBValid}
               dateStr={inputs.dob.value}
               signUpType={curSignUpType}
@@ -249,9 +257,9 @@ const SignUp = () => {
                 onChangeText: inputChangedHandler.bind(this, "dob"),
               }}
             />
-            <OptionSelector onOptionChange={handleOptionChange} />
+            <OptionSelector onOptionChange={handleOptionChange} onEnglish={isEnglishEnabled} />
             <TextInputField
-              placeHolder="Số điện thoại"
+              placeHolder={isEnglishEnabled ? "Phone number" :"Số điện thoại"}
               required={false}
               value={inputs.phoneNumber.value}
               isValid={inputValidation.isPhoneNumberValid}
@@ -261,7 +269,7 @@ const SignUp = () => {
             />
           </View>
           <View style={styles.applyButton}>
-            <ApplyButton label="ĐĂNG KÝ" onPress={submitHandler} />
+            <ApplyButton label={isEnglishEnabled ? "SIGN UP" :"ĐĂNG KÝ"} onPress={submitHandler} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>
@@ -270,6 +278,11 @@ const SignUp = () => {
 };
 
 const styles = StyleSheet.create({
+  languageContainer: {
+    width: "30%",
+    alignSelf: "flex-end",
+    marginBottom: 15,
+  },
   logo: {
     resizeMode: "contain",
     alignSelf: "center",

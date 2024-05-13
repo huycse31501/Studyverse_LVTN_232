@@ -9,7 +9,10 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { convertSubjectToId, convertSubjectsToIds } from "../shared/constants/convertSubjectToId";
+import {
+  convertSubjectToId,
+  convertSubjectsToIds,
+} from "../shared/constants/convertSubjectToId";
 import { isEnabled } from "react-native/Libraries/Performance/Systrace";
 
 const MathIcon = require("../../assets/images/courseLogo/Math.png");
@@ -23,6 +26,7 @@ interface SubjectListProps {
   selectedMemberId: number | string | undefined;
   studyPackage?: any;
   isEnabled: boolean;
+  onEnglish?: any;
 }
 
 type StudyDetailsNavigationProp = StackNavigationProp<{
@@ -35,22 +39,25 @@ type StudyDetailsNavigationProp = StackNavigationProp<{
   };
 }>;
 const subjects = [
-  { key: "1", name: "Toán", logo: MathIcon },
+  { key: "1", name: "Toán", alternative: "Math", logo: MathIcon },
   {
     key: "2",
     name: "Ngữ văn",
+    alternative: "Literature",
     logo: LiteratureIcon,
   },
-  { key: "3", name: "Anh văn", logo: EnglishIcon },
-  { key: "4", name: "Vật lý", logo: PhysicsIcon },
+  { key: "3", name: "Anh văn", alternative: "English", logo: EnglishIcon },
+  { key: "4", name: "Vật lý", alternative: "Physics", logo: PhysicsIcon },
   {
     key: "5",
     name: "Hóa học",
+    alternative: "Chemistry",
     logo: ChemistryIcon,
   },
   {
     key: "6",
     name: "Sinh học",
+    alternative: "Biology",
     logo: BiologyIcon,
   },
 ];
@@ -66,7 +73,8 @@ const getBackgroundColor = (key: string) => {
 const SubjectList: React.FC<SubjectListProps> = ({
   selectedMemberId,
   studyPackage,
-  isEnabled
+  isEnabled,
+  onEnglish,
 }) => {
   const navigation = useNavigation<StudyDetailsNavigationProp>();
   return (
@@ -76,8 +84,7 @@ const SubjectList: React.FC<SubjectListProps> = ({
           style={[
             styles.container,
             { backgroundColor: getBackgroundColor(String(index)) },
-          ]
-}
+          ]}
           key={index}
           disabled={!isEnabled}
           onPress={() => {
@@ -89,14 +96,17 @@ const SubjectList: React.FC<SubjectListProps> = ({
                 logoType: item.logo,
                 color: getBackgroundColor(String(index)),
                 userId: Number(selectedMemberId),
-                courseInfo: studyPackage?.studyPlanInfo[convertSubjectToId[item.name]]
+                courseInfo:
+                  studyPackage?.studyPlanInfo[convertSubjectToId[item.name]],
               },
             });
           }}
         >
           <View style={styles.contentContainer}>
             <Image source={item.logo} style={styles.iconStyles} />
-            <Text style={styles.subjectText}>{item.name}</Text>
+            <Text style={styles.subjectText}>
+              {onEnglish ? item.alternative : item.name}
+            </Text>
           </View>
         </TouchableOpacity>
       ))}

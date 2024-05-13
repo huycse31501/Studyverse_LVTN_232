@@ -54,6 +54,11 @@ const UserInformationScreen = () => {
   let port = Constants?.expoConfig?.extra?.port;
 
   const dispatch = useDispatch<AppDispatch>();
+
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+
   const user = useSelector((state: RootState) => state.user.user);
 
   const navigation = useNavigation<UserInformationScreenProp>();
@@ -306,7 +311,9 @@ const UserInformationScreen = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Thông tin cá nhân</Text>
+            <Text style={styles.title}>
+              {isEnglishEnabled ? "Personal Information" : "Thông tin cá nhân"}
+            </Text>
           </View>
           <View style={styles.userAvatarContainer}>
             <View style={styles.card}>
@@ -320,7 +327,9 @@ const UserInformationScreen = () => {
           </View>
           <View style={styles.textContainer}>
             <View style={styles.informationContainer}>
-              <Text style={styles.textInfo}>Họ: {user?.firstName}</Text>
+              <Text style={styles.textInfo}>
+                {isEnglishEnabled ? "Last name" : "Họ"}: {user?.firstName}
+              </Text>
               <TouchableOpacity
                 style={styles.editIcon}
                 onPress={() => {
@@ -335,7 +344,9 @@ const UserInformationScreen = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.informationContainer}>
-              <Text style={styles.textInfo}>Tên: {user?.lastName}</Text>
+              <Text style={styles.textInfo}>
+                {isEnglishEnabled ? "First name" : "Tên"}: {user?.lastName}
+              </Text>
               <TouchableOpacity
                 style={styles.editIcon}
                 onPress={() => {
@@ -350,7 +361,9 @@ const UserInformationScreen = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.informationContainer}>
-              <Text style={styles.textInfo}>Biệt danh: {user?.nickName}</Text>
+              <Text style={styles.textInfo}>
+                {isEnglishEnabled ? "Nickname" : "Biệt danh"}: {user?.nickName}
+              </Text>
               <TouchableOpacity
                 style={styles.editIcon}
                 onPress={() => {
@@ -366,7 +379,8 @@ const UserInformationScreen = () => {
             </View>
             <View style={styles.informationContainer}>
               <Text style={styles.textInfo}>
-                Số điện thoại: {user?.phoneNumber}
+                {isEnglishEnabled ? "Phone number" : "Số điện thoại"}:{" "}
+                {user?.phoneNumber}
               </Text>
               <TouchableOpacity
                 style={styles.editIcon}
@@ -383,7 +397,7 @@ const UserInformationScreen = () => {
             </View>
             <View style={styles.informationContainer}>
               <Text style={styles.textInfo}>
-                Ngày sinh:{" "}
+                {isEnglishEnabled ? "Date of birth" : "Ngày sinh"}:{" "}
                 {user?.dateOfBirth
                   ? formatDateInUserInformation(user?.dateOfBirth)
                   : "Ngày sinh chưa xác định"}
@@ -492,10 +506,18 @@ const UserInformationScreen = () => {
                     style={styles.closeIcon}
                   />
                 </TouchableOpacity>
-                <Text style={styles.modalIntroText}>Thay đổi thông tin</Text>
+                <Text style={styles.modalIntroText}>
+                  {isEnglishEnabled
+                    ? "Change information"
+                    : "Thay đổi thông tin"}
+                </Text>
                 <TextInput
                   style={styles.modalTextInput}
-                  placeholder={`Thay đổi ${curInfoToChangeType}`}
+                  placeholder={
+                    isEnglishEnabled
+                      ? `New Information`
+                      : `Thay đổi ${curInfoToChangeType}`
+                  }
                   value={infoToChange}
                   onChangeText={setInfoToChange}
                   keyboardType={
@@ -506,7 +528,7 @@ const UserInformationScreen = () => {
                 />
                 <ApplyButton
                   extraStyle={styles.modalButton}
-                  label="XÁC NHẬN"
+                  label={isEnglishEnabled ? "CONFIRM" :"XÁC NHẬN"}
                   onPress={handleSubmitChangeInfo}
                 />
               </View>

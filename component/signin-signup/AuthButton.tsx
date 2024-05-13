@@ -9,7 +9,7 @@ type AuthNavigationProp = StackNavigationProp<{
   SignUp: undefined;
 }>;
 
-const AuthButton = ({ type }: AuthButtonProps) => {
+const AuthButton = ({ type, onEnglish }: AuthButtonProps) => {
   const navigation = useNavigation<AuthNavigationProp>();
   return (
     <View style={styles.container}>
@@ -21,7 +21,7 @@ const AuthButton = ({ type }: AuthButtonProps) => {
           <Text
             style={type === "SignUp" ? [styles.text, styles.bold] : styles.text}
           >
-            ĐĂNG KÝ
+            {onEnglish ? "SIGN UP" :"ĐĂNG KÝ"}
           </Text>
           {type === "SignUp" && <View style={styles.underline} />}
         </View>
@@ -34,7 +34,7 @@ const AuthButton = ({ type }: AuthButtonProps) => {
           <Text
             style={type === "SignIn" ? [styles.text, styles.bold] : styles.text}
           >
-            ĐĂNG NHẬP
+            {onEnglish ? "SIGN IN" :"ĐĂNG NHẬP"}
           </Text>
           {type === "SignIn" && <View style={styles.underline} />}
         </View>

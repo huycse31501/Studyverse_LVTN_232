@@ -75,6 +75,12 @@ const NotificationManager = () => {
       return;
     }
 
+    if (typeof event.remindTime !== 'number' || event.remindTime <= 0) {
+      console.log("No valid remindTime provided for event:", event.name);
+      return;
+    }
+    
+
     const gmtPlus7Offset = '+07:00';
     const eventStartTimeWithZone = event.timeStart.includes('Z') || event.timeStart.includes('+') ? event.timeStart : `${event.timeStart}${gmtPlus7Offset}`;
     const eventEndTimeWithZone = event.timeEnd.includes('Z') || event.timeEnd.includes('+') ? event.timeEnd : `${event.timeEnd}${gmtPlus7Offset}`;
@@ -94,7 +100,7 @@ const NotificationManager = () => {
     const remindTime = typeof event.remindTime === 'number' && event.remindTime > 0 ? event.remindTime : 0;
     let notificationTime = subMinutes(eventStartTime, remindTime);
 
-    if (currentTime > notificationTime && currentTime < eventEndTime) {
+    if (currentTime < notificationTime && notificationTime < eventEndTime) {
       notificationTime = currentTime; 
     }
 

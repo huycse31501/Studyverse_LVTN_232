@@ -25,6 +25,8 @@ import ApplyButton from "../../component/shared/ApplyButton";
 import { formatTimeToHHMMSS } from "../../utils/formatTimeFromSecondToHHMMSS";
 import { convertTimeToSeconds } from "../../utils/convertTimeToSecond";
 import { Ionicons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 export type Option = {
   content: string;
@@ -77,6 +79,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState("");
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   // console.log(userId)
   // console.log(questions, time)
   const totalExamTimeInSeconds = useRef(getSecondsFromTime(time));
@@ -276,7 +281,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
       case "multiple-choice":
         return (
           <View style={[styles.questionContainer]}>
-            <Text style={styles.headerText}>Câu hỏi</Text>
+            <Text style={styles.headerText}>
+              {isEnglishEnabled ? "Question" : "Câu hỏi"}
+            </Text>
             <View style={styles.progessBarContainer}>
               <ProgressBar progress={progress} width={300} />
               <Text style={styles.progressTextStyle}>{progressText}</Text>
@@ -292,7 +299,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
                 style={styles.submitButton}
                 onPress={handleSubmitTest}
               >
-                <Text style={styles.submitText}>Nộp bài</Text>
+                <Text style={styles.submitText}>
+                  {isEnglishEnabled ? "Submit" : "Nộp bài"}
+                </Text>
               </TouchableOpacity>
             </View>
             <View style={styles.imageContainer}>
@@ -337,7 +346,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
       case "text":
         return (
           <View style={[styles.questionContainer]}>
-            <Text style={styles.headerText}>Câu hỏi</Text>
+            <Text style={styles.headerText}>
+              {isEnglishEnabled ? "Question" : "Câu hỏi"}
+            </Text>
             <View style={styles.progessBarContainer}>
               <ProgressBar progress={progress} width={300} />
               <Text style={styles.progressTextStyle}>{progressText}</Text>
@@ -353,11 +364,15 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
                 style={styles.submitButton}
                 onPress={handleSubmitTest}
               >
-                <Text style={styles.submitText}>Nộp bài</Text>
+                <Text style={styles.submitText}>
+                  {isEnglishEnabled ? "Submit" : "Nộp bài"}
+                </Text>
               </TouchableOpacity>
             </View>
             <View style={styles.imageContainer}>
-              <Text style={styles.answerTitleTextStyle}>Ảnh minh họa: </Text>
+              <Text style={styles.answerTitleTextStyle}>
+                {isEnglishEnabled ? "Image" : "Ảnh minh họa: "}
+              </Text>
               <TouchableOpacity
                 onPress={() => {
                   setImageUri(item.image);
@@ -374,14 +389,20 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
             <View style={styles.textNoticeContainer}>
               <Text style={styles.noticeInput}>{item.question}</Text>
             </View>
-            <Text style={styles.answerTitleTextStyle}>Trả lời</Text>
+            <Text style={styles.answerTitleTextStyle}>
+              {isEnglishEnabled ? "Answer" : "Trả lời"}
+            </Text>
 
             <View style={styles.textNoticeContainer}>
               <TextInput
                 value={questionChoice?.answer || ""}
                 onChangeText={(text) => handleTextChange(item.id, text)}
                 style={styles.noticeInput}
-                placeholder="Điền câu trả lời tại đây"
+                placeholder={
+                  isEnglishEnabled
+                    ? "Fill your answer here"
+                    : "Điền câu trả lời tại đây"
+                }
                 multiline={true}
                 keyboardType="ascii-capable"
               />
@@ -461,7 +482,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           disabled={currentIndex === 0}
         >
           <View style={styles.nextContainer}>
-            <Text style={styles.navButtonText}>{"Trước"}</Text>
+            <Text style={styles.navButtonText}>
+              {isEnglishEnabled ? "Previous" : "Trước"}
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -471,7 +494,9 @@ const DoExamScreen = ({ route, navigation }: DoExamScreenProps) => {
           disabled={currentIndex === questions.length - 1}
         >
           <View style={styles.nextContainer}>
-            <Text style={styles.navButtonText}>{"Sau"}</Text>
+            <Text style={styles.navButtonText}>
+              {isEnglishEnabled ? "Next" : "Sau"}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>

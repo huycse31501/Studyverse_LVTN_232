@@ -70,6 +70,8 @@ export interface SetUserStatusAction {
   payload: string;
 }
 
+export const TOGGLE_ENGLISH = "TOGGLE_ENGLISH";
+
 export type UserActionTypes =
   | SetUserAction
   | LogoutAction

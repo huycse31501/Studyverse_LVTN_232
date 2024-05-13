@@ -30,6 +30,7 @@ import ToggleSwitch from "toggle-switch-react-native";
 import Constants from "expo-constants";
 import { isEqual } from "lodash";
 import ExamToLinkMilestoneList from "../../component/studyPlanRelated/examToLinkList";
+import { translateSubject } from "../../utils/subjectTranslator";
 
 type AddMoreMilestoneRouteProp = RouteProp<
   RootStackParamList,
@@ -275,6 +276,10 @@ const AddMoreMilestoneScreen = ({
     }
   };
 
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -307,9 +312,9 @@ const AddMoreMilestoneScreen = ({
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Tạo cột mốc mới</Text>
+          <Text style={styles.headerText}>{isEnglishEnabled ? "Create a new milestone" : "Tạo cột mốc mới"}</Text>
           <View>
-            <Text style={styles.inputTitleText}>Tên cột mốc</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Milestone's name" :"Tên cột mốc"}</Text>
             <BlackBorderTextInputField
               placeHolder="Cột mốc học tập"
               isValid
@@ -321,11 +326,11 @@ const AddMoreMilestoneScreen = ({
             />
           </View>
           <View>
-            <Text style={styles.inputTitleText}>Môn học</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Subject" :"Môn học"}</Text>
             <BlackBorderTextInputField
               placeHolder=""
               isValid
-              value={studyPackage?.courseName}
+              value={isEnglishEnabled ? translateSubject(studyPackage?.coursename) :studyPackage?.courseName}
               textInputConfig={{
                 editable: false,
               }}
@@ -339,13 +344,13 @@ const AddMoreMilestoneScreen = ({
               },
             ]}
           >
-            Thời gian bắt đầu cột mốc
+            {isEnglishEnabled ? "Milestone's start time" :"Thời gian bắt đầu cột mốc"}
           </Text>
           <View style={styles.MilestoneDateContainer}>
             <DateInputField
               required
               isValid
-              placeHolder="Ngày bắt đầu"
+              placeHolder={isEnglishEnabled ? "Start date" :"Ngày bắt đầu"}
               dateStr={inputs.MilestoneStartDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
@@ -369,7 +374,7 @@ const AddMoreMilestoneScreen = ({
             <DateInputField
               required
               isValid
-              placeHolder="Ngày kết thúc"
+              placeHolder={isEnglishEnabled ? "End date" :"Ngày kết thúc"}
               dateStr={inputs.MilestoneEndDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
@@ -379,19 +384,19 @@ const AddMoreMilestoneScreen = ({
               }}
             />
           </View>
-          <Text style={styles.inputTitleText}>Nội dung cột mốc</Text>
+          <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Note" :"Nội dung cột mốc"}</Text>
 
           <View style={styles.textNoticeContainer}>
             <TextInput
               value={inputs?.noteContent?.value || ""}
               onChangeText={inputChangedHandler.bind(this, "noteContent")}
               style={styles.noticeInput}
-              placeholder="Điền nội dung cột mốc"
+              placeholder={isEnglishEnabled ? "Note" :"Điền nội dung cột mốc"}
             />
           </View>
 
           <View style={styles.linkTextContainer}>
-            <Text style={styles.inputTitleText}>Liên kết bài kiểm tra</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Link to an exam" :"Liên kết bài kiểm tra"}</Text>
 
             <View style={styles.toggleContainer}>
               <ToggleSwitch
@@ -414,7 +419,7 @@ const AddMoreMilestoneScreen = ({
             />
           )}
           <View style={styles.nextButtonContainer}>
-            <ApplyButton label="Tạo cột mốc" onPress={continueHandle} />
+            <ApplyButton label={isEnglishEnabled ? "Create milestone" :"Tạo cột mốc"} onPress={continueHandle} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

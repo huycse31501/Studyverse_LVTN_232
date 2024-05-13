@@ -29,6 +29,7 @@ import ToggleSwitch from "toggle-switch-react-native";
 import Constants from "expo-constants";
 import { isEqual } from "lodash";
 import ExamToLinkMilestoneList from "../../component/studyPlanRelated/examToLinkList";
+import { translateSubject } from "../../utils/subjectTranslator";
 
 type CreateMilestoneRouteProp = RouteProp<
   RootStackParamList,
@@ -71,7 +72,9 @@ const CreateMilestoneScreen = ({
   const { userId, tagUser, studyPackage } = route.params;
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const user = useSelector((state: RootState) => state.user.user);
 
   const [inputs, setInputs] = useState({
@@ -285,11 +288,11 @@ const CreateMilestoneScreen = ({
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Tạo cột mốc mới</Text>
+          <Text style={styles.headerText}>{isEnglishEnabled ? "Create a new milestone" : "Tạo cột mốc mới"}</Text>
           <View>
-            <Text style={styles.inputTitleText}>Tên cột mốc</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Milestone's name" :"Tên cột mốc"}</Text>
             <BlackBorderTextInputField
-              placeHolder="Cột mốc học tập"
+              placeHolder={isEnglishEnabled ? "Milestone" :"Cột mốc học tập"}
               isValid
               required
               value={inputs.MilestoneName.value}
@@ -299,11 +302,11 @@ const CreateMilestoneScreen = ({
             />
           </View>
           <View>
-            <Text style={styles.inputTitleText}>Môn học</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Subject" :"Môn học"}</Text>
             <BlackBorderTextInputField
               placeHolder=""
               isValid
-              value={studyPackage?.courseName}
+              value={isEnglishEnabled ? translateSubject(studyPackage?.coursename) : studyPackage?.courseName}
               textInputConfig={{
                 editable: false,
               }}
@@ -317,13 +320,13 @@ const CreateMilestoneScreen = ({
               },
             ]}
           >
-            Thời gian bắt đầu cột mốc
+            {isEnglishEnabled ? "Milestone's start time" :"Thời gian bắt đầu cột mốc"}
           </Text>
           <View style={styles.MilestoneDateContainer}>
             <DateInputField
               required
               isValid
-              placeHolder="Ngày bắt đầu"
+              placeHolder={isEnglishEnabled ? "Start time" :"Ngày bắt đầu"}
               dateStr={inputs.MilestoneStartDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
@@ -341,13 +344,13 @@ const CreateMilestoneScreen = ({
               },
             ]}
           >
-            Thời gian kết thúc cột mốc
+            {isEnglishEnabled ? "Milestone's end time" :"Thời gian kết thúc cột mốc"}
           </Text>
           <View style={styles.MilestoneDateContainer}>
             <DateInputField
               required
               isValid
-              placeHolder="Ngày kết thúc"
+              placeHolder={isEnglishEnabled ? "End time" :"Ngày kết thúc"}
               dateStr={inputs.MilestoneEndDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
@@ -357,19 +360,19 @@ const CreateMilestoneScreen = ({
               }}
             />
           </View>
-          <Text style={styles.inputTitleText}>Nội dung cột mốc</Text>
+          <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Milestone's note" :"Nội dung cột mốc"}</Text>
 
           <View style={styles.textNoticeContainer}>
             <TextInput
               value={inputs?.noteContent?.value || ""}
               onChangeText={inputChangedHandler.bind(this, "noteContent")}
               style={styles.noticeInput}
-              placeholder="Điền nội dung cột mốc"
+              placeholder={isEnglishEnabled ? "Note" :"Điền nội dung cột mốc"}
             />
           </View>
 
           <View style={styles.linkTextContainer}>
-            <Text style={styles.inputTitleText}>Liên kết bài kiểm tra</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Link milestone to an exam" :"Liên kết bài kiểm tra"}</Text>
 
             <View style={styles.toggleContainer}>
               <ToggleSwitch
@@ -392,7 +395,7 @@ const CreateMilestoneScreen = ({
             />
           )}
           <View style={styles.nextButtonContainer}>
-            <ApplyButton label="Tạo cột mốc" onPress={continueHandle} />
+            <ApplyButton label={isEnglishEnabled ? "Create milestone" :"Tạo cột mốc"} onPress={continueHandle} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

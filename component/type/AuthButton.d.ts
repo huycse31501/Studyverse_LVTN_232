@@ -1,5 +1,6 @@
 interface AuthButtonProps {
-    type: 'SignIn' | 'SignUp';
-};
+  type: "SignIn" | "SignUp";
+  onEnglish?: any;
+}
 
 export default AuthButtonProps;

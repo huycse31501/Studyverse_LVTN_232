@@ -19,6 +19,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
 import OTPInput from "../../component/shared/OTPInput";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 type OTPScreenNavigationProp = StackNavigationProp<{
   SignIn: undefined;
@@ -28,7 +30,9 @@ type OTPScreenNavigationProp = StackNavigationProp<{
 
 const OTPScreen = () => {
   const navigation = useNavigation<OTPScreenNavigationProp>();
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const [OTPinput, setOTPInput] = useState(["", "", "", ""] as [
     string,
     string,
@@ -65,40 +69,40 @@ const OTPScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <RedTextHeader text="ĐIỀN MÃ XÁC THỰC" />
+            <RedTextHeader text={isEnglishEnabled ? "VALIDATION CODE" :"ĐIỀN MÃ XÁC THỰC"} />
           </View>
           <View style={styles.OTPContainer}>
             <OTPInput input={OTPinput} onInputChange={handleInputChange} />
           </View>
           <View style={styles.resendOTP}>
-            <Text style={styles.resendOTPText}>Không nhận được mã?</Text>
+            <Text style={styles.resendOTPText}>{isEnglishEnabled ? "Did not receive OTP yet?" :"Không nhận được mã?"}</Text>
             <TouchableTextComponent
-              text="Gửi lại"
+              text={isEnglishEnabled ? "Resend" :"Gửi lại"}
               onPress={() => Alert.alert("Handle gửi lại OTP")}
             />
           </View>
           <View style={styles.sendOTPButton}>
             <ApplyButton
-              label="XÁC THỰC"
+              label={isEnglishEnabled ? "SUBMIT" :"XÁC THỰC"}
               extraStyle={styles.OTPButton}
               onPress={submitHandler}
             />
           </View>
           <View style={styles.askToSignUp}>
-            <Text style={styles.askToSignUpText}>Bạn chưa có tài khoản?</Text>
+          <Text style={styles.askToSignUpText}>{isEnglishEnabled ? "You have no account yet?" :"Bạn chưa có tài khoản?"}</Text>
           </View>
           <View style={styles.backToSignUpContainer}>
             <ApplyButton
-              label="ĐĂNG KÝ"
+              label={isEnglishEnabled ? "SIGN UP" :"ĐĂNG KÝ"}
               extraStyle={styles.backToSignUpButton}
               extraTextStyle={styles.backToSignUpButtonTextStyle}
               onPress={() => navigation.navigate("SignUp")}
             />
           </View>
           <View style={styles.backToSignIn}>
-            <Text style={styles.backToSignInText}>Trở lại</Text>
+          <Text style={styles.backToSignInText}>{isEnglishEnabled ? "Back to" :"Trở lại"}</Text>
             <TouchableTextComponent
-              text="Đăng nhập"
+              text={isEnglishEnabled ? "Sign In" :"Đăng nhập"}
               onPress={() => navigation.navigate("SignIn")}
             />
           </View>

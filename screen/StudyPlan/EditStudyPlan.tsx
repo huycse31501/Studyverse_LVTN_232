@@ -33,6 +33,7 @@ import {
 } from "../../component/shared/constants/convertSubjectToId";
 import Constants from "expo-constants";
 import { formatDate } from "../../utils/formatDate";
+import { translateSubject } from "../../utils/subjectTranslator";
 
 type EditStudyPlanRouteProp = RouteProp<
   RootStackParamList,
@@ -105,6 +106,10 @@ const EditStudyPlanScreen = ({
       inputs.studyPlanEndDate.value
     ),
   });
+
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
 
   useEffect(() => {
     const updatedValidation = {
@@ -259,11 +264,11 @@ const EditStudyPlanScreen = ({
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerText}>Chỉnh sửa kế hoạch</Text>
+          <Text style={styles.headerText}>{isEnglishEnabled ? "Edit study plan" : "Chỉnh sửa kế hoạch"}</Text>
           <View>
-            <Text style={styles.inputTitleText}>Tên kế hoạch</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Study plan's name" :"Tên kế hoạch"}</Text>
             <BlackBorderTextInputField
-              placeHolder="Kế hoạch học tập"
+              placeHolder={isEnglishEnabled ? "Studyplan" :"Kế hoạch học tập"}
               isValid
               required
               value={inputs.studyPlanName.value}
@@ -273,11 +278,11 @@ const EditStudyPlanScreen = ({
             />
           </View>
           <View>
-            <Text style={styles.inputTitleText}>Môn học</Text>
+            <Text style={styles.inputTitleText}>{isEnglishEnabled ? "Subject" :"Môn học"}</Text>
             <BlackBorderTextInputField
               placeHolder=""
               isValid
-              value={studyPackage?.courseName}
+              value={isEnglishEnabled ? translateSubject(studyPackage?.courseName) :studyPackage?.courseName}
               textInputConfig={{
                 editable: false,
               }}
@@ -291,13 +296,13 @@ const EditStudyPlanScreen = ({
               },
             ]}
           >
-            Thời gian bắt đầu kế hoạch
+            {isEnglishEnabled ? "Study plan's start date" :"Thời gian bắt đầu kế hoạch"}
           </Text>
           <View style={styles.studyPlanDateContainer}>
             <DateInputField
               required
               isValid
-              placeHolder="Ngày bắt đầu"
+              placeHolder={isEnglishEnabled ? "Start date" :"Ngày bắt đầu"}
               dateStr={inputs.studyPlanStartDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
@@ -315,13 +320,13 @@ const EditStudyPlanScreen = ({
               },
             ]}
           >
-            Thời gian kết thúc kế hoạch
+            {isEnglishEnabled ? "Study plan's end date" :"Thời gian kết thúc kế hoạch"}
           </Text>
           <View style={styles.studyPlanDateContainer}>
             <DateInputField
               required
               isValid
-              placeHolder="Ngày kết thúc"
+              placeHolder={isEnglishEnabled ? "End date" :"Ngày kết thúc"}
               dateStr={inputs.studyPlanEndDate.value}
               textInputConfig={{
                 onChangeText: inputChangedHandler.bind(
@@ -331,7 +336,7 @@ const EditStudyPlanScreen = ({
               }}
             />
           </View>
-          <Text style={styles.noteText}>Thành viên tham gia kế hoạch</Text>
+          <Text style={styles.noteText}>{isEnglishEnabled ? "Tag family member" :"Thành viên tham gia kế hoạch"}</Text>
 
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
@@ -340,7 +345,7 @@ const EditStudyPlanScreen = ({
           </View>
 
           <View style={styles.nextButtonContainer}>
-            <ApplyButton label="Cập nhật" onPress={continueHandle} />
+            <ApplyButton label={isEnglishEnabled ? "Edit" :"Cập nhật"} onPress={continueHandle} />
           </View>
         </KeyboardAwareScrollView>
       </KeyboardAvoidingView>

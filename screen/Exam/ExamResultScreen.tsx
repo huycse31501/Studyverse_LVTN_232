@@ -18,6 +18,8 @@ import {
   getExamStatusForHistory,
   getExamStatusForHistoryForDashboard,
 } from "../../utils/examStatus";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 type ExamResultRouteProp = RouteProp<RootStackParamList, "ExamResultScreen">;
 
@@ -50,7 +52,9 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
   const percentage = (correctAnswers / totalQuestions) * 100;
   const color =
     pass === "pass" ? "#9cef76" : pass === "fail" ? "#f3716b" : "#c9e8f4";
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -75,7 +79,9 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.resultText}>Hoàn thành</Text>
+      <Text style={styles.resultText}>
+        {isEnglishEnabled ? "Done" : "Hoàn thành"}
+      </Text>
       {pass !== "grading" ? (
         <>
           <View style={styles.circleResultContainer}>
@@ -88,30 +94,44 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
             />
           </View>
           <Text style={styles.testResult}>
-            {pass === "pass" ? "Đạt" : "Chưa đạt"}
+            {pass === "pass"
+              ? isEnglishEnabled
+                ? "Passed"
+                : "Đạt"
+              : isEnglishEnabled
+              ? "Failed"
+              : "Chưa đạt"}
           </Text>
           <View style={styles.detailsContainer}>
             <View style={styles.scoreContainer}>
               <Text
                 style={styles.resultDetailText}
               >{`${correctAnswers}/${totalQuestions}`}</Text>
-              <Text style={styles.resultDetailTextName}>Kết quả</Text>
+              <Text style={styles.resultDetailTextName}>
+                {isEnglishEnabled ? "Result" : "Kết quả"}
+              </Text>
             </View>
             <View style={styles.scoreContainer}>
               <Text style={styles.resultDetailText}>{`${timeTaken}`}</Text>
-              <Text style={styles.resultDetailTextName}>Thời gian</Text>
+              <Text style={styles.resultDetailTextName}>
+                {isEnglishEnabled ? "Time" : "Thời gian"}
+              </Text>
             </View>
           </View>
         </>
       ) : (
         <>
-          <Text style={styles.nextTimeText}>Bài kiểm tra sẽ được chấm sau</Text>
+          <Text style={styles.nextTimeText}>
+            {isEnglishEnabled
+              ? "The submission will be graded later"
+              : "Bài kiểm tra sẽ được chấm sau"}
+          </Text>
         </>
       )}
       <View style={styles.buttonGroup}>
         <WideButton
           backgroundColor="#FEDB86"
-          title="Màn hình chính"
+          title={isEnglishEnabled ? "Main screen" : "Màn hình chính"}
           onPress={() => {
             navigation.navigate("ExamInfoScreen", {
               userId: Number(userId),
@@ -126,7 +146,7 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
         <WideButton
           backgroundColor="#41ABF7"
           textColor="#f5f0f0"
-          title="Làm lại"
+          title={isEnglishEnabled ? "Retake" : "Làm lại"}
           onPress={() => {
             navigation.navigate("DoExamScreen", {
               userId: Number(userId),
@@ -145,7 +165,7 @@ const ExamResultScreen = ({ route, navigation }: ExamResultScreenProps) => {
                 examId,
                 childrenId,
                 examInfo,
-              }
+              },
             });
           }}
         />

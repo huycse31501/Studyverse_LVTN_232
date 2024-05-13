@@ -88,6 +88,10 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
   const [passExams, setPassExams] = useState([]);
   const [examToInput, setExamToInput] = useState<ExamProps[]>([]);
   const [countExam, setCountExam] = useState([]);
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+
   useEffect(() => {
     if (!Array.isArray(examToInput)) return;
 
@@ -297,6 +301,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
               onExam
               listOfEventCount={countExam}
               onDateSelect={handleDateSelect}
+              onEnglish={isEnglishEnabled}
             />
           </View>
           <View style={styles.memberChoiceContainer}>
@@ -308,7 +313,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{`Chưa hoàn thành (${pendingExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Pending exams (${pendingExams.length})` : `Chưa hoàn thành (${pendingExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={pendingExams}
@@ -346,7 +351,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{`Đang được chấm (${gradingExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Grading exams (${pendingExams.length})` :`Đang được chấm (${gradingExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={gradingExams}
@@ -383,7 +388,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{`Bài kiểm tra đã đạt (${passExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Passed exams (${pendingExams.length})` :`Bài kiểm tra đã đạt (${passExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={passExams}
@@ -420,7 +425,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           <Text
             style={styles.noteText}
-          >{`Bài kiểm tra chưa đạt (${failExams.length})`}</Text>
+          >{isEnglishEnabled ?  `Failed exams (${pendingExams.length})` :`Bài kiểm tra chưa đạt (${failExams.length})`}</Text>
           <View style={styles.examContainer}>
             <ExamList
               Exams={failExams}
@@ -457,7 +462,7 @@ const ExamInfoScreen = ({ route, navigation }: ExamInfoScreenProps) => {
           </View>
           {user && user.role === "parent" && (
             <ApplyButton
-              label="Tạo bài kiểm tra"
+              label={isEnglishEnabled ?  `Create exam` :"Tạo bài kiểm tra"}
               extraStyle={{
                 width: "50%",
                 marginTop: 30,

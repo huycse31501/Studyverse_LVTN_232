@@ -26,6 +26,7 @@ import { setUser } from "../../redux/actions/userActions";
 import { User, familyMemberList } from "../../redux/types/actionTypes";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { setWaitList } from "../../redux/actions/waitListAction";
+import LanguageDropdown from "../../component/shared/languageDropdown";
 type ForgotPasswordNavigationProp = StackNavigationProp<{
   ForgotPassword: undefined;
   StatusDashboard: undefined;
@@ -44,7 +45,9 @@ const SignIn = () => {
   const isFocused = useIsFocused();
 
   const waitList = useSelector((state: RootState) => state.waitList.waitList);
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const [requestState, setRequestState] = useState(false);
 
   const [inputs, setInputs] = useState({
@@ -268,8 +271,11 @@ const SignIn = () => {
           enableAutomaticScroll={!isLoading}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.languageContainer}>
+          <LanguageDropdown />
+          </View>
           <View style={styles.authButton}>
-            <AuthButton type="SignIn" />
+            <AuthButton type="SignIn" onEnglish={isEnglishEnabled} />
           </View>
           <Image
             source={require("../../assets/images/signIn-signUp/bigLogo.png")}
@@ -286,7 +292,7 @@ const SignIn = () => {
               }}
             />
             <PasswordInputField
-              placeHolder="Mật khẩu"
+              placeHolder={isEnglishEnabled ? "Password" :"Mật khẩu"}
               isValid={true}
               value={inputs.password.value}
               textInputConfig={{
@@ -295,11 +301,11 @@ const SignIn = () => {
             />
           </View>
           <View style={styles.applyButton}>
-            <ApplyButton label="ĐĂNG NHẬP" onPress={submitHandler} />
+            <ApplyButton label={isEnglishEnabled ? "SIGN IN" :"ĐĂNG NHẬP"} onPress={submitHandler} />
           </View>
           <View>
             <TouchableTextComponent
-              text="Quên mật khẩu"
+              text={isEnglishEnabled ? "Forgot password" :"Quên mật khẩu"}
               onPress={() => navigation.navigate("ForgotPassword")}
             />
           </View>
@@ -315,6 +321,11 @@ const SignIn = () => {
 };
 
 const styles = StyleSheet.create({
+  languageContainer: {
+    width: "30%",
+    alignSelf: "flex-end",
+    marginBottom: 15
+  },
   authButton: {
     marginBottom: "10%",
   },

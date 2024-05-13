@@ -47,6 +47,10 @@ const StatusDashboard = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+
   const [listOfEvent, setListOfEvent] = useState([]);
   const requestEventList = async () => {
     let requestUserEventURL = `https://${host}/event/${user?.userId}`;
@@ -178,7 +182,9 @@ const StatusDashboard = () => {
             />
           </View>
           <View style={styles.eventContainer}>
-            <Text style={styles.eventHeader}>Sự kiện hôm nay</Text>
+            <Text style={styles.eventHeader}>
+              {isEnglishEnabled ? "Today's event" : "Sự kiện hôm nay"}
+            </Text>
             {listOfEvent.length !== 0 ? (
               <EventTimeline
                 userId={Number(user?.userId)}
@@ -189,7 +195,9 @@ const StatusDashboard = () => {
             ) : (
               <View style={styles.eventPlaceHolder}>
                 <Text style={styles.eventNotFound}>
-                  Hôm nay bạn không có sự kiện gì
+                  {isEnglishEnabled
+                    ? "You don't have any events today"
+                    : "Hôm nay bạn không có sự kiện gì"}
                 </Text>
                 <TouchableOpacity
                   style={styles.addTask}
@@ -199,18 +207,24 @@ const StatusDashboard = () => {
                     })
                   }
                 >
-                  <Text style={styles.addTaskText}>Thêm sự kiện</Text>
+                  <Text style={styles.addTaskText}>
+                    {isEnglishEnabled ? "Add event" : "Thêm sự kiện"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
           </View>
           <View style={styles.familyStatusContainer}>
-            <Text style={styles.familyStatusText}>Trạng thái gia đình </Text>
+            <Text style={styles.familyStatusText}>
+              {isEnglishEnabled ? "Family status" : "Trạng thái gia đình"}{" "}
+            </Text>
 
             {Number(user?.familyId) === 0 ? (
               <View style={styles.familyNotLinkPlaceHolder}>
                 <Text style={styles.familyNotLinkText}>
-                  Tài khoản hiện chưa liên kết gia đình
+                  {isEnglishEnabled
+                    ? "The account is not currently linked to family"
+                    : "Tài khoản hiện chưa liên kết gia đình"}
                 </Text>
                 <TouchableOpacity
                   style={styles.linkFamily}
@@ -218,7 +232,11 @@ const StatusDashboard = () => {
                     navigation.navigate("Setting");
                   }}
                 >
-                  <Text style={styles.linkFamilyText}>Liên kết gia đình</Text>
+                  <Text style={styles.linkFamilyText}>
+                    {isEnglishEnabled
+                      ? "Link to a family"
+                      : "Liên kết gia đình"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             ) : Array.isArray(familyList) && familyList.length !== 0 ? (
@@ -226,7 +244,9 @@ const StatusDashboard = () => {
             ) : (
               <View style={styles.familyNotFoundPlaceHolder}>
                 <Text style={styles.familyNotFoundText}>
-                  Gia đình hiện chưa có thành viên
+                  {isEnglishEnabled
+                    ? "The family currently has no members"
+                    : "Gia đình hiện chưa có thành viên"}
                 </Text>
                 <TouchableOpacity
                   style={styles.linkFamily}
@@ -236,7 +256,9 @@ const StatusDashboard = () => {
                     })
                   }
                 >
-                  <Text style={styles.linkFamilyText}>Thông tin gia đình</Text>
+                  <Text style={styles.linkFamilyText}>
+                    {isEnglishEnabled ? "Family Info" : "Thông tin gia đình"}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

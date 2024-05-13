@@ -31,6 +31,7 @@ import MemberOption from "../../component/examRelated/examMemberSlide";
 import { convertIdToSubject } from "../../component/shared/constants/convertSubjectToId";
 import { logoMap } from "../../component/shared/constants/listOfSubject";
 import { LinearGradient } from "expo-linear-gradient";
+import { translateSubject } from "../../utils/subjectTranslator";
 
 type StudyStatisticRouteProp = RouteProp<
   RootStackParamList,
@@ -49,7 +50,9 @@ const StudyStatisticScreen = ({
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
   const { userId } = route.params;
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const user = useSelector((state: RootState) => state.user.user);
   const familyList = useSelector(
     (state: RootState) => state.familyMember.familyMembers
@@ -175,7 +178,9 @@ const StudyStatisticScreen = ({
               style={styles.avatar}
             />
           </View>
-          <Text style={styles.headerText}>Thống kê học tập</Text>
+          <Text style={styles.headerText}>
+            {isEnglishEnabled ? "Study performance" : "Thống kê học tập"}
+          </Text>
           {user?.role === "parent" && (
             <View style={styles.memberChoiceContainer}>
               <MemberOption
@@ -191,7 +196,7 @@ const StudyStatisticScreen = ({
               ></Image>
               <View style={styles.innerTextContainer}>
                 <Text style={styles.ratingText}>{numberOfTestDone}</Text>
-                <Text style={styles.explanationText}>Bài kiểm tra</Text>
+                <Text style={styles.explanationText}>{isEnglishEnabled ? "Exam" :"Bài kiểm tra"}</Text>
               </View>
             </View>
             <View style={styles.testNumberContainer}>
@@ -203,16 +208,16 @@ const StudyStatisticScreen = ({
                 <Text style={styles.ratingText}>
                   {ratingScore ? ratingScore : 0}%
                 </Text>
-                <Text style={styles.explanationText}>Tỷ lệ đúng</Text>
+                <Text style={styles.explanationText}>{isEnglishEnabled ? "Correctness" :"Tỷ lệ đúng"}</Text>
               </View>
             </View>
           </View>
-          <Text style={styles.textRating}>Tỷ lệ câu hỏi trả lời đúng</Text>
+          <Text style={styles.textRating}>{isEnglishEnabled ? "Subject's correctness rating" :"Tỷ lệ câu hỏi trả lời đúng"}</Text>
           <View style={styles.chartContainer}>
             {statisticData &&
               statisticData.map(
-                  (subject: { name: string; score: number }, index: number) => {
-                    //   console.log(logoMap)
+                (subject: { name: string; score: number }, index: number) => {
+                  //   console.log(logoMap)
                   const logo = logoMap[subject.name];
                   const progressBarWidth = subject.score * 100;
                   return (
@@ -223,7 +228,7 @@ const StudyStatisticScreen = ({
                         <Text>Invalid subject name</Text>
                       )}
                       <View style={styles.contentContainer}>
-                        <Text style={styles.subjectName}>{subject.name}</Text>
+                        <Text style={styles.subjectName}>{isEnglishEnabled ? translateSubject(subject.name) : subject.name}</Text>
                         <View style={styles.progressContainer}>
                           <View
                             style={{

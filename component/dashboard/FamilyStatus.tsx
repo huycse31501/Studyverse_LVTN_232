@@ -36,6 +36,11 @@ const StatusCard: React.FC = ({}) => {
   const memberStatusData = useSelector(
     (state: RootState) => state.familyMember.familyMembers
   );
+
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
+
   const navigation = useNavigation<StatusCardNavigationProp>();
   return (
     <View style={styles.cardContainer}>
@@ -84,7 +89,9 @@ const StatusCard: React.FC = ({}) => {
           {memberStatus?.lastLogin && (
             <Text style={styles.lastOnline}>
               {!memberStatus.accountStatus
-                ? getTimeDifference(memberStatus?.lastLogin)
+                ? getTimeDifference(memberStatus?.lastLogin, isEnglishEnabled)
+                : isEnglishEnabled
+                ? "Online"
                 : "Đang trực tuyến"}
             </Text>
           )}

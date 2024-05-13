@@ -5,9 +5,10 @@ type OptionType = "parent" | "children";
 
 type OptionSelectorProps = {
   onOptionChange?: (option: OptionType) => void;
+  onEnglish?: any
 };
 
-const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
+const OptionSelector = ({ onOptionChange, onEnglish }: OptionSelectorProps) => {
   const [selectedOption, setSelectedOption] = useState<OptionType>("parent");
 
   const selectOption = (option: OptionType) => {
@@ -35,7 +36,7 @@ const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
               : styles.unselectedText,
           ]}
         >
-          Phụ huynh
+          {onEnglish ? "Parent" : "Phụ huynh"}
         </Text>
       </TouchableOpacity>
 
@@ -55,7 +56,7 @@ const OptionSelector = ({ onOptionChange }: OptionSelectorProps) => {
               : styles.unselectedText,
           ]}
         >
-          Con trẻ
+          {onEnglish ? "Children" :"Con trẻ"}
         </Text>
       </TouchableOpacity>
     </View>

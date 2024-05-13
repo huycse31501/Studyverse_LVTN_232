@@ -57,7 +57,9 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
 
   const [curEventChange, setCurEventChange] = useState<EventProps>();
   const [listOfEvent, setListOfEvent] = useState([]);
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const requestEventList = async () => {
     let requestCreateEventURL = `https://${host}/event/${userId}`;
     try {
@@ -219,7 +221,7 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
             />
           </View>
           <View style={styles.weekDatePickerContainer}>
-            <WeekDatePicker remind onDateSelect={handleDateSelect} />
+            <WeekDatePicker remind onDateSelect={handleDateSelect} onEnglish={isEnglishEnabled} />
           </View>
           <EventReminder
             events={listOfEvent}
@@ -259,7 +261,7 @@ const EventRemindScreen = ({ route, navigation }: EventRemindScreenProps) => {
                 </Text>
                 <ApplyButton
                   extraStyle={styles.modalButton}
-                  label="XÁC NHẬN"
+                  label={isEnglishEnabled ? "CONFIRM": "XÁC NHẬN"}
                   onPress={handleCancelButton}
                 />
               </View>

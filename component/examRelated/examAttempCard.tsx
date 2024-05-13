@@ -14,11 +14,13 @@ export type ExamAttempt = {
 type ExamAttemptCardProps = {
   attempt: ExamAttempt;
   onPressCard?: () => void;
+  onEnglish?: any;
 };
 
 const ExamAttemptCard: React.FC<ExamAttemptCardProps> = ({
   attempt,
   onPressCard,
+  onEnglish,
 }) => {
   const { title, result, correctAnswers, totalQuestions, timeTaken } = attempt;
 
@@ -34,7 +36,9 @@ const ExamAttemptCard: React.FC<ExamAttemptCardProps> = ({
         <Text style={styles.title}>{title}</Text>
       </View>
       <View style={styles.detailRow}>
-        <Text style={styles.detailLabel}>Kết quả</Text>
+        <Text style={styles.detailLabel}>
+          {onEnglish ? "Result" : "Kết quả"}
+        </Text>
         <Text
           style={[
             styles.result,
@@ -46,20 +50,20 @@ const ExamAttemptCard: React.FC<ExamAttemptCardProps> = ({
           ]}
         >
           {result === "pass"
-            ? "Đạt"
+            ? onEnglish ? "Passed" :"Đạt"
             : result === "grading"
-            ? "Đang chấm"
-            : "Chưa đạt"}
+            ? onEnglish ? "Grading" : "Đang chấm"
+            : onEnglish ? "Failed" : "Chưa đạt"}
         </Text>
       </View>
       <View style={styles.detailRow}>
-        <Text style={styles.detailLabel}>Số câu đúng</Text>
+        <Text style={styles.detailLabel}>{onEnglish ? "Correct answers" : "Số câu đúng"}</Text>
         <Text style={styles.detailValue}>
           {correctAnswers}/{totalQuestions}
         </Text>
       </View>
       <View style={styles.detailRow}>
-        <Text style={styles.detailLabel}>Thời gian làm bài</Text>
+        <Text style={styles.detailLabel}>{onEnglish ? "Time" : "Thời gian làm bài"}</Text>
         <Text style={styles.detailValue}>{timeTaken}</Text>
       </View>
     </TouchableOpacity>

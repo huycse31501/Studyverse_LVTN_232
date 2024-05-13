@@ -6,11 +6,13 @@ import DatePicker, {
 
 type Props = {
   onDateSelect?: (dateStr: string) => void;
+  onEnglish?: any;
 };
 
-const daysOfWeek = ["Su", "Mo", "Tu", "Wed", "Th", "Fr", "Sa"];
-
-const DatePickerBlue: React.FC<Props> = ({ onDateSelect }) => {
+const DatePickerBlue: React.FC<Props> = ({ onDateSelect, onEnglish }) => {
+  const daysOfWeek = onEnglish
+    ? ["SU", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    : ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -88,7 +90,9 @@ const DatePickerBlue: React.FC<Props> = ({ onDateSelect }) => {
   return (
     <View style={styles.container}>
       <View style={styles.eventDateContainer}>
-        <Text style={styles.eventDateText}>{"Chọn ngày"}</Text>
+        <Text style={styles.eventDateText}>
+          {onEnglish ? "Date" : "Chọn ngày"}
+        </Text>
         <Text style={styles.eventDateTime}>
           {date.getMonth() + 1}/{date.getFullYear()}
         </Text>

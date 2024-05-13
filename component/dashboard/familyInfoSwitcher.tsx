@@ -7,12 +7,14 @@ interface SwitcherProps {
   type: "List" | "WaitList";
   onListPress?: () => void;
   onWaitListPress?: () => void;
+  onEnglish: boolean;
 }
 
 const FamilyInfoSwitcher = ({
   type,
   onListPress,
   onWaitListPress,
+  onEnglish,
 }: SwitcherProps) => {
   const waitList = useSelector((state: RootState) => state.waitList.waitList);
 
@@ -23,7 +25,7 @@ const FamilyInfoSwitcher = ({
           <Text
             style={type === "List" ? [styles.text, styles.bold] : styles.text}
           >
-            DANH SÁCH
+            {onEnglish ? "FAMILY MEMBER" : "DANH SÁCH"}
           </Text>
           {type === "List" && <View style={styles.underline} />}
         </View>
@@ -38,7 +40,11 @@ const FamilyInfoSwitcher = ({
               type === "WaitList" ? [styles.text, styles.bold] : styles.text
             }
           >
-            {`CHỜ DUYỆT ${
+            {onEnglish ? `APPROVAL ${
+              Array.isArray(waitList) && waitList.length !== 0
+                ? `(${waitList.length})`
+                : ""
+            }` : `CHỜ DUYỆT ${
               Array.isArray(waitList) && waitList.length !== 0
                 ? `(${waitList.length})`
                 : ""

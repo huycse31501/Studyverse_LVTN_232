@@ -94,13 +94,17 @@ const ExamHistoryScreen = ({ route, navigation }: ExamHistoryScreenProps) => {
     childrenId,
   } = route.params;
   const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>();
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   useEffect(() => {
     if (examInfo && examInfo.submissions) {
       const formattedAttempts = examInfo.submissions.map(
         (submission: any, index: any) => ({
           id: submission.id,
-          title: `Lần làm bài thứ ${index + 1}`,
+          title: isEnglishEnabled
+            ? `Attemp ${index + 1}`
+            : `Lần làm bài thứ ${index + 1}`,
           result: getExamStatusForHistory(
             submission,
             examInfo.questions,
@@ -133,27 +137,26 @@ const ExamHistoryScreen = ({ route, navigation }: ExamHistoryScreenProps) => {
 
   const deleteExam = async () => {
     let requestDeleteTestURL = `https://${host}/test/${examInfo?.testId}`;
-      try {
-        const response = await fetch(requestDeleteTestURL, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-
+    try {
+      const response = await fetch(requestDeleteTestURL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (data.msg == "1") {
+        navigation.navigate("ExamInfoScreen", {
+          userId: Number(userId),
+          routeBefore: "CreateExamScreen",
+          newExamCreated: true,
         });
-        const data = await response.json();
-        if (data.msg == "1") {
-          navigation.navigate("ExamInfoScreen", {
-            userId: Number(userId),
-            routeBefore: "CreateExamScreen",
-            newExamCreated: true,
-          });
-        } else {
-          Alert.alert("Thất bại", "Xóa kiểm tra thất bại");
-        }
-      } catch (e) {
-        Alert.alert(`Xóa kiểm tra thất bại`);
+      } else {
+        Alert.alert("Thất bại", "Xóa kiểm tra thất bại");
       }
+    } catch (e) {
+      Alert.alert(`Xóa kiểm tra thất bại`);
+    }
   };
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -184,7 +187,9 @@ const ExamHistoryScreen = ({ route, navigation }: ExamHistoryScreenProps) => {
             >
               <Text style={styles.backButtonText}>Back</Text>
             </TouchableOpacity>
-            <Text style={styles.header}>Lịch sử bài làm</Text>
+            <Text style={styles.header}>
+              {isEnglishEnabled ? "Exam's attemps" : "Lịch sử bài làm"}
+            </Text>
           </View>
 
           <ScrollView style={styles.container}>
@@ -204,12 +209,15 @@ const ExamHistoryScreen = ({ route, navigation }: ExamHistoryScreenProps) => {
                       result: attempt.result,
                     });
                   }}
+                  onEnglish={isEnglishEnabled}
                 />
               ))
             ) : (
               <>
                 <Text style={styles.placeHolderText}>
-                  Chưa ghi nhận bài làm
+                  {isEnglishEnabled
+                    ? "There is no current attemp"
+                    : "Chưa ghi nhận bài làm"}
                 </Text>
               </>
             )}
@@ -218,7 +226,7 @@ const ExamHistoryScreen = ({ route, navigation }: ExamHistoryScreenProps) => {
       </KeyboardAvoidingView>
       {user?.role === "parent" ? (
         <ApplyButton
-          label="Xóa bài kiểm tra"
+          label={isEnglishEnabled ? "Delete exam" : "Xóa bài kiểm tra"}
           extraStyle={{
             width: 200,
             height: 50,
@@ -229,7 +237,7 @@ const ExamHistoryScreen = ({ route, navigation }: ExamHistoryScreenProps) => {
         />
       ) : (
         <ApplyButton
-          label="Làm bài kiểm tra"
+          label={isEnglishEnabled ? "Do exam" : "Làm bài kiểm tra"}
           extraStyle={{
             width: 200,
             height: 50,

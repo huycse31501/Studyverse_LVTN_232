@@ -22,6 +22,7 @@ type EventTimelineProps = {
   userId?: number;
   height?: number;
   fromFooter?: string;
+  onEnglish?: any;
 };
 
 type EventTimeLineNavigationProp = StackNavigationProp<{
@@ -39,6 +40,7 @@ const EventTimeline = ({
   userId,
   routeBefore,
   fromFooter,
+  onEnglish,
 }: EventTimelineProps) => {
   const navigation = useNavigation<EventTimeLineNavigationProp>();
   const [currentTime, setCurrentTime] = useState("");
@@ -89,13 +91,17 @@ const EventTimeline = ({
 
     let timeString = "";
     if (hoursUntilEvent > 0) {
-      timeString += `${hoursUntilEvent} giờ `;
+      timeString += onEnglish
+        ? `${hoursUntilEvent} hours `
+        : `${hoursUntilEvent} giờ `;
     }
     if (remainingMinutes > 0) {
-      timeString += `${remainingMinutes} phút`;
+      timeString += onEnglish
+        ? `${remainingMinutes} minutes`
+        : `${remainingMinutes} phút`;
     }
 
-    return timeString ? `Sau ${timeString}` : "";
+    return timeString ? onEnglish ? `After ${timeString}` :`Sau ${timeString}` : "";
   };
 
   return (

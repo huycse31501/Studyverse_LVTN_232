@@ -30,6 +30,7 @@ import { logout } from "../../redux/actions/logoutAction";
 import { setWaitList } from "../../redux/actions/waitListAction";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { avatarList } from "../../utils/listOfAvatar";
+import LanguageDropdown from "../../component/shared/languageDropdown";
 
 type DetailsNavigationProp = StackNavigationProp<{
   StatusDashboard: undefined;
@@ -45,10 +46,9 @@ const Setting = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const user = useSelector((state: RootState) => state.user.user);
-  const familyList = useSelector(
-    (state: RootState) => state.familyMember.familyMembers
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
   );
-  const waitList = useSelector((state: RootState) => state.waitList.waitList);
 
   const navigation = useNavigation<DetailsNavigationProp>();
 
@@ -162,7 +162,7 @@ const Setting = () => {
 
   const listOfAccountSetting = [
     {
-      name: "Thông tin cá nhân",
+      name: isEnglishEnabled ? "Personal Information" : "Thông tin cá nhân",
       image: require("../../assets/images/dashboard/setting1.png"),
       onPress: () => {
         navigation.navigate("UserInformationScreen");
@@ -170,7 +170,7 @@ const Setting = () => {
       valid: true,
     },
     {
-      name: "Tạo gia đình",
+      name: isEnglishEnabled ? "Create a family" : "Tạo gia đình",
       image: require("../../assets/images/dashboard/setting2.png"),
       onPress: () => {
         setcreateFamilyModalVisible(true);
@@ -178,19 +178,19 @@ const Setting = () => {
       valid: !!(Number(user?.familyId) === 0) && !!(user?.role === "parent"),
     },
     {
-      name: "Thông tin gia đình",
+      name: isEnglishEnabled ? "Family Information" : "Thông tin gia đình",
       image: require("../../assets/images/dashboard/setting2.png"),
       onPress: () => navigation.navigate("FamilyInfoScreen"),
       valid: !!(Number(user?.familyId) !== 0 && Number(user?.familyId) !== -1),
     },
     {
-      name: "Mật khẩu",
+      name: isEnglishEnabled ? "Password" : "Mật khẩu",
       image: require("../../assets/images/dashboard/setting3.png"),
       onPress: () => {},
       valid: true,
     },
     {
-      name: "Thông báo",
+      name: isEnglishEnabled ? "Notification" : "Thông báo",
       image: require("../../assets/images/dashboard/setting4.png"),
       onPress: () => {},
       valid: true,
@@ -199,11 +199,11 @@ const Setting = () => {
 
   const extraSetting = [
     {
-      name: "Hỗ trợ",
+      name: isEnglishEnabled ? "Support" : "Hỗ trợ",
       image: require("../../assets/images/dashboard/setting6.png"),
     },
     {
-      name: "Đăng xuất",
+      name: isEnglishEnabled ? "Log out" : "Đăng xuất",
       image: require("../../assets/images/shared/logout.png"),
       onPress: async () => {
         try {
@@ -263,8 +263,8 @@ const Setting = () => {
                 style={styles.leftArrow}
               />
             </TouchableOpacity>
-            <Text style={styles.title}>Cài đặt</Text>
-            <View style={{ width: 45 }} />
+            <Text style={styles.title}>{isEnglishEnabled ? "Setting" : "Cài đặt"}</Text>
+            <LanguageDropdown />
           </View>
           <View style={styles.imageContainer}>
             <Image
@@ -274,7 +274,7 @@ const Setting = () => {
               style={styles.avatar}
             />
           </View>
-          <Text style={styles.account}>Tài khoản</Text>
+          <Text style={styles.account}>{isEnglishEnabled ? "Account Setting" :"Tài khoản"}</Text>
           <View style={styles.accountSettingContainer}>
             {listOfAccountSetting.map(
               (setting, index) =>
@@ -299,7 +299,9 @@ const Setting = () => {
                 )
             )}
           </View>
-          <Text style={styles.account}>Thêm</Text>
+          <Text style={styles.account}>
+            {isEnglishEnabled ? "More" : "Thêm"}
+          </Text>
           <View style={styles.accountSettingContainer}>
             {extraSetting.map((setting, index) => (
               <TouchableOpacity
@@ -320,7 +322,11 @@ const Setting = () => {
           </View>
           {Number(user?.familyId) === 0 && (
             <>
-              <Text style={styles.linkText}>Tài khoản chưa liên kết</Text>
+              <Text style={styles.linkText}>
+                {isEnglishEnabled
+                  ? "The account has not been linked to a family"
+                  : "Tài khoản chưa liên kết"}
+              </Text>
               <ApplyButton
                 extraStyle={styles.linkButton}
                 label="LIÊN KẾT GIA ĐÌNH"
@@ -332,11 +338,13 @@ const Setting = () => {
           {Number(user?.familyId) === -1 && (
             <>
               <Text style={styles.pendingLinkText}>
-                Đã gửi yêu cầu liên kết
+                {isEnglishEnabled
+                  ? "Sending family request"
+                  : "Đã gửi yêu cầu liên kết"}
               </Text>
               <ApplyButton
                 extraStyle={styles.pendingLinkButton}
-                label="HỦY"
+                label={isEnglishEnabled ? "CANCEL" : "HỦY"}
                 onPress={handleUnlinkPress}
               />
             </>
@@ -345,7 +353,9 @@ const Setting = () => {
           {Number(user?.familyId) !== 0 && Number(user?.familyId) !== -1 && (
             <>
               <Text style={styles.linkedText}>
-                Tài khoản đã liên kết gia đình
+                {isEnglishEnabled
+                  ? "The account has been linked to a family"
+                  : "Tài khoản đã liên kết gia đình"}
               </Text>
             </>
           )}
@@ -464,6 +474,7 @@ const styles = StyleSheet.create({
     color: "#090A0A",
     alignSelf: "center",
     textAlign: "center",
+    marginLeft: 20,
   },
   imageContainer: {
     marginTop: "5%",

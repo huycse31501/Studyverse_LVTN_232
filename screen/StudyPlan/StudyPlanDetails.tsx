@@ -27,6 +27,7 @@ import { RootStackParamList } from "../../component/navigator/appNavigator";
 import MemberOption from "../../component/examRelated/examMemberSlide";
 import ApplyButton from "../../component/shared/ApplyButton";
 import StudyPlanList from "../../component/studyPlanRelated/studyPlanList";
+import { translateSubject } from "../../utils/subjectTranslator";
 type StudyPlanDetailsRouteProp = RouteProp<
   RootStackParamList,
   "StudyPlanDetailsScreen"
@@ -63,7 +64,9 @@ const StudyPlanDetailsScreen = ({
       routeBefore: "StatusDashboard",
     });
   }, [navigation, memberToRender.userId, user?.userId, userId]);
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const insets = useSafeAreaInsets();
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
@@ -97,7 +100,7 @@ const StudyPlanDetailsScreen = ({
               style={styles.avatar}
             />
           </View>
-          <Text style={styles.headerText}>{studyPackage?.courseName}</Text>
+          <Text style={styles.headerText}>{isEnglishEnabled ? translateSubject(studyPackage?.courseName) :studyPackage?.courseName}</Text>
           <View style={styles.studyPlanlistContainer}>
             <StudyPlanList
               logo={studyPackage.logoType}
@@ -110,7 +113,7 @@ const StudyPlanDetailsScreen = ({
       </KeyboardAvoidingView>
       {user?.role === "parent" && (
         <ApplyButton
-          label="Tạo kế hoạch mới"
+          label={isEnglishEnabled ? "Create new plan" :"Tạo kế hoạch mới"}
           extraStyle={{
             width: "50%",
             position: "absolute",

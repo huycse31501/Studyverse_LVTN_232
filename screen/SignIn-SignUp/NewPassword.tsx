@@ -19,7 +19,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import regexVault from "../../utils/regex";
 import PasswordInputField from "../../component/signin-signup/PasswordInputField";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 type NewPasswordNavigationProp = StackNavigationProp<{
   SignIn: undefined;
   SignUp: undefined;
@@ -28,7 +29,9 @@ type NewPasswordNavigationProp = StackNavigationProp<{
 
 const NewPasswordScreen = () => {
   const navigation = useNavigation<NewPasswordNavigationProp>();
-
+  const isEnglishEnabled = useSelector(
+    (state: RootState) => state.language.isEnglishEnabled
+  );
   const [inputs, setInputs] = useState({
     newpassword: {
       value: "",
@@ -135,11 +138,11 @@ const NewPasswordScreen = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <RedTextHeader text="ĐẶT LẠI MẬT KHẨU" />
+            <RedTextHeader text={isEnglishEnabled ? "RESET PASSWORD" :"ĐẶT LẠI MẬT KHẨU"} />
           </View>
           <View style={styles.inputField}>
             <PasswordInputField
-              placeHolder="Mật khẩu mới"
+              placeHolder={isEnglishEnabled ? "New password" :"Mật khẩu mới"}
               isValid={inputValidation.isNewPasswordValid}
               value={inputs.newpassword.value}
               textInputConfig={{
@@ -147,8 +150,8 @@ const NewPasswordScreen = () => {
               }}
             />
             <PasswordInputField
-              placeHolder="Nhập lại mật khẩu mới"
-              customError="Mật khẩu chưa trùng khớp"
+              placeHolder={isEnglishEnabled ? "Re-enter your new password" :"Nhập lại mật khẩu mới"}
+              customError={isEnglishEnabled ? "Did not match with your password" :"Mật khẩu chưa trùng khớp"}
               isValid={inputValidation.isRePasswordValid}
               value={inputs.rePassword.value}
               textInputConfig={{
@@ -157,15 +160,15 @@ const NewPasswordScreen = () => {
             />
           </View>
           <View style={styles.backToSignIn}>
-            <Text style={styles.backToSignInText}>Trở lại</Text>
+          <Text style={styles.backToSignInText}>{isEnglishEnabled ? "Back to" :"Trở lại"}</Text>
             <TouchableTextComponent
-              text="Đăng nhập"
+              text={isEnglishEnabled ? "Sign In" :"Đăng nhập"}
               onPress={() => navigation.navigate("SignIn")}
             />
           </View>
           <View style={styles.sendNewPassword}>
             <ApplyButton
-              label="XÁC NHẬN"
+              label={isEnglishEnabled ? "SUBMIT" :"XÁC NHẬN"}
               extraStyle={styles.NewPasswordButton}
               onPress={submitHandler}
             />
