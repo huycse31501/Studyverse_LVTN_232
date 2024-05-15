@@ -384,7 +384,7 @@ const MilestoneList: React.FC<MilestoneListProps> = ({
                           {isCreated &&
                             shiftLeft &&
                             shiftRight &&
-                            !item?.isNewCreated(
+                            !item?.isNewCreated && (
                               <>
                                 <TouchableOpacity
                                   onPress={() => shiftLeft(index)}
