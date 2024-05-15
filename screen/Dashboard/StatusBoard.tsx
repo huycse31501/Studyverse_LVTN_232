@@ -22,6 +22,7 @@ import Constants from "expo-constants";
 import { useDispatch } from "react-redux";
 import { setFamilyMember } from "../../redux/actions/familyAction";
 import { mapUserIdsToAvatarIds } from "../../utils/mapUserIdToAvatarId";
+import MockAdBanner from "../../component/adMods/mockAds";
 
 type StatusBoardNavigationProp = StackNavigationProp<{
   UserDetailsScreen: { user: User };
@@ -262,8 +263,11 @@ const StatusDashboard = () => {
                 </TouchableOpacity>
               </View>
             )}
+                    <MockAdBanner />
+
           </View>
         </KeyboardAwareScrollView>
+
         <View style={styles.footerContainer}>
           <Footer />
         </View>
