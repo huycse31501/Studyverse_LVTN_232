@@ -7,7 +7,7 @@ interface SwitcherProps {
   type: "List" | "WaitList";
   onListPress?: () => void;
   onWaitListPress?: () => void;
-  onEnglish: boolean;
+  onEnglish?: boolean;
 }
 
 const FamilyInfoSwitcher = ({
