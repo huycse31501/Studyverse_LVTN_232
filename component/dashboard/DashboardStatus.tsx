@@ -34,7 +34,7 @@ const UserStatus = React.memo(
     const user = useSelector((state: RootState) => state.user.user);
     const [editStatus, setEditStatus] = useState(false);
     const [statusText, setStatusText] = useState<string>(
-      user?.userStatus || "Trạng thái hoạt động"
+      user?.userStatus  ??  "Trạng thái hoạt động"
     );
 
     const getStatusColor = () => {
@@ -60,7 +60,7 @@ const UserStatus = React.memo(
           },
           body: JSON.stringify({
             email: user?.email,
-            status: statusText.trim().length > 0 ? statusText : null,
+            status: statusText.trim().length > 0 ? statusText : "",
           }),
         });
         const changeResponse = await ChangeStatusResponse.json();
@@ -137,7 +137,7 @@ const UserStatus = React.memo(
           </View>
           {editStatus ? (
             <TextInput
-              value={statusText}
+              value={statusText === "null" ? "" : statusText}
               onChangeText={setStatusText}
               onEndEditing={handleStatusChange}
               autoFocus={true}
@@ -145,7 +145,7 @@ const UserStatus = React.memo(
             />
           ) : (
             <TouchableOpacity onPress={handleStatusPress}>
-              <Text style={styles.status}>{statusText}</Text>
+              <Text style={styles.status}>{statusText === "null" ? "Trạng thái hoạt động" : statusText}</Text>
             </TouchableOpacity>
           )}
         </View>
