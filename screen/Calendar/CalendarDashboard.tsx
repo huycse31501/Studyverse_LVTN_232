@@ -74,7 +74,6 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   const memberToRender = totalList.filter(
     (user) => user.userId === String(userId)
   )[0];
-
   const isEnglishEnabled = useSelector(
     (state: RootState) => state.language.isEnglishEnabled
   );
@@ -102,7 +101,6 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
   }, [navigation, memberToRender.userId, user?.userId, userId]);
 
   const insets = useSafeAreaInsets();
-
   useEffect(() => {
     const requestEventList = async () => {
       let requestCreateEventURL = `https://${host}/event/${userId}`;
@@ -121,13 +119,18 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
         console.error("Error fetching events:", e);
       }
     };
-    requestEventList();
-  }, [host, port, userId, route.params?.newEventCreated]);
 
+    requestEventList();
+
+    const intervalId = setInterval(() => {
+      requestEventList();
+    }, 2000);
+
+    return () => clearInterval(intervalId);
+  }, [host, port, userId, route.params?.newEventCreated]);
   useEffect(() => {
     const processData = () => {
       const selectedDateString = selectedDate.toLocaleDateString("en-GB");
-
       const filteredAndFormattedEvents = eventsData
         .map((event: any) => {
           const startDateObj = new Date(event.timeStart);
@@ -208,7 +211,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
           };
         })
         .filter((event: any) => {
-          const today = new Date();
+          const today = selectedDate;
           const tomorrow = new Date(today);
           tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -231,8 +234,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
     };
 
     processData();
-  }, [eventsData]);
-
+  }, [eventsData, selectedDate]);
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: insets.top - 15 }}>
       <KeyboardAvoidingView
@@ -327,7 +329,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
               <Text style={styles.remindNotForgetText}>
                 {isEnglishEnabled
                   ? "Don't miss these important events tomorrow"
-                  : "Đừng bỏ lỡ những sự kiện sau vào ngày mai nhé"}
+                  : "Đừng bỏ lỡ những sự kiện sau vào ngày sau nhé"}
               </Text>
             )}
           </View>
@@ -346,7 +348,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
               >
                 {isEnglishEnabled
                   ? "There is no important events tomorrow"
-                  : "Không có sự kiện đáng lưu ý vào ngày mai"}
+                  : "Không có sự kiện đáng lưu ý vào ngày sau"}
               </Text>
               <TouchableOpacity
                 style={styles.addTask}
@@ -362,7 +364,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
             routeBefore === "familyMemberDetails" && user?.role === "children"
           ) && (
             <ApplyButton
-              label={isEnglishEnabled ? "Add an event"  : "Tạo sự kiện"}
+              label={isEnglishEnabled ? "Add an event" : "Tạo sự kiện"}
               extraStyle={{
                 width: 200,
                 height: 50,
