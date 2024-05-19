@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/signIn-signUp/appLogo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.quanghuy31501.Studyverse"

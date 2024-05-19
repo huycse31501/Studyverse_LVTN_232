@@ -32,6 +32,7 @@ import { convertIdToSubject } from "../../component/shared/constants/convertSubj
 import { logoMap } from "../../component/shared/constants/listOfSubject";
 import { LinearGradient } from "expo-linear-gradient";
 import { translateSubject } from "../../utils/subjectTranslator";
+import { toInteger } from "lodash";
 
 type StudyStatisticRouteProp = RouteProp<
   RootStackParamList,
@@ -107,7 +108,8 @@ const StudyStatisticScreen = ({
           const subjectName = convertIdToSubject[key];
           const { correct, count } = subjects[key];
           if (count > 0) {
-            acc[subjectName] = Number((correct / count).toFixed(2));
+            let score = Number((correct / count).toFixed(2));
+            acc[subjectName] = Math.round(score * 100) / 100;
           } else {
             acc[subjectName] = 0;
           }
@@ -196,7 +198,9 @@ const StudyStatisticScreen = ({
               ></Image>
               <View style={styles.innerTextContainer}>
                 <Text style={styles.ratingText}>{numberOfTestDone}</Text>
-                <Text style={styles.explanationText}>{isEnglishEnabled ? "Exam" :"Bài kiểm tra"}</Text>
+                <Text style={styles.explanationText}>
+                  {isEnglishEnabled ? "Exam" : "Bài kiểm tra"}
+                </Text>
               </View>
             </View>
             <View style={styles.testNumberContainer}>
@@ -208,11 +212,17 @@ const StudyStatisticScreen = ({
                 <Text style={styles.ratingText}>
                   {ratingScore ? ratingScore : 0}%
                 </Text>
-                <Text style={styles.explanationText}>{isEnglishEnabled ? "Correctness" :"Tỷ lệ đúng"}</Text>
+                <Text style={styles.explanationText}>
+                  {isEnglishEnabled ? "Correctness" : "Tỷ lệ đúng"}
+                </Text>
               </View>
             </View>
           </View>
-          <Text style={styles.textRating}>{isEnglishEnabled ? "Subject's correctness rating" :"Tỷ lệ câu hỏi trả lời đúng"}</Text>
+          <Text style={styles.textRating}>
+            {isEnglishEnabled
+              ? "Subject's correctness rating"
+              : "Tỷ lệ câu hỏi trả lời đúng"}
+          </Text>
           <View style={styles.chartContainer}>
             {statisticData &&
               statisticData.map(
@@ -220,6 +230,7 @@ const StudyStatisticScreen = ({
                   //   console.log(logoMap)
                   const logo = logoMap[subject.name];
                   const progressBarWidth = subject.score * 100;
+                  const displayScore = parseFloat(String(subject.score*100)).toFixed(0);
                   return (
                     <View style={styles.subjectStatistic} key={index}>
                       {logo ? (
@@ -228,7 +239,11 @@ const StudyStatisticScreen = ({
                         <Text>Invalid subject name</Text>
                       )}
                       <View style={styles.contentContainer}>
-                        <Text style={styles.subjectName}>{isEnglishEnabled ? translateSubject(subject.name) : subject.name}</Text>
+                        <Text style={styles.subjectName}>
+                          {isEnglishEnabled
+                            ? translateSubject(subject.name)
+                            : subject.name}
+                        </Text>
                         <View style={styles.progressContainer}>
                           <View
                             style={{
@@ -256,7 +271,7 @@ const StudyStatisticScreen = ({
                           </View>
                           <Text
                             style={styles.label}
-                          >{`${progressBarWidth}%`}</Text>
+                          >{`${displayScore}%`}</Text>
                         </View>
                       </View>
                     </View>
