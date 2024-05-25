@@ -32,6 +32,7 @@ type StatusBoardNavigationProp = StackNavigationProp<{
   };
   CreateEventScreen: {
     userId: number;
+    fromDashboard?: any;
   };
 }>;
 
@@ -205,6 +206,7 @@ const StatusDashboard = () => {
                   onPress={() =>
                     navigation.navigate("CreateEventScreen", {
                       userId: Number(user?.userId),
+                      fromDashboard: true,
                     })
                   }
                 >
@@ -261,12 +263,14 @@ const StatusDashboard = () => {
                     {isEnglishEnabled ? "Family Info" : "Thông tin gia đình"}
                   </Text>
                 </TouchableOpacity>
-              </View>
+                  </View>
+
             )}
-                    <MockAdBanner />
 
           </View>
+
         </KeyboardAwareScrollView>
+        <MockAdBanner />
 
         <View style={styles.footerContainer}>
           <Footer />

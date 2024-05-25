@@ -52,7 +52,7 @@ interface Event {
 }
 
 const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
-  const { userId } = route.params;
+  const { userId, fromDashboard } = route.params;
   let host = Constants?.expoConfig?.extra?.host;
   let port = Constants?.expoConfig?.extra?.port;
   const [isLoading, setIsLoading] = useState(false);
@@ -413,6 +413,10 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
                 style={styles.backButton}
                 onPress={() => {
                   resetInputs();
+                  if (fromDashboard === true) {
+                    navigation.navigate("StatusDashboard");
+                    return;
+                  }
                   navigation.navigate("EventInfoScreen", {
                     userId: Number(userId),
                     routeBefore: "StatusDashboard",
@@ -538,7 +542,9 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               }}
               circleColor={"#FFFFFF"}
             />
-            <Text style={styles.eventLoopText}>{isEnglishEnabled ? "Notification" :"Nhắc nhở"}</Text>
+            <Text style={styles.eventLoopText}>
+              {isEnglishEnabled ? "Notification" : "Nhắc nhở"}
+            </Text>
           </View>
           {isNotiEnabled && (
             <View style={styles.loopChoiceContainer}>
@@ -577,7 +583,11 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
               ))}
             </View>
           )}
-          <Text style={styles.noteText}>{isEnglishEnabled ? "Tag family member" :"Những người liên quan đến sự kiện"}</Text>
+          <Text style={styles.noteText}>
+            {isEnglishEnabled
+              ? "Tag family member"
+              : "Những người liên quan đến sự kiện"}
+          </Text>
           <View style={styles.memberChoiceContainer}>
             <MemberTagList
               isEvent
@@ -593,7 +603,7 @@ const CreateEventScreen = ({ route, navigation }: CreateEventScreenProps) => {
             />
           </View>
           <ApplyButton
-            label={isEnglishEnabled ? "Create event" :"Tạo sự kiện"}
+            label={isEnglishEnabled ? "Create event" : "Tạo sự kiện"}
             extraStyle={{ width: "50%", marginTop: 50, marginBottom: 30 }}
             onPress={submitHandler}
           />

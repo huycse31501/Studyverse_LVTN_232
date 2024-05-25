@@ -60,10 +60,10 @@ const NotificationManager = () => {
         },
       });
 
-        const events = await response.json();
-        console.log(events)
+      const events = await response.json();
       events.forEach(scheduleNotificationForEvent);
     } catch (e) {
+      console.error("Error fetching events:", e);
     }
   }
 
@@ -71,21 +71,25 @@ const NotificationManager = () => {
     if (typeof event.timeStart !== 'string') {
       return;
     }
-  
+
     const eventStartTime = new Date(event.timeStart);
     if (isNaN(eventStartTime.getTime())) {
       console.error('Invalid event timeStart:', event.timeStart);
       return;
     }
-  
-    const remindTime = typeof event.remindTime === 'number' && event.remindTime > 0 ? event.remindTime : 0;
+
+    const remindTime = typeof event.remindTime === 'number' ? event.remindTime : 0;
+
+    if (remindTime === 0) {
+      return;
+    }
     
     const notificationTime = subMinutes(eventStartTime, remindTime);
-  
+    console.log(notificationTime, new Date())
     Notifications.scheduleNotificationAsync({
       content: {
-        title: 'Sự kiện sắp diễn ra',
-        body: `${event.name} sẽ diễn ra sau ${remindTime} phút`,
+        title: 'Sự kiện sắp diễn ra',
+        body: `${event.name} sẽ diễn ra sau ${remindTime} phút`,
       },
       trigger: notificationTime.getTime(),
     }).then(response => {

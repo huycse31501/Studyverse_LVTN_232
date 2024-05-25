@@ -122,6 +122,15 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
     },
   });
 
+
+  useEffect(() => {
+    const remindTimeStr = eventInfo.remindTime.toString();
+    const notiOptionExists = notiOptions.some(option => option.value === remindTimeStr);
+    if (notiOptionExists) {
+      setSelectedNotiValue(remindTimeStr);
+    }
+  }, [eventInfo.remindTime]);
+
   const [inputValidation, setInputValidation] = useState({
     isEventNameValid: regexVault.preventxssValidate.test(
       inputs.eventName.value
@@ -278,6 +287,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
         });
 
         const data = await response.json();
+        console.log(data)
         if (data.msg == "1") {
           setIsLoading(false);
           resetInputs();
@@ -296,7 +306,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
         }
       } catch (e) {
         setIsLoading(false);
-        Alert.alert(`Chỉnh sửa sự kiện thất bại`);
+        Alert.alert(`Chỉnh sửa sự kiện thất bại ${e}`);
       }
     }
   }

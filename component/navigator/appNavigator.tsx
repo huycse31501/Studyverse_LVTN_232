@@ -71,6 +71,7 @@ export type RootStackParamList = {
   };
   CreateEventScreen: {
     userId: number;
+    fromDashboard?: any;
   };
   EditEventScreen: {
     userId: number;

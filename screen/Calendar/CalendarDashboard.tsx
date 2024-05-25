@@ -142,6 +142,7 @@ const EventInfoScreen = ({ route, navigation }: EventInfoScreenProps) => {
           const endTime = endDateObj.toTimeString().substring(0, 5);
 
           return {
+            id: event.id,
             startDate,
             endDate,
             startTime,
