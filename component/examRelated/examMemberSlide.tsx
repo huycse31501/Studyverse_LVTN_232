@@ -104,8 +104,8 @@ const styles = StyleSheet.create({
 
   },
   statusContainer: {
-    width: 90,
-    height: 125,
+    width: 110,
+    height: 140,
     flexDirection: "column",
     alignItems: "center",
     backgroundColor: "#ffffff",
